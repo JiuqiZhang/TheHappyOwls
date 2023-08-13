@@ -1,29 +1,18 @@
-import { StatusBar } from 'expo-status-bar';
-import { Button, StyleSheet, TextInput, View } from 'react-native';
-import { useState, useEffect } from 'react';
-import * as Location from 'expo-location';
+import { StatusBar } from "expo-status-bar";
+import { Button, StyleSheet, TextInput, View, Text } from "react-native";
+import { useState, useEffect } from "react";
+import FlashMessage from "react-native-flash-message";
+import * as React from "react";
+import Routes from './src/Navigation/Route';
+import { Provider } from "react-redux";
+import { Store } from "./src/redux/store";
+
+
 
 export default function App() {
-  const [location, setLocation] = useState();
-  const [address, setAddress] = useState();
+
 
   // Location.setGoogleApiKey("AIzaSyD5GUOMMrDY5Ml8JOQ5j7z7p9f8GaGCDBg");
-
-  useEffect(() => {
-    const getPermissions = async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.log("Please grant location permissions");
-        return;
-      }
-
-      let currentLocation = await Location.getCurrentPositionAsync({});
-      setLocation(currentLocation);
-      console.log("Location:");
-      console.log(currentLocation);
-    };
-    getPermissions();
-  }, []);
 
   // const geocode = async () => {
   //   const geocodedLocation = await Location.geocodeAsync(address);
@@ -42,20 +31,50 @@ export default function App() {
   // };
 
   return (
-    <View style={styles.container}>
-      <TextInput placeholder='Address' value={address} onChangeText={setAddress} />
-      {/* <Button title="Geocode Address" onPress={geocode} />
-      <Button title="Reverse Geocode Current Location" onPress={reverseGeocode} /> */}
-      <StatusBar style="auto" />
-    </View>
+    <Provider store={Store}>
+    <Routes />
+    <FlashMessage
+        position="top"
+      />
+     </Provider>
+    // <NavigationContainer>
+    //   <Stack.Navigator
+    //     screenOptions={{
+    //       headerShown: false,
+    //     }}
+    //   >
+    //     <Stack.Screen
+    //       name="Home"
+    //       component={HomeScreen}
+    //       options={{ title: "Happy Owls" }}
+    //     />
+    //     <Stack.Screen name="Profile" component={ProfileScreen} />
+    //   </Stack.Navigator>
+    // </NavigationContainer>
   );
 }
+//  <View style={styles.container}>
+//   <TextInput placeholder='Address' value={address} onChangeText={setAddress} />
+//   {/* <Button title="Geocode Address" onPress={geocode} />
+//   <Button title="Reverse Geocode Current Location" onPress={reverseGeocode} /> */}
+//   <StatusBar style="auto" />
+// </View>
+
+// const MapScreen = ({ navigation }) => {
+//   return (
+//     <Button
+//       title="Go to Jane's profile"
+//       onPress={() => navigation.navigate("Profile", { name: "Jane" })}
+//     />
+//   );
+// };
+
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
