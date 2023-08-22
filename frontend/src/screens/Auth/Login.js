@@ -12,8 +12,9 @@ import { setEmail,setName } from "../../redux/actions";
 import { useSelector, useDispatch } from 'react-redux';
 import validator from 'validator'
 import emailjs from '@emailjs/browser';
-
-export default Login = ({}) => {
+import * as Icon from "react-native-feather";
+import { Divider } from "react-native-elements";
+export default Login = ({navigation}) => {
   const [emailAddress, onChangeEmail] = React.useState("");
   const [emailError, setEmailError] = React.useState("");
   const [password, onChangePassword] = React.useState("");
@@ -63,37 +64,16 @@ export default Login = ({}) => {
 
   return (
     <View style={styles.container}>
-      {/* <TextInputWithLable
-                label="Email"
-                placheHolder="enter your email"
-                onChangeText={(email) => updateState({ email })}
-            />
-            <TextInputWithLable
-                label="Password"
-                placheHolder="enter your password"
-                // isSecure={isSecure}
-                secureTextEntry={isSecure}
-                onChangeText={(password) => updateState({ password })}
-            />
 
-            <ButtonWithLoader
-                text="Login"
-                onPress={onLogin}
-                isLoading={isLoading}
-            />
-
-            <View style={{marginVertical: 8}} />
-
-            <ButtonWithLoader
-                text="Signup"
-                onPress={() => navigation.navigate('Signup')}
-            /> */}
       <SafeAreaView>
         <Image
           style={styles.image}
           source={require("../../../assets/icon.png")}
         />
         <View style={styles.inputView}>
+        <View style={styles.inputContainer}>
+            <Icon.Mail color={"grey"} />
+            <Divider orientation="vertical" style={styles.divider} />
           <TextInput
             style={styles.input}
             onChangeText={onChangeEmail}
@@ -101,7 +81,11 @@ export default Login = ({}) => {
             value = {emailAddress}
 
           />
+          </View>
             <Text style={styles.error}>{emailError}</Text>
+            <View style={styles.inputContainer}>
+            <Icon.Lock color={"grey"} />
+            <Divider orientation="vertical" style={styles.divider} />
           <TextInput
             style={styles.input}
             onChangeText={onChangePassword}
@@ -109,13 +93,17 @@ export default Login = ({}) => {
             value={password}
             placeholder="Password"
           />
+                    </View>
           <TouchableOpacity onPress={()=>{console.log('forget password')}}>
             <Text style={styles.loginText}>Forget Password?</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={()=>{navigation.navigate('Signup')}}>
+            <Text style={styles.loginText}>Don't have an account? Sign up</Text>
           </TouchableOpacity>
         </View>
 
         <TouchableOpacity style={styles.loginBtn} onPress={()=>login()}>
-        <Text style={styles.loginText}>LOGIN</Text> 
+        <Text style={{    color:'white',}}>LOGIN</Text> 
       </TouchableOpacity>
 
       </SafeAreaView>
@@ -138,19 +126,38 @@ const styles = StyleSheet.create({
     color:'red'
   },
   input: {
-    maxHeight: 40,
+    height: 50,
     minWidth: "80%",
-    margin: 12,
+    marginBottom: 12,
     borderWidth: 1,
-    borderColor:'white',
+    borderColor: "grey",
     padding: 10,
     borderRadius: 10,
-    backgroundColor:'#ededed',
-    shadowColor: '#000',
+    shadowColor: 'white',
+    backgroundColor:'white',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.8,
+    shadowOpacity: 0.4,
     shadowRadius: 2,  
     elevation: 5
+  },
+  inputContainer: {
+    minHeight: 50,
+    height: 50,
+    maxWidth: "80%",
+    borderWidth: 1,
+    borderColor: "grey",
+    padding: 10,
+    borderRadius: 10,
+    display: "flex",
+    flexDirection: "row",
+    margin: 10,
+  },
+  divider: {
+    marginHorizontal: 6,
+    borderColor: "grey",
+  },
+  input: {
+    minWidth: "80%",
   },
   image: {
     width: 200,
@@ -170,7 +177,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginTop: 40,
-    backgroundColor: "#FF1493",
+    backgroundColor: "brown",
+
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.8,
