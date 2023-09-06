@@ -65,6 +65,30 @@ export default Signup = ({ navigation }) => {
   }
   const onSubmit = (data) => {
     console.log(data)
+    var myHeaders = new Headers();
+myHeaders.append("Content-Type", "application/json");
+
+var raw = JSON.stringify({
+  "username": data.email, //email
+  "lastname": "Zhan",
+  "firstname": "Vi",
+  "birthday": "01/09/1999",
+  "address": "1232qaasd",
+  "password": data.password,
+  "phone": "9174289859"
+});
+
+var requestOptions = {
+  method: 'POST',
+  headers: myHeaders,
+  body: raw,
+  redirect: 'follow'
+};
+
+fetch("http://ec2-34-203-231-63.compute-1.amazonaws.com:8080/api/v1/users/AddUser", requestOptions)
+  .then(response => response.text())
+  .then(result => console.log(result))
+  .catch(error => console.log('error', error));
     if (validateEmail(data.email) && data.password === data.repassword) {
         dispatch(setEmail(data.email));
         emailjs

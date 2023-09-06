@@ -8,104 +8,125 @@ import {
   Image,
   TouchableOpacity,
 } from "react-native";
-import { setEmail,setName } from "../../redux/actions";
-import { useSelector, useDispatch } from 'react-redux';
-import validator from 'validator'
-import emailjs from '@emailjs/browser';
+import { setEmail, setName } from "../../redux/actions";
+import { useSelector, useDispatch } from "react-redux";
+import validator from "validator";
+import emailjs from "@emailjs/browser";
 import * as Icon from "react-native-feather";
 import { Divider } from "react-native-elements";
-export default Login = ({navigation}) => {
+import axios from "axios";
+import { api } from "../../api/baseurl";
+export default Login = ({ navigation }) => {
   const [emailAddress, onChangeEmail] = React.useState("");
   const [emailError, setEmailError] = React.useState("");
   const [password, onChangePassword] = React.useState("");
-  const {email, name} = useSelector(state => state.userReducer);
+  const { email, name } = useSelector((state) => state.userReducer);
   const dispatch = useDispatch();
-
 
   useEffect(() => {
     const timer = setTimeout(() => {
-        setEmailError('');
-        console.log("ends");
-      }, 2000);
-      return () => clearTimeout(timer);
-    }, [emailError]);
-
+      setEmailError("");
+      console.log("ends");
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [emailError]);
 
   const login = () => {
 
-   if(validateEmail()){
-      
-    dispatch(setEmail(emailAddress))
-    emailjs.send('happyhour', 'template_prk74qi', {
-        to_email: emailAddress,
-        email:emailAddress,
-        from_name: 'The Happy Owls',
-      }, 'rfsak_qMYsWxckmdR').then(
-        function (response) {
-          console.log('SUCCESS!', response.status, response.text);
-        },
-        function (error) {
-          console.log('FAILED...', error);
-        }
-      );
-    console.log(emailAddress, password)
-   } 
-  }
+    if (validateEmail()) {
+      axios.post(api+'users/AuthenticateUser',{
+        username: emailAddress.toLowerCase(),
+        password: password,
+      },{ headers: {
+        "Content-Type": "application/json",
+      },})
+        .then(function (response) {
+          dispatch(setEmail(emailAddress));
+          // emailjs
+          //   .send(
+          //     "happyhour",
+          //     "template_prk74qi",
+          //     {
+          //       to_email: emailAddress,
+          //       email: emailAddress,
+          //       from_name: "The Happy Owls",
+          //     },
+          //     "rfsak_qMYsWxckmdR"
+          //   )
+          //   .then(
+          //     function (response) {
+          //       console.log("SUCCESS!", response.status, response.text);
+          //     },
+          //     function (error) {
+          //       console.log("FAILED...", error);
+          //     }
+          //   );
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      console.log(emailAddress, password);
+    }
+  };
 
   const validateEmail = () => {
-   
     if (!validator.isEmail(emailAddress)) {
-      setEmailError('Email invalid!')
-      console.log('invalid')
-      return false
+      setEmailError("Email invalid!");
+      console.log("invalid");
+      return false;
     }
-    return true
-  }
+    return true;
+  };
 
   return (
     <View style={styles.container}>
-
       <SafeAreaView>
         <Image
           style={styles.image}
           source={require("../../../assets/icon.png")}
         />
         <View style={styles.inputView}>
-        <View style={styles.inputContainer}>
+          <View style={styles.inputContainer}>
             <Icon.Mail color={"grey"} />
             <Divider orientation="vertical" style={styles.divider} />
-          <TextInput
-            style={styles.input}
-            onChangeText={onChangeEmail}
-            placeholder="Email"
-            value = {emailAddress}
-
-          />
+            <TextInput
+              style={styles.input}
+              onChangeText={onChangeEmail}
+              placeholder="Email"
+              value={emailAddress}
+            />
           </View>
-            <Text style={styles.error}>{emailError}</Text>
-            <View style={styles.inputContainer}>
+          <Text style={styles.error}>{emailError}</Text>
+          <View style={styles.inputContainer}>
             <Icon.Lock color={"grey"} />
             <Divider orientation="vertical" style={styles.divider} />
-          <TextInput
-            style={styles.input}
-            onChangeText={onChangePassword}
-            secureTextEntry={true}
-            value={password}
-            placeholder="Password"
-          />
-                    </View>
-          <TouchableOpacity onPress={()=>{console.log('forget password')}}>
+            <TextInput
+              style={styles.input}
+              onChangeText={onChangePassword}
+              secureTextEntry={true}
+              value={password}
+              placeholder="Password"
+            />
+          </View>
+          <TouchableOpacity
+            onPress={() => {
+              console.log("forget password");
+            }}
+          >
             <Text style={styles.loginText}>Forget Password?</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={()=>{navigation.navigate('Signup')}}>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("Signup");
+            }}
+          >
             <Text style={styles.loginText}>Don't have an account? Sign up</Text>
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.loginBtn} onPress={()=>login()}>
-        <Text style={{    color:'white',}}>LOGIN</Text> 
-      </TouchableOpacity>
-
+        <TouchableOpacity style={styles.loginBtn} onPress={() => login()}>
+          <Text style={{ color: "white" }}>LOGIN</Text>
+        </TouchableOpacity>
       </SafeAreaView>
     </View>
   );
@@ -122,8 +143,8 @@ const styles = StyleSheet.create({
     paddingTop: "30%",
     alignSelf: "center",
   },
-  error:{
-    color:'red'
+  error: {
+    color: "red",
   },
   input: {
     height: 50,
@@ -133,12 +154,12 @@ const styles = StyleSheet.create({
     borderColor: "grey",
     padding: 10,
     borderRadius: 10,
-    shadowColor: 'white',
-    backgroundColor:'white',
+    shadowColor: "white",
+    backgroundColor: "white",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.4,
-    shadowRadius: 2,  
-    elevation: 5
+    shadowRadius: 2,
+    elevation: 5,
   },
   inputContainer: {
     minHeight: 50,
@@ -168,7 +189,6 @@ const styles = StyleSheet.create({
   },
   loginText: {
     color: "#303030",
-
   },
   loginBtn: {
     minWidth: "80%",
@@ -179,10 +199,10 @@ const styles = StyleSheet.create({
     marginTop: 40,
     backgroundColor: "brown",
 
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.8,
-    shadowRadius: 2,  
-    elevation: 5
+    shadowRadius: 2,
+    elevation: 5,
   },
 });

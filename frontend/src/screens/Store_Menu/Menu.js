@@ -1,69 +1,143 @@
 import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
-  Text,
   SafeAreaView,
   ScrollView,
-  StatusBar,
-  FlatList
+  TouchableOpacity,
+  View,
+  TextInput
 } from 'react-native';
-import { ListItem } from 'react-native-elements'
+import { Divider } from "react-native-elements";
+import * as Icon from "react-native-feather"
+import StoreCard from '../../Component/StoreCard';
 import axios from "axios";
+import { SearchBar } from 'react-native-elements';
 const list = [
   {
-    name: 'Amy Farha',
-    avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/ladylexy/128.jpg',
-    subtitle: 'Vice President'
+    name: 'Amy Farha Bar and Grill',
+    cuisine: 'Japanese cuisine',
+    rating:'5.5',
+    hours:'5pm - 8pm',
+    location:'jackson park ave, New york, NY 11101'
   },
   {
-    name: 'Chris Jackson',
-    avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-    subtitle: 'Vice Chairman'
+    name: 'Jackson Park Lic',
+    cuisine: 'Chinese cuisine',
+    rating:'4.5',
+    hours:'6am - 8pm',
+    location:'jackson park ave, New york, NY 11101'
   },
-
+  {
+    name: 'The Spot',
+    cuisine: 'dessert Bar',
+    rating:'5.5',
+    hours:'9am - 12am',
+    location:'jackson park ave, New york, NY 11101'
+  },
+  {
+    name: 'Amy Farha Bar and Grill',
+    cuisine: 'Japanese cuisine',
+    rating:'5.5',
+    hours:'5pm - 8pm',
+    location:'jackson park ave, New york, NY 11101'
+  },
+  {
+    name: 'Jackson Park Lic',
+    cuisine: 'Chinese cuisine',
+    rating:'4.5',
+    hours:'6am - 8pm',
+    location:'jackson park ave, New york, NY 11101'
+  },
+  {
+    name: 'The Spot',
+    cuisine: 'dessert Bar',
+    rating:'5.5',
+    hours:'9am - 12am',
+    location:'jackson park ave, New york, NY 11101'
+  },
+  {
+    name: 'Amy Farha Bar and Grill',
+    cuisine: 'Japanese cuisine',
+    rating:'5.5',
+    hours:'5pm - 8pm',
+    location:'jackson park ave, New york, NY 11101'
+  },
+  {
+    name: 'Jackson Park Lic',
+    cuisine: 'Chinese cuisine',
+    rating:'4.5',
+    hours:'6am - 8pm',
+    location:'jackson park ave, New york, NY 11101'
+  },
+  {
+    name: 'The Spot',
+    cuisine: 'dessert Bar',
+    rating:'5.5',
+    hours:'9am - 12am'
+  },
+  {
+    name: 'Amy Farha Bar and Grill',
+    cuisine: 'Japanese cuisine',
+    rating:'5.5',
+    hours:'5pm - 8pm'
+  },
+  {
+    name: 'Jackson Park Lic',
+    cuisine: 'Chinese cuisine',
+    rating:'4.5',
+    hours:'6am - 8pm'
+  },
+  {
+    name: 'The Spot',
+    cuisine: 'dessert Bar',
+    rating:'5.5',
+    hours:'9am - 12am'
+  }
 ]
-export default MenuScreen = ({}) => {
-  const [data, setData] = useState('')
+export default MenuScreen = ({navigation}) => {
+  const [data, setData] = useState()
   useEffect(()=>{
     axios
-    .get("https://randomuser.me/api/?results=5")
+    .get("http://ec2-34-203-231-63.compute-1.amazonaws.com:8080/api/v1/stores/getAllStores")
     .then(response =>
-      response.data.results.map(user => ({
-        name: `${user.name.first} ${user.name.last}`,
-        username: `${user.login.username}`,
-        email: `${user.email}`,
-        image: `${user.picture.thumbnail}`
+      response.data.map(store => ({
+        name: `${store.name}`,
+        rating:`${store.rating}`,
+        cuisine:`${store.cuisine}`,
+        hours:`${store.hours}`
       }))
     )
-    .then(users => {
-      setData({
-        users,
-        isLoading: false
-      });
+    .then(stores => {
+      console.log(stores)
+      setData(
+        stores
+      );
     })
-    .catch(error => this.setState({ error, isLoading: false }));
+    .catch(error => console.log(error));
   },[])
 
   return (
     <SafeAreaView style={styles.container}>
+    <View style={styles.searchArea}>
+    <View style={styles.inputContainer}>
+            <Icon.Search color={"grey"} />
+            <Divider orientation="vertical" style={styles.divider} />
+            <TextInput
+              style={styles.input}
+              
+              placeholder="Search"
+            />
+          </View>
+          </View>
     <ScrollView style={styles.scrollView}>
-    <Text>placeholder for MenuScree</Text>
-    <FlatList
-        data={[
-          {key: 'Devin'},
-          {key: 'Dan'},
-          {key: 'Dominic'},
-          {key: 'Jackson'},
-          {key: 'James'},
-          {key: 'Joel'},
-          {key: 'John'},
-          {key: 'Jillian'},
-          {key: 'Jimmy'},
-          {key: 'Julie'},
-        ]}
-        renderItem={({item}) => <Text style={styles.text}>{item.key}</Text>}
-      />
-          <Text>{JSON.stringify(data)}</Text>
+   {data? data.splice(0,30).map((object, index) => (
+    <TouchableOpacity key={index} onPress={()=>{console.log(object.name)}} ><StoreCard  store = {object}/></TouchableOpacity>
+    ))
+:list.map((object, index) => (
+    <TouchableOpacity key={index} onPress={()=>{ navigation.navigate('Detail',{ store: object }) }} ><StoreCard  store = {object}/></TouchableOpacity>
+    ))
+}
+
     </ScrollView> 
 
   </SafeAreaView>
@@ -72,13 +146,43 @@ export default MenuScreen = ({}) => {
 const styles = StyleSheet.create({
     container: {
       flex: 1,
-      paddingTop: StatusBar.currentHeight,
+      justifyContent: 'center',
+  
+      alignItems: 'center',
     },
+
     scrollView: {
-      marginHorizontal: 20,
+      marginHorizontal: 15,
+      flexGrow:1
     },
-    text: {
-      fontSize: 42,
+    inputContainer: {
+      minHeight: 50,
+      height: 50,
+      maxWidth:'90%',
+      borderWidth: 1,
+      borderColor: "grey",
+      padding: 10,
+      borderRadius: 20,
+      display: "flex",
+      flexDirection: "row",
+      margin: 10,
+    },
+    searchArea:{
+
+      width:'100%',
+      padding:'3%',
+      borderBottomColor:'grey',
+      borderTopColor:'grey',
+      borderWidth: .4,
+  
+
+    },
+    divider: {
+      marginHorizontal: 6,
+      borderColor: "grey",
+    },
+    input: {
+      minWidth: "80%",
     },
   });
   

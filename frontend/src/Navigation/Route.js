@@ -19,7 +19,7 @@ export default function Routes() {
             <Stack.Navigator  screenOptions={{
           headerShown: false,
         }}>
-        {email ? MainStack(Stack)
+        {!email ? MainStack(Stack)
             : AuthStack(Stack)
         }
             </Stack.Navigator>
