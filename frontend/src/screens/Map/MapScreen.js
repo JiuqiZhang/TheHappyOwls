@@ -7,6 +7,7 @@ import {
   Image,
   SafeAreaView,
   Button,
+  TouchableOpacity,
 } from "react-native";
 import React, { useEffect, useState, useRef } from "react";
 var FormData = require("form-data");
@@ -27,7 +28,7 @@ const CARD_WIDTH = width * 0.8;
 const SPACING_FOR_CARD_INSET = width * 0.1 - 10;
 export default MapScreen = ({}) => {
   const [userLocation, setLocation] = useState(null);
-  const [ind, setind] = useState(0);
+  const [refresh, setrefresh] = useState(false);
   const [data, setData] = useState([]);
   let mapAnimation = new Animated.Value(0);
   let mapIndex = 0;
@@ -213,6 +214,7 @@ export default MapScreen = ({}) => {
   const onRegionChange = async (region, details) => {
     if (details.isGesture === true) {
       console.log(region);
+      setrefresh(true)
       return;
     }
     
@@ -235,17 +237,20 @@ export default MapScreen = ({}) => {
         style={styles.map}
         onRegionChangeComplete={(region, details) => onRegionChange(region, details)}
       >
-      <View
+      {refresh?<View
         style={{
             position: 'absolute',//use absolute position to show button on top of the map
-            top: '50%', //for center align
-            alignSelf: 'flex-end' //for align to right
+            top: '1%', //for center align
+            alignSelf: 'center',//for align to right,
+            backgroundColor:'white',
+            borderRadius: 40,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.8,
+            shadowRadius: 1,
+            elevation: 0.1,
         }}
-    >
-        <Button onPress={()=>{console.log('refresh')}}
-  title="Learn More"
-  color="#841584"/>
-    </View>
+    ><Button title="search" onPress={()=>{console.log("123");setrefresh(false)}}></Button></View>:null}
         <Marker
           coordinate={{
             latitude: 40.7295,
