@@ -5,7 +5,7 @@ export default function MainStack(Stack){
 
 <>
         <Stack.Screen
-          name="Home"
+          name="Login"
           component={Login}
         />
         <Stack.Screen

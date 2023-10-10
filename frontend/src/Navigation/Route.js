@@ -1,5 +1,7 @@
 import React, {Text} from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+
+
 
 
 import MainStack from './MainStack';
@@ -9,19 +11,28 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 const Stack = createNativeStackNavigator();
 
-
+const MyTheme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: '#FFFFFF'
+    },
+  };
 export default function Routes() {
     const {email, name} = useSelector(state => state.userReducer);
 
 
     return (
-        <NavigationContainer>
-            <Stack.Navigator  screenOptions={{
+        <NavigationContainer theme={MyTheme}>
+            <Stack.Navigator 
+             screenOptions={{
           headerShown: false,
+
         }}>
-        {!email ? MainStack(Stack)
+        {MainStack(Stack)}
+        {/* {!email ? MainStack(Stack)
             : AuthStack(Stack)
-        }
+        } */}
             </Stack.Navigator>
         </NavigationContainer>
 

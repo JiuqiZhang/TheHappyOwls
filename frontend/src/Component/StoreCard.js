@@ -1,11 +1,11 @@
 import React from "react";
 import { Text, Image, View, StyleSheet } from "react-native";
 import * as Icon from "react-native-feather";
-
+import moment from "moment/moment";
 const week = ["M", "T", "W", "T", "F", "S", "S"];
 export default StoreCard = (props) => {
   return (
-    <React.Fragment>
+    <View style={styles.container}>
       <Image style={styles.image} source={require("../Image/store.jpg")} />
       <View style={[styles.flexcontainer, styles.row]}>
         <Text style={styles.text}>{props.store.name}</Text>
@@ -19,7 +19,7 @@ export default StoreCard = (props) => {
       <View style={styles.row}>
         {week.map((day, index) => {
           return (
-      <View key={index} style={[styles.circleContainer, index<=4?styles.hh:null]}>
+      <View key={index} style={[styles.circleContainer, props.store.hours[index][props.store.hours[index].length - 1]!=='d'?styles.hh:null]}>
             <Text style={styles.circle} >
               {day}
             </Text>
@@ -28,11 +28,14 @@ export default StoreCard = (props) => {
           );
         })}
       </View>
-      <Text style={styles.cuisine}>{props.store.hours}</Text>
-    </React.Fragment>
+      <Text style={styles.cuisine}>{props.store.hours[moment().day()-1]}</Text>
+    </View>
   );
 };
 const styles = StyleSheet.create({
+  container:{
+    maxWidth:'100%'
+  },
   text: {
     fontSize: 19,
     fontWeight: "600",
@@ -72,7 +75,7 @@ const styles = StyleSheet.create({
     marginRight: 5,
     marginLeft: -3,
     marginTop:-5,
-    backgroundColor: "#E0E0E0",
+    backgroundColor: "#B6BBBF",
     justifyContent:'center',
   textAlign:'center',
   display:'flex'
@@ -93,6 +96,7 @@ const styles = StyleSheet.create({
     fontWeight:'bold'
   },
   hh:{
-    backgroundColor:'#FFB300'
+    backgroundColor:'#FFB300',
+
   },
 });

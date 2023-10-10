@@ -80,6 +80,12 @@ export default Login = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+    <TouchableOpacity
+        style={styles.back}
+        onPress={() => {
+            navigation.navigate("Profile");
+        }}
+    ><Icon.X color={"black"} /></TouchableOpacity>
       <SafeAreaView>
         <Image
           style={styles.image}
@@ -138,6 +144,11 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     alignItems: "center",
   },
+  back: {
+    position: "absolute",
+    left: "4%",
+    top: "6%",
+},
   inputView: {
     alignItems: "center",
     paddingTop: "30%",
