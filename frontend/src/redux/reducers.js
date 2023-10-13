@@ -1,9 +1,9 @@
 import { SET_EMAIL, SET_NAME_LAST, SET_NAME_FIRST } from "./actions";
 
 const initialState = {
-    email:'test@nyu.edu',
-    firstName:'Zach',
-    lastName:'Zhang'
+    email:'',
+    firstName:'',
+    lastName:''
 }
 
 

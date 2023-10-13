@@ -1,13 +1,13 @@
 import React, {useState} from "react";
 import {
-   
+  Text,
     StyleSheet,
     View,
     TextInput
   } from 'react-native';
 import { Divider } from "react-native-elements";
 import * as Icon from "react-native-feather";
-export const Searchbar = () =>{
+export const Searchbar = ({value, onchange, setResult}) =>{
 
     return(
        
@@ -15,7 +15,8 @@ export const Searchbar = () =>{
             <View style={styles.inputContainer}>
               <Icon.Search color={"grey"} />
               <Divider orientation="vertical" style={styles.divider} />
-              <TextInput style={styles.input} placeholder="Search" />
+      
+              <TextInput style={styles.input} value={value} onChangeText={onchange} placeholder="Search store name" onSubmitEditing={()=>{setResult()}}/>
             </View>
           </View>
     )
@@ -44,7 +45,9 @@ const styles = StyleSheet.create({
       },
       searchArea: {
         width: "100%",
-        padding: "3%",
+        padding: "1%",
+        alignItems: 'center',
+        justifyContent: 'center',
         borderBottomColor: "grey",
         paddingTop:0,
         borderTopColor: "grey",

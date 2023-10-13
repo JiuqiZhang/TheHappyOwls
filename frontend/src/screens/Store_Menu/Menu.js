@@ -3,6 +3,7 @@ import {
   StyleSheet,
   SafeAreaView,
   ScrollView,
+  ActivityIndicator,
   TouchableOpacity,
   View,
   Button,
@@ -10,10 +11,16 @@ import {
 import { Searchbar } from "../../Component/SearchBar";
 import StoreCard from "../../Component/StoreCard";
 import axios from "axios";
-import { SearchBar } from "react-native-elements";
+import { useRef } from 'react';
+
+
 
 export default MenuScreen = ({ navigation }) => {
+  const [indicator, setIndicator] = useState(true)
   const [data, setData] = useState();
+  const [search, setsearch] = useState('')
+  const [result, setResult] = useState('')
+  const scrollRef = useRef();
   useEffect(() => {
     var config = {
       method: 'get',
@@ -24,25 +31,67 @@ export default MenuScreen = ({ navigation }) => {
     
     axios(config)
     .then((response) =>
-        response.data.map((store) => ({
+        response.data.splice(0,30).map((store) => ({
           name: store.name,
           rating: store.rating,
           cuisine:`${store.cuisine}`,
           hours: store.hours,
+          photoResult:store.photoResult,
+          location:store.location,
+          hh:store.hhResult
         }))
       )
       .then((stores) => {
         // console.log(stores);
         setData(stores);
+        setIndicator(false)
       })
       .catch((error) => console.log(error));
   }, []);
+
+  const searchResult = async()=>{
+    var req = new FormData();
+    req.append("search", search);
+    setIndicator(true)
+    
+
+    await axios({
+      method: "get",
+      url: "https://data.tpsi.io/api/v1/stores/Search?search="+search,
+      headers: {},
+    })
+      .then((response) =>
+        response.data.map((store) => ({
+          name: store.name,
+          rating: store.rating,
+          cuisine:`${store.cuisine}`,
+          hours: store.hours,
+          photoResult:store.photoResult,
+          location:store.location,
+          hh:store.hhResult
+        }
+        ))
+
+      )
+      .then((data)=>{
+        setResult(data)
+        scrollRef.current?.scrollTo({y: 0,animated: true,
+        })
+        setIndicator(false)
+
+      })
+      .catch((e)=>{
+        console.log(e)
+      })
+
+  }
   return (
     <SafeAreaView style={styles.container}>
-    <Searchbar/>
-<ScrollView style={styles.scrollView}>
+    <Searchbar value={search} onchange={setsearch} setResult={searchResult} />
+
+{!indicator?(!result?<ScrollView style={styles.scrollView} ref={scrollRef}>
         {data
-          ? data.splice(0, 30).map((object, index) => (
+          ? data.map((object, index) => (
               <TouchableOpacity
                 key={index}
                 onPress={() => {
@@ -53,12 +102,24 @@ export default MenuScreen = ({ navigation }) => {
               </TouchableOpacity>
             ))
           : null}
-      </ScrollView>
+      </ScrollView>:<ScrollView style={styles.scrollView} ref={scrollRef}>
+        {result.map((object, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => {
+                  navigation.navigate("Detail", { store: object });
+                }}
+              >
+                <StoreCard store={object} />
+              </TouchableOpacity>
+            ))}
+      </ScrollView>): <ActivityIndicator size="large" color="grey" style={{top:'5%'}} animating={indicator} />}
       <View style={styles.stickyButton}>
-        <Button title={"Map"} color="white" accessibilityLabel="Map" onPress={()=>{navigation.navigate("Map");}}/>
+       {result?<Button title={"Return"} color="white" accessibilityLabel="Return" onPress={()=>{setsearch('');setResult(null);scrollRef.current?.scrollTo({y: 0,animated: true,
+  })}}/>:null}
       </View>
     </SafeAreaView>
-  );
+  )
 };
 const styles = StyleSheet.create({
   container: {
@@ -69,6 +130,7 @@ const styles = StyleSheet.create({
 
   scrollView: {
     marginHorizontal: 15,
+    width:'90%',
     flexGrow: 1,
   },
   inputContainer: {

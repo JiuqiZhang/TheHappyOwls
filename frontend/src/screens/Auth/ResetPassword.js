@@ -13,7 +13,7 @@ export default Reset = () => {
       name: state.name,
       job: state.job,
     };
-    await axios.post("", userData).then((response) => {
+    await axios.post("https://ec2-34-203-231-63.compute-1.amazonaws.com/api/v1/users/ChangePassword", userData).then((response) => {
       console.log(response.status, response.data);
     }).catch((error)=>{
         console.log(error)

@@ -1,14 +1,15 @@
 import React from "react";
-import { Text, Image, View, StyleSheet } from "react-native";
+import { Text, Image, View, StyleSheet, Linking } from "react-native";
 import * as Icon from "react-native-feather";
 import moment from "moment/moment";
 const week = ["M", "T", "W", "T", "F", "S", "S"];
 export default StoreCard = (props) => {
   return (
     <View style={styles.container}>
-      <Image style={styles.image} source={require("../Image/store.jpg")} />
+      <Image style={styles.image} source={props.store.photoResult[0]?{uri:'http://spring-boot-repo-tpsi.s3.amazonaws.com/'+props.store.photoResult[0]._id+'_'+props.store.photoResult[0]['photos'][0].id}:require("../Image/store.jpg")}/>
       <View style={[styles.flexcontainer, styles.row]}>
         <Text style={styles.text}>{props.store.name}</Text>
+        
         <View style={styles.rating}>
           <Icon.Star color={"black"} fill={"black"} width={12} />
           <Text style={styles.ratingText}>{props.store.rating}</Text>
@@ -48,9 +49,10 @@ const styles = StyleSheet.create({
   },
   image: {
     maxWidth: "100%",
-    height: "auto",
+    height: "100%",
     height: 220,
-
+    width:'100%',
+    resizeMode: 'cover',
     borderRadius: 20,
     alignSelf: "center",
     marginTop: "8%",

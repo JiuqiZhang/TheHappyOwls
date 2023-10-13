@@ -9,33 +9,11 @@ const Slides = [
       title: 'pic 1',
       description: 'placeholder',
       price: null,
-    },
-    {
-        id: 2,
-        img: require('../Image/store.jpg'),
-        title: 'pic 2',
-        description: 'placeholder',
-        price: null,
-      },
-      {
-        id: 3,
-        img: require('../Image/store.jpg'),
-        title: 'pic 3',
-        description: 'placeholder',
-        price: null,
-      },
-      {
-          id: 4,
-          img: require('../Image/store.jpg'),
-          title: 'pic 4',
-          description: 'placeholder',
-          price: null,
-        },
-    
+    }    
   ];
 
 
-const Slider = () => {
+const Slider = (props) => {
   const [index, setIndex] = useState(0);
   const scrollX = useRef(new Animated.Value(0)).current;
 
@@ -67,18 +45,18 @@ const Slider = () => {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={Slides}
-        renderItem={({item}) => <SlideItem item={item} />}
-        horizontal
-        pagingEnabled
-        snapToAlignment="center"
-        showsHorizontalScrollIndicator={false}
-        onScroll={handleOnScroll}
-        onViewableItemsChanged={handleOnViewableItemsChanged}
-        viewabilityConfig={viewabilityConfig}
-      />
-      <Pagination data={Slides} scrollX={scrollX} index={index} />
+  <FlatList
+    data={!props.img?Slides:props.img.photos}
+    renderItem={({item}) => <SlideItem item={!props.img?item:{img:{uri:'http://spring-boot-repo-tpsi.s3.amazonaws.com/'+props.img._id+'_'+item.id}}} />}
+    horizontal
+    pagingEnabled
+    snapToAlignment="center"
+    showsHorizontalScrollIndicator={false}
+    onScroll={handleOnScroll}
+    onViewableItemsChanged={handleOnViewableItemsChanged}
+    viewabilityConfig={viewabilityConfig}
+  />
+  <Pagination data={!props.img?Slides:props.img.photos} scrollX={scrollX} index={index} />
     </View>
   );
 };
@@ -88,7 +66,10 @@ export default Slider;
 const styles = StyleSheet.create({
     container: {
         width:'100%',
-        height:'38%',
-        alignItems: 'center',
+        height:'40%',
+        flexGrow:1
+
+
+  
       },
 });

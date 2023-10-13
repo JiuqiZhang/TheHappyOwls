@@ -49,29 +49,11 @@ import {
     container: {
       width:width,
       height:height,
-      alignItems: 'center',
-// backgroundColor:'red'
+      // backgroundColor:'red'
     },
     image: {
-      flex: 0.41,
-      width: '100%',
-    },
-    content: {
-      flex: 0.4,
-      alignItems: 'center',
-    },
-    title: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      color: '#333',
-    },
-    description: {
-      fontSize: 18,
-      marginVertical: 12,
-      color: '#333',
-    },
-    price: {
-      fontSize: 32,
-      fontWeight: 'bold',
+
+      width: width,
+      height:height*.38
     },
   });

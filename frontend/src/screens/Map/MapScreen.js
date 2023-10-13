@@ -9,15 +9,13 @@ import {
   Button,
   TouchableOpacity,
 } from "react-native";
+import { AntDesign} from '@expo/vector-icons';
 import React, { useEffect, useState, useRef } from "react";
 var FormData = require("form-data");
 import * as Location from "expo-location";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Marker } from "react-native-maps";
 const { width, height } = Dimensions.get("window");
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import { Icon } from "react-native-elements";
-const CARD_HEIGHT = 220;
 import axios from "axios";
 import { Searchbar } from "../../Component/SearchBar";
 const image = require("../../Image/store.jpg");
@@ -26,12 +24,14 @@ const longitudeDelta = 0.0081;
 
 const CARD_WIDTH = width * 0.8;
 const SPACING_FOR_CARD_INSET = width * 0.1 - 10;
-export default MapScreen = ({}) => {
-  const [userLocation, setLocation] = useState(null);
+export default MapScreen = ({navigation}) => {
+  const [region, setRegion] = useState(null);
   const [refresh, setrefresh] = useState(false);
   const [data, setData] = useState([]);
+  const [searchVal, setsearch] = useState('')
+  const [indicator, setIndicator] = useState(true)
   let mapAnimation = new Animated.Value(0);
-  let mapIndex = 0;
+  const [mapIndex, setInd] =useState();
   const _map = useRef(null);
   mapStyle = [
     {
@@ -60,50 +60,50 @@ export default MapScreen = ({}) => {
     },
   ];
 
-  useEffect(() => {
-    _map.current.animateToRegion(
-      {
-        latitude: 40.7295,
-        longitude: -73.9965,
-        latitudeDelta: latitudeDelta,
-        longitudeDelta: longitudeDelta,
-      },
-      1000
-    );
-    // mapAnimation.addListener(({ value }) => {
-    //   let index = Math.floor(value / CARD_WIDTH + 0.3); // animate 30% away from landing on the next item
-    //   if (index >= data.length) {
-    //     index = data.length - 1;
-    //   }
-    //   if (index <= 0) {
-    //     index = 0;
-    //   }
-    //   // console.log(data[index])
+  const search = async ()=>{
+    setrefresh(false)
+    var req = new FormData();
+      req.append("lat", region.latitude);
+      req.append("lng", region.longitude);
+      req.append("latDelta", region.latitudeDelta);
+      req.append("lngDelta", region.longitudeDelta);
 
-    //   clearTimeout(regionTimeout);
+      await axios({
+        method: "post",
+        url: "https://data.tpsi.io/api/v1/stores/getNearByPhone",
+        headers: {},
+        data: req,
+      })
+        .then((response) =>
+          response.data.map((store) => ({
+            name: store.name,
+            rating: store.rating,
+            cuisine: `${store.cuisine}`,
+            hours: store.hours,
+            latitude: store.latitude,
+            longitude: store.longitude,
+            photoResult:store.photoResult,
+            hh:store.hhResult
+          }))
+        )
+        .then((stores) => {
+          setData(stores);
+          _map.current.animateToRegion(
+            {
+              latitude: region.latitude,
+              longitude: region.longitude,
+              latitudeDelta: region.latitudeDelta,
+              longitudeDelta: region.longitudeDelta,
+            },
+            1000
+          );
+          _scrollView.current?.scrollTo({x: 0,animated: true,
+          })
+        })
+        .catch((error) => console.log(error));
+  }
 
-    //   const regionTimeout = setTimeout(() => {
-    //     if( mapIndex !== index ) {
-    //       mapIndex = index;
-    //       const { coordinate } =  {
-    //         coordinate: {
-    //           latitude: data[mapIndex]['latitude'],
-    //           longitude:data[mapIndex]['longitude'],
-    //         },}
 
-    //         // console.log('animated',mapIndex)
-    //       _map.current.animateToRegion(
-    //         {
-    //           ...coordinate,
-    //           latitudeDelta: latitudeDelta,
-    //           longitudeDelta: longitudeDelta,
-    //         },
-    //         350
-    //       );
-    //     }
-    //   }, 20);
-    // });
-  }, [data]);
 
   useEffect(() => {
     const getPermissions = async () => {
@@ -119,7 +119,7 @@ export default MapScreen = ({}) => {
       req.append("latDelta", latitudeDelta);
       req.append("lngDelta", longitudeDelta);
 
-      axios({
+      await axios({
         method: "post",
         url: "https://data.tpsi.io/api/v1/stores/getNearByPhone",
         headers: {},
@@ -130,31 +130,31 @@ export default MapScreen = ({}) => {
             name: store.name,
             rating: store.rating,
             cuisine: `${store.cuisine}`,
-            // hours: store.hours,
+            hours: store.hours,
             latitude: store.latitude,
             longitude: store.longitude,
+            photoResult:store.photoResult,
+            hh:store.hhResult
           }))
         )
         .then((stores) => {
           setData(stores);
-          console.log(stores.length);
+          _map.current.animateToRegion(
+            {
+              latitude: 40.7295,
+              longitude: -73.9965,
+              latitudeDelta: latitudeDelta,
+              longitudeDelta: longitudeDelta,
+            },
+            1000
+          );
         })
         .catch((error) => console.log(error));
+       
 
-      let currentLocation = await Location.getCurrentPositionAsync({});
-      setLocation({
-        coords: {
-          accuracy: 5,
-          altitude: 0,
-          altitudeAccuracy: -1,
-          heading: -1,
-          latitude: 40.7295,
-          longitude: 73.9965,
-          speed: -1,
-        },
-      });
-      console.log("Location:");
-      console.log(currentLocation);
+      // let currentLocation = await Location.getCurrentPositionAsync({});
+      // console.log("Location:");
+      // console.log(currentLocation);
     };
 
     getPermissions();
@@ -178,6 +178,7 @@ export default MapScreen = ({}) => {
 
   const onMarkerPress = (mapEventData) => {
     const markerID = mapEventData._targetInst.return.key;
+    setInd(mapEventData._targetInst.return.key)
     const { coordinate } = {
       coordinate: {
         latitude: data[markerID]["latitude"],
@@ -193,6 +194,13 @@ export default MapScreen = ({}) => {
       },
       350
     );
+    setRegion({
+      latitude: data[markerID]["latitude"],
+      longitude: data[markerID]["longitude"],
+      latitudeDelta: latitudeDelta,
+      longitudeDelta: longitudeDelta,
+    });
+    setrefresh(true);
     let x = markerID * CARD_WIDTH + markerID * 20;
     if (Platform.OS === "ios") {
       x = x - SPACING_FOR_CARD_INSET;
@@ -205,15 +213,65 @@ export default MapScreen = ({}) => {
 
   const onRegionChange = async (region, details) => {
     if (details.isGesture === true) {
-      console.log(region);
+      setRegion(region);
       setrefresh(true);
       return;
     }
   };
 
+  const searchResult = async()=>{
+    var req = new FormData();
+    req.append("search", search);
+    setIndicator(true)
+    
+
+    await axios({
+      method: "get",
+      url: "https://data.tpsi.io/api/v1/stores/Search?search="+searchVal,
+      headers: {},
+    })
+      .then((response) =>
+        response.data.map((store) => ({
+          name: store.name,
+          rating: store.rating,
+          cuisine:`${store.cuisine}`,
+          hours: store.hours,
+          photoResult:store.photoResult,
+          latitude: store.latitude,
+          longitude: store.longitude,
+          location:store.location,
+          hh:store.hhResult
+        }
+        ))
+
+      )
+      .then((data)=>{
+        setData(data)
+        _scrollView.current?.scrollTo({x: 0,animated: true,
+        })
+        setsearch('')
+        setIndicator(false)
+        _map.current.animateToRegion(
+          {
+            latitude: 40.7295,
+            longitude: -73.9965,
+            latitudeDelta: 0.07,
+            longitudeDelta: 0.1,
+          },
+          1000
+        );
+        
+
+      })
+      .catch((e)=>{
+        console.log(e)
+      })
+    }
+
+
   return (
     <SafeAreaView style={styles.container}>
-      <Searchbar />
+      <Searchbar value={searchVal} onchange={setsearch} setResult={searchResult} />
 
       {/* <Text>{userLocation?(userLocation['coords']['latitude']+ ', '+userLocation['coords']['longitude']):"Waiting"}</Text> */}
       <MapView
@@ -222,8 +280,8 @@ export default MapScreen = ({}) => {
         initialRegion={{
           latitude: 40.7295,
           longitude: -73.9965,
-          latitudeDelta: latitudeDelta,
-          longitudeDelta: latitudeDelta,
+          latitudeDelta: 0.1,
+          longitudeDelta: 0.2,
         }}
         // customMapStyle={mapStyle}
         style={styles.map}
@@ -236,7 +294,10 @@ export default MapScreen = ({}) => {
             latitude: 40.7295,
             longitude: -73.9965,
           }}
-        />
+        >
+          <AntDesign name="user" size={24} /> 
+
+</Marker>
         {data.map((marker, index) => {
           const scaleStyle = {
             transform: [
@@ -247,15 +308,17 @@ export default MapScreen = ({}) => {
           };
 
           return (
-            <Marker
+          <Marker
               key={index}
               coordinate={{
                 latitude: marker.latitude,
                 longitude: marker.longitude,
               }}
-              pinColor={mapIndex === index ? "res" : "white"}
-              onPress={(e) => onMarkerPress(e)}
-            />
+              pinColor={"white"}
+              onPress={(e) => onMarkerPress(e)}>
+             
+
+</Marker>
           );
         })}
       </MapView>
@@ -278,9 +341,7 @@ export default MapScreen = ({}) => {
               shadowRadius: 1,
               elevation: 5,
             }}
-            onPress={() => {
-              setrefresh(false);
-            }}
+            onPress={search}
           >
             <Text>Search this area</Text>
           </TouchableOpacity>
@@ -313,14 +374,18 @@ export default MapScreen = ({}) => {
               e.nativeEvent.contentOffset.x / CARD_WIDTH + 0.3
             ); // animate 30% away from landing on the next item
             console.log(index);
+            setInd(index)
           }
         }}
       >
         {data
           ? data.map((data, index) => (
-              <View style={styles.card} key={index}>
+             <TouchableOpacity key={index}  onPress={() => {
+                  navigation.navigate("Detail", { store: data });
+                }}>
+             <View style={styles.card} >
                 <Image
-                  source={image}
+                  source={data.photoResult[0]?{uri:'http://spring-boot-repo-tpsi.s3.amazonaws.com/'+data.photoResult[0]._id+'_'+data.photoResult[0]['photos'][0].id}:image}
                   style={styles.cardImage}
                   resizeMode="cover"
                 />
@@ -333,6 +398,7 @@ export default MapScreen = ({}) => {
                   <View style={styles.button}></View>
                 </View>
               </View>
+             </TouchableOpacity>
             ))
           : null}
       </Animated.ScrollView>

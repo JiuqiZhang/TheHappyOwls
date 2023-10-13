@@ -26,7 +26,7 @@ export default InfoScreen = ({ navigation }) => {
    <View style={styles.wrapper}>
    <Text style={styles.email}>Email</Text>
        <View style={styles.wrapper}>
-   <Text>{state.email}</Text></View>
+   <Text>{state.email||"-"}</Text></View>
    </View>
 
    </View>)
