@@ -7,7 +7,8 @@ import Routes from './src/Navigation/Route';
 import { Provider } from "react-redux";
 import { Store } from "./src/redux/store";
 
-
+import { enableScreens } from 'react-native-screens';
+enableScreens();
 
 export default function App() {
 

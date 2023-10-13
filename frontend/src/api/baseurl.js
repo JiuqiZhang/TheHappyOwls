@@ -1,0 +1,1 @@
+export const api = 'http://ec2-34-203-231-63.compute-1.amazonaws.com:8080/api/v1/'
