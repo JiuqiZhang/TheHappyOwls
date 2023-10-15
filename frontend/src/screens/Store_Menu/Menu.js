@@ -37,6 +37,8 @@ export default MenuScreen = ({ navigation }) => {
           cuisine:`${store.cuisine}`,
           hours: store.hours,
           photoResult:store.photoResult,
+          latitude: store.latitude,
+          longitude: store.longitude,
           location:store.location,
           hh:store.hhResult
         }))
@@ -50,6 +52,9 @@ export default MenuScreen = ({ navigation }) => {
   }, []);
 
   const searchResult = async()=>{
+    if (search===''){
+      return
+    }
     var req = new FormData();
     req.append("search", search);
     setIndicator(true)
@@ -130,7 +135,7 @@ const styles = StyleSheet.create({
 
   scrollView: {
     marginHorizontal: 15,
-    width:'90%',
+    width:'100%',
     flexGrow: 1,
   },
   inputContainer: {

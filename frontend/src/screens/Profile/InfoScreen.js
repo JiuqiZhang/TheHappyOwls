@@ -7,8 +7,6 @@ import { useSelector } from "react-redux";
 
 export default InfoScreen = ({ navigation }) => {
     const state = useSelector((state) => state.userReducer);
-    const [first, setFirst] = React.useState(state.firstName)
-    const [last, setLast] = React.useState(state.lastName)
     return(<View style={styles.container}><TouchableOpacity
         style={styles.back}
         onPress={() => {
@@ -18,15 +16,16 @@ export default InfoScreen = ({ navigation }) => {
     </TouchableOpacity>
     <Text style={styles.title}>Edit Personal Info</Text>
   <View style={styles.wrapper}>
-  <InputBox label="First name" value={first} onchange={setFirst}/>
-    <InputBox label="Last name"  value={last} onchange={setLast} />
+  <InputBox label="First name" value={state.firstName} />
+    <InputBox label="Last name"  value={state.firstName} />
   </View>
   
    <Divider width={1.5}/>
    <View style={styles.wrapper}>
    <Text style={styles.email}>Email</Text>
        <View style={styles.wrapper}>
-   <Text>{state.email||"-"}</Text></View>
+   <Text>{state.email||"-"}</Text>
+   <Text>{JSON.stringify(state)}</Text></View>
    </View>
 
    </View>)

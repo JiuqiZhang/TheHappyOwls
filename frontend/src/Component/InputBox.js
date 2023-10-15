@@ -9,7 +9,7 @@ export default function InputBox(props) {
         <TextInput
           style={styles.input}
           autoCapitalize="none"
-          defaultValue={props.value||'-'}
+          defaultValue={props.value}
           onChangeText={props.onchange} 
           editable={false}       />
       </View>

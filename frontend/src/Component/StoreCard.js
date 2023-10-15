@@ -3,6 +3,15 @@ import { Text, Image, View, StyleSheet, Linking } from "react-native";
 import * as Icon from "react-native-feather";
 import moment from "moment/moment";
 const week = ["M", "T", "W", "T", "F", "S", "S"];
+const days ={
+  0:'Monday',
+  1:'Tuesday',
+  2:'Wednesday',
+  3:'Thursday',
+  4:'Friday',
+  5:'Saturday',
+  6:'Sunday'
+}
 export default StoreCard = (props) => {
   return (
     <View style={styles.container}>
@@ -18,9 +27,9 @@ export default StoreCard = (props) => {
 
       <Text style={styles.cuisine}>{props.store.cuisine}</Text>
       <View style={styles.row}>
-        {week.map((day, index) => {
+      {week.map((day, index) => {
           return (
-      <View key={index} style={[styles.circleContainer, props.store.hours[index][props.store.hours[index].length - 1]!=='d'?styles.hh:null]}>
+      <View key={index} style={[styles.circleContainer, props.store.hh[0]?props.store.hh[0].infos[0].days.includes(days[index])?styles.hh:null:null]}>
             <Text style={styles.circle} >
               {day}
             </Text>
@@ -29,13 +38,17 @@ export default StoreCard = (props) => {
           );
         })}
       </View>
-      <Text style={styles.cuisine}>{props.store.hours[moment().day()-1]}</Text>
+      
+      <Text style={styles.cuisine}>{props.store.hh[0]&&props.store.hh[0].infos[0].days.includes(moment().format('dddd'))?(moment().format('dddd')+': '+props.store.hh[0].infos[0].start_time+ ' - ' + props.store.hh[0].infos[0].end_time):("No happy hours today")}</Text>
     </View>
   );
 };
 const styles = StyleSheet.create({
   container:{
-    maxWidth:'100%'
+    width:'90%',
+    left:'5%',
+    right:'auto',
+
   },
   text: {
     fontSize: 19,
@@ -65,7 +78,7 @@ const styles = StyleSheet.create({
 
   },
   flexcontainer: {
-    marginTop: 8,
+    marginTop: 6,
     marginBottom: 0,
     justifyContent: "space-between",
   },

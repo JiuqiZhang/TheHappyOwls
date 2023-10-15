@@ -4,25 +4,31 @@
     "slug": "tpsi",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/tpsi.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/tpsi.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#1F1B1B"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.theHappyOwls.Tpsi"
+      "bundleIdentifier": "com.theHappyOwls.Tpsi",
+      "buildNumber": "1.21",
+      
+      "config":{
+        "googleMapsApiKey":"AIzaSyBWQ5iFtnT2EQSo1Yi4D6pc-edq7MJkaPA"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.theHappyOwls.Tpsi"
     },
     "web": {
       "favicon": "./assets/favicon.png"

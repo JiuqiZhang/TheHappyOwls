@@ -19,7 +19,7 @@ const MyTheme = {
     },
   };
 export default function Routes() {
-    const {email, name} = useSelector(state => state.userReducer);
+    const {email, firstName, lastName} = useSelector(state => state.userReducer);
 
 
     return (

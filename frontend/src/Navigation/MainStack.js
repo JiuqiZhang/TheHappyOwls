@@ -5,7 +5,7 @@ import InfoScreen from '../screens/Profile/InfoScreen';
 import FeedbackScreen from '../screens/Profile/FeedbackScreen';
 import SecurityScreen from '../screens/Profile/SecurityScreen';
 import EmailConfirm from '../screens/Auth/EmailConfirm';
-import AuthStack from './AuthStack';
+import Signup from '../screens/Auth/Signup';
 
 import Login from '../screens/Auth/Login';
 export default function MainStack(Stack){
@@ -42,6 +42,10 @@ export default function MainStack(Stack){
           name="Login"
           component={EmailConfirm}
 
+        />
+         <Stack.Screen
+          name="Signup"
+          component={Signup}
         />
           
         {/* <Stack.Screen name="Map" component={MapScreen} /> */}

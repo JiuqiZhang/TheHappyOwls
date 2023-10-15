@@ -82,6 +82,7 @@ export default MapScreen = ({navigation}) => {
             hours: store.hours,
             latitude: store.latitude,
             longitude: store.longitude,
+            location:store.location,
             photoResult:store.photoResult,
             hh:store.hhResult
           }))
@@ -133,6 +134,7 @@ export default MapScreen = ({navigation}) => {
             hours: store.hours,
             latitude: store.latitude,
             longitude: store.longitude,
+            location:store.location,
             photoResult:store.photoResult,
             hh:store.hhResult
           }))
