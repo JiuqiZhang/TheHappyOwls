@@ -222,6 +222,10 @@ export default MapScreen = ({navigation}) => {
   };
 
   const searchResult = async()=>{
+
+    if (searchVal===''){
+      return
+    }
     var req = new FormData();
     req.append("search", search);
     setIndicator(true)
@@ -296,8 +300,9 @@ export default MapScreen = ({navigation}) => {
             latitude: 40.7295,
             longitude: -73.9965,
           }}
+
+         
         >
-          <AntDesign name="user" size={24} /> 
 
 </Marker>
         {data.map((marker, index) => {
@@ -316,10 +321,10 @@ export default MapScreen = ({navigation}) => {
                 latitude: marker.latitude,
                 longitude: marker.longitude,
               }}
-              pinColor={"white"}
+
               onPress={(e) => onMarkerPress(e)}>
              
-
+           <Text style={{fontSize:8}}>{marker.name}</Text>
 </Marker>
           );
         })}

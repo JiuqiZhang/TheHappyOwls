@@ -8,6 +8,7 @@ import {
   Image,
   TouchableOpacity,
 } from "react-native";
+import axios from "axios";
 import validator from "validator";
 import { Divider } from "react-native-elements";
 import * as Icon from "react-native-feather";
@@ -21,6 +22,23 @@ export default function EmailConfirm({navigation}) {
   else{
     setDisable(true)
   }},[emailAddress])
+  const Search = async ()=>{
+    await axios.post('https://data.tpsi.io/api/v1/users/VerifyUserEmail?email='+emailAddress)
+    .then(function (response) {
+     if(response.data){
+     
+        console.log('login')
+     }
+      else{
+        navigation.navigate("Signup", { email: emailAddress })
+      }
+     }
+    )
+    .catch(function (error) {
+      console.log(error);
+    });
+    
+  }
   return (
     <SafeAreaView style={styles.container}>
      <TouchableOpacity
@@ -46,7 +64,7 @@ export default function EmailConfirm({navigation}) {
             />
           </View>
 
-          <TouchableOpacity style={!disable?styles.loginBtn:styles.disableBtn} onPress={() => navigation.navigate("Signup", { email: emailAddress })} disabled={disable}>
+          <TouchableOpacity style={!disable?styles.loginBtn:styles.disableBtn} onPress={() => Search()} disabled={disable}>
           <Text style={{ color: "white" }}>Continue</Text>
         </TouchableOpacity>
     </SafeAreaView>

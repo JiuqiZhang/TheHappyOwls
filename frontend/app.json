@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/tpsi.png",
       "resizeMode": "contain",
-      "backgroundColor": "#1F1B1B"
+      "backgroundColor": "#FCFCEF"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -17,7 +17,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.theHappyOwls.Tpsi",
-      "buildNumber": "1.21",
+      "buildNumber": "1.22",
       
       "config":{
         "googleMapsApiKey":"AIzaSyBWQ5iFtnT2EQSo1Yi4D6pc-edq7MJkaPA"

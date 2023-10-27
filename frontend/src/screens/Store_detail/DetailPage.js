@@ -48,15 +48,20 @@ export default DetailPage = ({ navigation, route }) => {
         <View style={styles.card}>
           <Text style={styles.text}>
             {data.name}
-            
-            {"\n"}
           </Text>
+          <Divider orientation="horizontal" width={1} style={styles.divider} />
+          <View style={{ flexDirection: "row",
+    display: "flex",}}>
+          
           <Text>
-            {data.rating} review 
-          </Text>
+          {data.rating}
+          </Text><Image
+        style={{width:20, height:20, alignSelf:'auto'}}
+        source={require('../../Image/G.png')}
+      /></View>
           <TouchableOpacity onPress={() => Linking.openURL('maps://app?daddr='+data.latitude+'+'+data.longitude)}><Text  style={{color: '#53A9FF',textDecorationLine:'underline'}}>{data.location}</Text></TouchableOpacity>
         </View>
-        <Divider orientation="horizontal" width={1} style={styles.divider} />
+        {/* <Divider orientation="horizontal" width={1} style={styles.divider} /> */}
 
         {/* Happy hour */}
         <View style={styles.card}>
@@ -83,7 +88,7 @@ export default DetailPage = ({ navigation, route }) => {
           }):<Text>No Happy Hour Schedules</Text>}
         </View>
 
-        <Divider orientation="horizontal" width={1} style={styles.divider} />
+        {/* <Divider orientation="horizontal" width={1} style={styles.divider} /> */}
 
         {/* Deals */}
         <View style={styles.card}>
@@ -156,6 +161,7 @@ export default DetailPage = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor:'#FFFFFF'
   },
   row: {
     flexDirection: "row",
@@ -185,11 +191,20 @@ const styles = StyleSheet.create({
   card: {
     marginVertical: 10,
     padding: 10,
-    backgroundColor: "#D9D9D9",
+    borderWidth: 1,
+    borderColor: "white",
+    borderRadius: 10,
+    shadowColor: "white",
+    backgroundColor: '#FFFEFA',
+    shadowOffset: { width: 0, height:2  },
+    shadowOpacity: 0.4,
+    shadowRadius: 2,
+    elevation: 10,
   },
   divider: {
-    borderColor: "grey",
-    marginVertical: "3%",
+    borderColor: "black",
+    marginVertical: "2%",
+    marginBottom:'3%'
   },
   scrollView: {
     paddingHorizontal: 12,

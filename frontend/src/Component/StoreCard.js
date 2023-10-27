@@ -15,17 +15,20 @@ const days ={
 export default StoreCard = (props) => {
   return (
     <View style={styles.container}>
-      <Image style={styles.image} source={props.store.photoResult[0]?{uri:'http://spring-boot-repo-tpsi.s3.amazonaws.com/'+props.store.photoResult[0]._id+'_'+props.store.photoResult[0]['photos'][0].id}:require("../Image/store.jpg")}/>
+      <Image style={styles.image} source={props.store.photoResult[0]?{uri:'http://spring-boot-repo-tpsi.s3.amazonaws.com/'+props.store.photoResult[0]._id+'_'+props.store.photoResult[0].photos[0].id}:require("../Image/store.jpg")}/>
       <View style={[styles.flexcontainer, styles.row]}>
         <Text style={styles.text}>{props.store.name}</Text>
         
         <View style={styles.rating}>
-          <Icon.Star color={"black"} fill={"black"} width={12} />
+        <Image
+        style={{width:20, height:20, alignSelf:'center'}}
+        source={require('../Image/G.png')}
+      />
           <Text style={styles.ratingText}>{props.store.rating}</Text>
         </View>
       </View>
 
-      <Text style={styles.cuisine}>{props.store.cuisine}</Text>
+      <Text style={styles.cuisine}>{props.store.cuisine}{' '+ '$'.repeat(+props.store.price)}</Text>
       <View style={styles.row}>
       {week.map((day, index) => {
           return (
@@ -39,7 +42,7 @@ export default StoreCard = (props) => {
         })}
       </View>
       
-      <Text style={styles.cuisine}>{props.store.hh[0]&&props.store.hh[0].infos[0].days.includes(moment().format('dddd'))?(moment().format('dddd')+': '+props.store.hh[0].infos[0].start_time+ ' - ' + props.store.hh[0].infos[0].end_time):("No happy hours today")}</Text>
+      <Text style={styles.cuisine}>{props.store.hh[0]&&props.store.hh[0].infos[0].days.includes(moment().format('dddd'))?('Today'+': '+props.store.hh[0].infos[0].start_time+ ' - ' + props.store.hh[0].infos[0].end_time):("No happy hours today")}</Text>
     </View>
   );
 };

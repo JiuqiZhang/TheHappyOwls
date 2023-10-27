@@ -40,7 +40,8 @@ export default MenuScreen = ({ navigation }) => {
           latitude: store.latitude,
           longitude: store.longitude,
           location:store.location,
-          hh:store.hhResult
+          hh:store.hhResult,
+          price:store.price
         }))
       )
       .then((stores) => {
@@ -73,7 +74,8 @@ export default MenuScreen = ({ navigation }) => {
           hours: store.hours,
           photoResult:store.photoResult,
           location:store.location,
-          hh:store.hhResult
+          hh:store.hhResult,
+          price:store.price
         }
         ))
 

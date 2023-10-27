@@ -65,9 +65,14 @@ import {
       // backgroundColor:'red'
     },
     image: {
+backgroundColor:'red',
+      minWidth: "100%",
+height:300,
 
-      width: width,
-      height:height*.38
+      width:'100%',
+
+      marginTop: "8%",
+      resizeMode:'cover' 
     },
     imageModal:{
       width: width,
