@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "Tpsi",
+    "name": "TPSI",
     "slug": "tpsi",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/tpsi.png",
+    "icon": "./assets/app.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/tpsi.png",
@@ -17,7 +17,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.theHappyOwls.Tpsi",
-      "buildNumber": "1.22",
+      "buildNumber": "1.28",
       
       "config":{
         "googleMapsApiKey":"AIzaSyBWQ5iFtnT2EQSo1Yi4D6pc-edq7MJkaPA"

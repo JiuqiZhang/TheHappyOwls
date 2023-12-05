@@ -1,62 +1,134 @@
 import React from "react";
 import { Text, Image, View, StyleSheet, Linking } from "react-native";
-import * as Icon from "react-native-feather";
 import moment from "moment/moment";
+import { Divider } from "react-native-elements";
 const week = ["M", "T", "W", "T", "F", "S", "S"];
-const days ={
-  0:'Monday',
-  1:'Tuesday',
-  2:'Wednesday',
-  3:'Thursday',
-  4:'Friday',
-  5:'Saturday',
-  6:'Sunday'
-}
+const days = {
+  0: "Monday",
+  1: "Tuesday",
+  2: "Wednesday",
+  3: "Thursday",
+  4: "Friday",
+  5: "Saturday",
+  6: "Sunday",
+};
 export default StoreCard = (props) => {
+  const OpenNow = () => {
+    if (props.store.days[moment().format("dddd")].time.length > 0) {
+      const start =
+        props.store.days[moment().format("dddd")].time[0].split(" - ")[0];
+      const end =
+        props.store.days[moment().format("dddd")].time[0].split(" - ")[1];
+
+      if (moment().format("hh:mm") > start && moment().format("hh:mm") > end) {
+        return (
+          <Text style={[styles.ratingText, { color: "green" }]}>Open</Text>
+        );
+      }
+    }
+    return (
+      <Text style={[styles.ratingText, { color: "red" }]}>Unavailable</Text>
+    );
+  };
   return (
     <View style={styles.container}>
-      <Image style={styles.image} source={props.store.photoResult[0]?{uri:'http://spring-boot-repo-tpsi.s3.amazonaws.com/'+props.store.photoResult[0]._id+'_'+props.store.photoResult[0].photos[0].id}:require("../Image/store.jpg")}/>
-      <View style={[styles.flexcontainer, styles.row]}>
-        <Text style={styles.text}>{props.store.name}</Text>
-        
-        <View style={styles.rating}>
-        <Image
-        style={{width:20, height:20, alignSelf:'center'}}
-        source={require('../Image/G.png')}
+      <View
+        style={[
+          {
+            position: "absolute",
+            zIndex: 7,
+            top:'10%',
+            left:'3%',
+            padding:'1%',
+            paddingHorizontal:'2%',
+            display: props.store.off ? "flex" : "none",
+          },
+          styles.percent,
+        ]}
+      >
+        <Text style={{ fontWeight: "bold" }}>
+          {props.store.off ? props.store.off.toFixed(0) + "% OFF" : null}
+        </Text>
+      </View>
+      <Image
+        style={styles.image}
+        source={
+          props.store.photoResult[0]&&props.store.photoResult[0].photos[0]
+            ? {
+                uri:
+                  "http://spring-boot-repo-tpsi.s3.amazonaws.com/" +
+                  props.store.photoResult[0]._id +
+                  "_" +
+                  props.store.photoResult[0].photos[0].id,
+              }
+            : require("../Image/store.jpg")
+        }
       />
+      <View
+        style={{
+          flexDirection: "row",
+          display: "flex",
+          justifyContent: "space-between",
+        }}
+      >
+        <View style={styles.rating}>
+          <OpenNow />
+          <Image
+            style={{ width: 20, height: 20, alignSelf: "center" }}
+            source={require("../Image/G.png")}
+          />
           <Text style={styles.ratingText}>{props.store.rating}</Text>
         </View>
+        <View style={styles.rating}>
+          <Text style={[styles.ratingText, { color: "#686868" }]}>
+            {props.store.distance+" miles"}
+          </Text>
+        </View>
+      </View>
+      <View style={[styles.flexcontainer, styles.row]}>
+        <Text style={styles.text}>{props.store.name}</Text>
       </View>
 
-      <Text style={styles.cuisine}>{props.store.cuisine}{' '+ '$'.repeat(+props.store.price)}</Text>
+      <View style={{ display: "flex", flexDirection: "row" }}>
+        <Text style={styles.cuisine}>
+          {props.store.cuisine}
+          {" | " + "$".repeat(+props.store.price)}
+        </Text>
+      </View>
       <View style={styles.row}>
-      {week.map((day, index) => {
+        {week.map((day, index) => {
           return (
-      <View key={index} style={[styles.circleContainer, props.store.hh[0]?props.store.hh[0].infos[0].days.includes(days[index])?styles.hh:null:null]}>
-            <Text style={styles.circle} >
-              {day}
-            </Text>
+            <View
+              key={index}
+              style={[
+                styles.circleContainer,
+                props.store.days[days[index]].time.length > 0
+                  ? styles.hh
+                  : null,
+              ]}
+            >
+              <Text style={styles.circle}>{day}</Text>
             </View>
-      
           );
         })}
       </View>
-      
-      <Text style={styles.cuisine}>{props.store.hh[0]&&props.store.hh[0].infos[0].days.includes(moment().format('dddd'))?('Today'+': '+props.store.hh[0].infos[0].start_time+ ' - ' + props.store.hh[0].infos[0].end_time):("No happy hours today")}</Text>
+      <Text style={styles.cuisine}>
+        {props.store.days[moment().format("dddd")].time.length > 0
+          ? "Today: " + props.store.days[moment().format("dddd")].time
+          : "No happy hours today"}
+      </Text>
     </View>
   );
 };
 const styles = StyleSheet.create({
-  container:{
-    width:'90%',
-    left:'5%',
-    right:'auto',
-
+  container: {
+    width: "90%",
+    left: "5%",
+    right: "auto",
   },
   text: {
     fontSize: 19,
     fontWeight: "600",
- 
   },
   ratingText: {
     fontSize: 14,
@@ -67,41 +139,39 @@ const styles = StyleSheet.create({
     maxWidth: "100%",
     height: "100%",
     height: 220,
-    width:'100%',
-    resizeMode: 'cover',
+    width: "100%",
+    resizeMode: "cover",
     borderRadius: 20,
     alignSelf: "center",
     marginTop: "8%",
-
   },
   row: {
     flex: 1,
     flexDirection: "row",
     margin: 5,
-
   },
   flexcontainer: {
-    marginTop: 6,
+    marginTop: 0,
     marginBottom: 0,
     justifyContent: "space-between",
   },
   circleContainer: {
-    width:25,
-    height:25,
+    width: 25,
+    height: 25,
     borderRadius: 100,
-    alignItems:'center',
+    alignItems: "center",
     marginRight: 5,
     marginLeft: -3,
-    marginTop:-5,
+    marginTop: -5,
     backgroundColor: "#B6BBBF",
-    justifyContent:'center',
-  textAlign:'center',
-  display:'flex'
-
+    justifyContent: "center",
+    textAlign: "center",
+    display: "flex",
   },
   rating: {
     flexDirection: "row",
     display: "flex",
+    marginTop: 5,
   },
   cuisine: {
     color: "#7A7A7A",
@@ -109,12 +179,22 @@ const styles = StyleSheet.create({
     margin: 5,
     marginTop: 0,
   },
-  circle:{
-    color:'#808021',
-    fontWeight:'bold'
+  circle: {
+    color: "#424241",
+    fontWeight: "bold",
   },
-  hh:{
-    backgroundColor:'#FFB300',
-
+  hh: {
+    backgroundColor: "#FFB300",
+  },
+  percent: {
+    backgroundColor: "#FFE68D",
+    borderRadius: 25,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.4,
+    shadowRadius: 1,
+    elevation: 1,
   },
 });

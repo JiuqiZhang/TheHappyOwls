@@ -56,7 +56,7 @@ const Slider = (props) => {
     onViewableItemsChanged={handleOnViewableItemsChanged}
     viewabilityConfig={viewabilityConfig}
   />
-  <Pagination data={!props.img?Slides:props.img.photos} scrollX={scrollX} index={index} />
+  {/* <Pagination data={!props.img?Slides:props.img.photos} scrollX={scrollX} index={index} /> */}
     </View>
   );
 };

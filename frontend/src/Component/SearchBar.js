@@ -18,6 +18,7 @@ export const Searchbar = ({value, onchange, setResult}) =>{
       
               <TextInput style={styles.input} value={value} onChangeText={onchange} placeholder="Search store name" onSubmitEditing={()=>{setResult()}}/>
             </View>
+    
           </View>
     )
          
