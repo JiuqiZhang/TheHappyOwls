@@ -42,7 +42,7 @@ const SlideItem = ({ item }) => {
           ]}
         />
       </TouchableOpacity>
-      <Modal
+      {/* <Modal
         testID={"modal"}
         isVisible={visible}
         onBackdropPress={() => setVisible(false)}
@@ -54,7 +54,7 @@ const SlideItem = ({ item }) => {
             style={styles.imageModal}
           />
         </TouchableOpacity>
-      </Modal>
+      </Modal> */}
     </View>
   );
 };
@@ -64,7 +64,6 @@ export default SlideItem;
 const styles = StyleSheet.create({
   container: {
     width: width,
-    height: height,
     // backgroundColor:'red'
   },
   image: {

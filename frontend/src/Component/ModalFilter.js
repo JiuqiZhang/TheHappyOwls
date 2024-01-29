@@ -1,4 +1,4 @@
-import {View, TouchableOpacity,TextInput, Text, ScrollView, StyleSheet} from 'react-native'
+import {View, TouchableOpacity,TextInput, Text, ScrollView, StyleSheet, Image} from 'react-native'
 import React, { useEffect, useState } from "react";
 import { Divider } from 'react-native-elements';
 import Modal from "react-native-modal";
@@ -13,7 +13,7 @@ const styles=StyleSheet.create({
       price: {
         alignItems: "center",
         justifyContent: "center",
-        flexDirection: "row",
+ 
         width: "22%",
         paddingVertical: "1%",
         borderColor: "black",
@@ -23,54 +23,31 @@ const styles=StyleSheet.create({
       },
 })
 
-export default FilterModal = ({filter, setFilter,data, modal, setmodal, setFilteredData, filterVal}) => {
+const img = {
+    Beer: require("../Image/Beer.png"),
+    Wine: require("../Image/Wine.png"),
+    Food: require("../Image/Food.png"),
+    Cocktail: require("../Image/Cocktail.png"),
+  };
+  
+export default FilterModal = ({filter, setFilter,data, modal, setmodal, setFilteredData, filterVal,screen}) => {
 
 
 
     const showFiltered = () =>{
-      // price
+    
+
      
-      let res = data.filter(
-        (store)=>{ return (store.off!==null && store.off<(+filter.discount.high) && store.off >= (+filter.discount.low))}
-      )
+     let res = data
 
-     //days
-     res = res.filter(
-      (store)=>{
-        for (day in filter.hhdays) {
-          if (filter.hhdays[day] === true && store.days[day].time.length<=0){
-            return
-          }
-          // if (obj.hasOwnProperty(key) && !predicate(obj[key])) {
-          //     result[key] = obj[key];
-          // }
-      }
-      return store
+     //sort
+      if (filter.sortBy){
+        res = res.sort(
+          (a,b)=>{return a[filter.sortBy]-b[filter.sortBy]}
+         )
+       }
 
-      }
-     )
-     
-     //price
-     res = res.filter(
-      (store)=>
-      {
-        for (level in filter.price) {
-          if (!store.price || (filter.price[level] === true && store.price!==level)){
-            return
-          }
-        }
-        return store
-      }
-     )
 
-     //cuisine
-     if (filter.selectedCuisine){
-      res = res.filter(
-        (store)=>{return store.cuisine == filter.selectedCuisine}
-       )
-     }
-
-     setFilteredData(res)
      setmodal(false)
 
     }
@@ -95,7 +72,7 @@ export default FilterModal = ({filter, setFilter,data, modal, setmodal, setFilte
           }}
         >
           <TouchableOpacity
-            style={{ position: "absolute", left: "2%", top: "1%", zIndex: 17 }}
+            style={{ position: "absolute", left: "2%", top: "1%", zIndex: 17,width:37,height:30 }}
             onPress={() => {
               setmodal(false);
             }}
@@ -115,10 +92,9 @@ export default FilterModal = ({filter, setFilter,data, modal, setmodal, setFilte
           </Text>
           <Divider width={1} />
 
-          {/* Discount range */}
           <ScrollView>
             <View>
-              <Text
+           {screen==='map'?null:<View><Text
                 style={{
                   fontWeight: "600",
                   fontSize: 15,
@@ -126,67 +102,10 @@ export default FilterModal = ({filter, setFilter,data, modal, setmodal, setFilte
                   paddingLeft: "8%",
                 }}
               >
-                Discount Range
+                Sort By
               </Text>
-              <View
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "space-evenly",
-                }}
-              >
-                <TextInput
-                  style={{ borderWidth: 1, width: "30%", height: 30,textAlign:'center' }}
-                  value={''+filter.discount.low}
-                  keyboardType="numeric"
-                  maxLength={2}
-                  onChangeText={(e) => {
-                    setFilter((filter) => ({
-                      ...filter,
-                      discount: { low: e, high: filter.discount.high },
-                    }));
-                  }}
-                />
-                <Text>-</Text>
-                <TextInput
-            value={''+filter.discount.high}
-                  keyboardType="numeric"
-                  maxLength={3}
-                  style={{ borderWidth: 1, width: "30%",textAlign:'center' }}
-                  onChangeText={(e) => {
-                    setFilter((filter) => ({
-                      ...filter,
-                      discount: { high: e, low: filter.discount.low },
-                    }));
-                  }}
-                />
-                {/* <View style={{}}>
-  <Text style={{color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5}}>{123}</Text>
-  <TextInput
-    mode="outlined"
-    label={'Email'}
-    // secureTextEntry={secureTextEntry}
-    // onChangeText={(text) => setText(text)}
-    // returnKeyType={returnKeyType}
-    // onSubmitEditing={onSubmitEditing}
-    // keyboardType={keyboardType}
 
-  />
-</View> */}
-              </View>
-              <Divider width={1} style={{ margin: "2%", marginTop: "5%" }} />
-              {/* days */}
-              <Text
-                style={{
-                  fontWeight: "600",
-                  fontSize: 15,
-                  padding: "5%",
-                  paddingLeft: "8%",
-                }}
-              >
-                Happy Hour Days
-              </Text>
-              {Object.entries(filter.hhdays).map((day, i) => {
+              {(filter.sortby).map((type, i) => {
                 return (
                   <View
                     key={i}
@@ -195,24 +114,33 @@ export default FilterModal = ({filter, setFilter,data, modal, setmodal, setFilte
                       styles.Checkbox,
                     ]}
                   >
-                    <Text>{day}</Text>
+                    <Text>{type}</Text>
                     <Checkbox
-                      value={filter.hhdays[day[0]]}
+                      value={filter.sortBy===type}
+                     
                       onValueChange={() => {
-                        setFilter((filter) => ({
+                        if(filter.sortBy === type){
+                          setFilter((filter) => ({
                           ...filter,
-                          hhdays: { ...filter.hhdays, [day[0]]: !day[1] },
+                          sortBy:null
                         }));
+                        }else{
+                          setFilter((filter) => ({
+                          ...filter,
+                          sortBy:type
+                        }));
+                        }
+                         
                       }}
                       color={"#E8BA183D"}
                     />
                   </View>
                 );
               })}
+              <Divider width={1} style={{ margin: "2%" }} /></View>}
 
+ 
               {/* items */}
-{/* 
-              <Divider width={1} style={{ margin: "2%" }} />
               <Text
                 style={{
                   fontWeight: "600",
@@ -222,7 +150,44 @@ export default FilterModal = ({filter, setFilter,data, modal, setmodal, setFilte
                 }}
               >
                 Happy Hour Items
-              </Text> */}
+              </Text>
+              <View
+                    style={[
+                       {
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  flexWrap:'wrap'
+       
+                },
+                      styles.Checkbox,
+                    ]}
+                  >
+              {Object.entries(filter.items).map((item, i) => {
+                return (
+                 
+                  <TouchableOpacity key={i} style={[styles.price,{width:'48%',marginBottom:20,backgroundColor:item[1]?'#E8BA183D':null}]} onPress={() => {
+                        setFilter((filter) => ({
+                          ...filter,
+                          items: { ...filter.items, [item[0]]: !item[1] },
+                        }));
+                      }}>
+                        <Image
+                          source={img[item[0]]}
+                          style={{
+                            resizeMode:"cover",
+                            width: 30,
+                            height: 30,
+                            marginBottom:'10%'
+                          }}
+                        />
+                  <Text>{item}</Text>
+                  </TouchableOpacity>
+                    
+                   
+           
+                );
+              })}
+              </View>
 
               {/* price */}
               <Divider width={1} style={{ margin: "2%" }} />
@@ -327,7 +292,7 @@ export default FilterModal = ({filter, setFilter,data, modal, setmodal, setFilte
                 height: "100%",
               }}
             >
-              <TouchableOpacity onPress={()=>{setFilter(filterVal);setmodal(false)}}>
+              <TouchableOpacity onPress={()=>{setFilter(filterVal);setmodal(false);setFilteredData(data)}}>
                 <Text style={{ alignSelf: "center", textDecorationLine:'underline'}}>Clear All</Text>
               </TouchableOpacity>
               <TouchableOpacity style={{backgroundColor:'#FFD029',borderRadius:15,padding:"3%",paddingHorizontal:'5%'}} onPress={()=>{showFiltered()}}>

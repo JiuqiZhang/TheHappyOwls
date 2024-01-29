@@ -11,15 +11,15 @@ export const Searchbar = ({value, onchange, setResult}) =>{
 
     return(
        
-            <View style={styles.searchArea}>
-            <View style={styles.inputContainer}>
-              <Icon.Search color={"grey"} />
-              <Divider orientation="vertical" style={styles.divider} />
-      
-              <TextInput style={styles.input} value={value} onChangeText={onchange} placeholder="Search store name" onSubmitEditing={()=>{setResult()}}/>
-            </View>
-    
-          </View>
+      <View style={styles.searchArea}>
+      <View style={styles.inputContainer}>
+        <Icon.Search color={"grey"} />
+        <Divider orientation="vertical" style={styles.divider} />
+
+        <TextInput style={styles.input} value={value} onChangeText={onchange} placeholder="Search store name" onSubmitEditing={()=>{setResult()}}/>
+      </View>
+
+    </View>
     )
          
 }

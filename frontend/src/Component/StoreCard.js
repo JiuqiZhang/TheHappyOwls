@@ -1,5 +1,6 @@
 import React from "react";
-import { Text, Image, View, StyleSheet, Linking } from "react-native";
+import { Text, View, StyleSheet, Linking } from "react-native";
+import { Image } from 'react-native-elements';
 import moment from "moment/moment";
 import { Divider } from "react-native-elements";
 const week = ["M", "T", "W", "T", "F", "S", "S"];
@@ -20,7 +21,7 @@ export default StoreCard = (props) => {
       const end =
         props.store.days[moment().format("dddd")].time[0].split(" - ")[1];
 
-      if (moment().format("hh:mm") > start && moment().format("hh:mm") > end) {
+      if (moment().format("HH:mm") > start && moment().format("HH:mm")<  end) {
         return (
           <Text style={[styles.ratingText, { color: "green" }]}>Open</Text>
         );
@@ -37,8 +38,8 @@ export default StoreCard = (props) => {
           {
             position: "absolute",
             zIndex: 7,
-            top:'10%',
-            left:'3%',
+            top:'7%',
+            right:'3%',
             padding:'1%',
             paddingHorizontal:'2%',
             display: props.store.off ? "flex" : "none",
@@ -59,7 +60,7 @@ export default StoreCard = (props) => {
                   "http://spring-boot-repo-tpsi.s3.amazonaws.com/" +
                   props.store.photoResult[0]._id +
                   "_" +
-                  props.store.photoResult[0].photos[0].id,
+                  props.store.photoResult[0].photos[0].id
               }
             : require("../Image/store.jpg")
         }
@@ -89,14 +90,19 @@ export default StoreCard = (props) => {
         <Text style={styles.text}>{props.store.name}</Text>
       </View>
 
+   
+      <Text style={{margin:5,fontWeight: '700',fontSize:14}}>
+        {props.store.days[moment().format("dddd")].time.length > 0
+          ? "Today: " + props.store.days[moment().format("dddd")].time
+          : "No happy hours today"}
+      </Text>
       <View style={{ display: "flex", flexDirection: "row" }}>
         <Text style={styles.cuisine}>
           {props.store.cuisine}
           {" | " + "$".repeat(+props.store.price)}
         </Text>
       </View>
-      <View style={styles.row}>
-        {week.map((day, index) => {
+      {/* {week.map((day, index) => {
           return (
             <View
               key={index}
@@ -110,13 +116,7 @@ export default StoreCard = (props) => {
               <Text style={styles.circle}>{day}</Text>
             </View>
           );
-        })}
-      </View>
-      <Text style={styles.cuisine}>
-        {props.store.days[moment().format("dddd")].time.length > 0
-          ? "Today: " + props.store.days[moment().format("dddd")].time
-          : "No happy hours today"}
-      </Text>
+        })} */}
     </View>
   );
 };
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     right: "auto",
   },
   text: {
-    fontSize: 19,
+    fontSize: 22,
     fontWeight: "600",
   },
   ratingText: {
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
     borderRadius: 20,
     alignSelf: "center",
-    marginTop: "8%",
+    marginTop: "5%",
   },
   row: {
     flex: 1,
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   cuisine: {
-    color: "#7A7A7A",
+  fontWeight:'500',
     fontSize: 12,
     margin: 5,
     marginTop: 0,
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFB300",
   },
   percent: {
-    backgroundColor: "#FFE68D",
+    backgroundColor: 'rgb(249, 238, 200)',
     borderRadius: 25,
     alignItems: "center",
     justifyContent: "center",
@@ -196,5 +196,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 1,
     elevation: 1,
+    opacity:.85
   },
 });
