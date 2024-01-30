@@ -4,6 +4,7 @@ import Constants from "expo-constants";
 import {
   StyleSheet,
   SafeAreaView,
+  PixelRatio,
   ScrollView,
   ActivityIndicator,
   TouchableOpacity,
@@ -15,7 +16,7 @@ import {
   TextInput,
 } from "react-native";
 import * as Location from "expo-location";
-
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Icon from "react-native-feather";
 import { Divider } from "react-native-elements";
 import StoreCard from "../../Component/StoreCard";
@@ -23,6 +24,7 @@ import axios from "axios";
 import { useRef } from "react";
 import moment from "moment/moment";
 const statusBarHeight = Constants.statusBarHeight;
+const dp = PixelRatio.get()
 
 export default MenuScreen = ({ navigation }) => {
   const [indicator, setIndicator] = useState(true);
@@ -391,20 +393,25 @@ var requestOptions = {
         <View
           style={{
             flexDirection: "row",
-            width: "100%",
-            justifyContent: "space-between",
+            width: "92%",
+            justifyContent:'space-around',
           }}
         >
           <TouchableOpacity
-            style={[
-              styles.filter,
-              { backgroundColor: open ? "#FFD029" : "white" },
-            ]}
             onPress={() => setopen(!open)}
-          >
-            <Text style={{ marginVertical: 7 }}>
-              {open ? "✓ " : null}Open Now
-            </Text>
+          ><LinearGradient colors={open?['#F9EEC8', '#FFD029', '#D9AA04' ]:['transparent']}
+          start={{ x: -0.4, y: 0 }}  end={{ x: 1.6, y: 1 }}
+           style={[
+              styles.filter,
+              { backgroundColor: open ? "#FFD029" : "white",flexDirection:'row', justifyContent:'space-between',height:32},
+            ]}>
+           {open ? <View style={{width: 2*dp, height: 2*dp, backgroundColor: '#008515', shadowColor: '#008515',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2, borderRadius: 9999}} />:null}
+            <Text style={{ marginVertical: 7, marginLeft:2*dp, fontSize:12, fontWeight:500 }}>
+             Live Now
+            </Text></LinearGradient>
           </TouchableOpacity>
           <View
             style={[
@@ -413,30 +420,23 @@ var requestOptions = {
                 flexDirection: "row",
                 backgroundColor: "#F9EEC8",
                 marginRight: "3%",
-                borderWidth: 1.25,
+                borderWidth: 1,
                 borderColor: "white",
-                justifyContent: "space-evenly",
+                justifyContent: "space-between",
+                width:269,
                 paddingVertical: 1,
+                height:32,
+            
               },
             ]}
           >
             {Object.entries(filter.hhdays).map((day, i) => {
               return (
                 <TouchableOpacity
-                  style={[
-                    {
-                      paddingVertical: 5,
-                      paddingHorizontal: "3%",
-                      borderRadius: 40,
-                    },
-                    filter.hhdays[day[0]] ?{
-                      backgroundColor: "white" ,
-                      shadowColor: "#C58A00",
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.4,
-                      shadowRadius: 2,
-                    }:null,
-                  ]}
+                  style={
+                    {alignSelf:'center',
+                      height:28,width:28}
+                  }
                   onPress={() => {
                     setFilter((filter) => ({
                       ...filter,
@@ -445,16 +445,27 @@ var requestOptions = {
                   }}
                   key={i}
                 >
-                  <Text
+                <LinearGradient colors={filter.hhdays[day[0]] ?['#F9EEC8', '#FFD029', '#D9AA04' ]:['transparent']} style={[filter.hhdays[day[0]] ?{
+                      shadowColor: "#C0A106",
+                      backgroundColor: "#F9C241",
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.4,
+                      borderWidth:.1,
+                      borderColor:'#F9C241',
+                      shadowRadius: 2, borderRadius: 999,
+                      
+                    }:null,{alignSelf:'center',
+                      height:28,width:28, borderRadius:999}]} start={{ x: -0.1, y: 0.2 }}  end={{ x: 1.1, y: 1 }}>
+                    <Text
                     style={
-                      moment().format("dddd") === day[0]
-                        ? { color: "#C48A00", fontWeight: "900" }
-                        : null
+                     [ {fontSize:14, fontWeight:moment().format("dddd") === day[0]?'800':'500', textAlign:'center',marginVertical:"20%"
+                      }]
                     }
                   >
                     {day[0] !== "Thursday" ? day[0][0] : "TH"}
-                  </Text>
-                </TouchableOpacity>
+                  </Text></LinearGradient></TouchableOpacity>
+                  
+               
               );
             })}
           </View>
@@ -612,16 +623,16 @@ const styles = StyleSheet.create({
   },
   filter: {
     paddingHorizontal: 10,
-    marginLeft: "5%",
+    marginLeft: "12%",
     marginRight: "-2%",
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 15,
     alignSelf: "flex-start",
-    shadowColor: "#C58A00",
-    shadowOffset: { width: 0, height: 1 },
+    shadowColor: "#c58a00",
+    shadowOffset: { width: 1, height: 1 },
     shadowOpacity: 0.8,
-    shadowRadius: 1,
+    shadowRadius: 2,
     elevation: 5,
     marginBottom: "1%",
   },
