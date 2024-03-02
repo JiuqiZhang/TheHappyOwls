@@ -14,6 +14,7 @@ import {
   Keyboard,
   Text,
   TextInput,
+  Dimensions,
 } from "react-native";
 import * as Location from "expo-location";
 import { LinearGradient } from 'expo-linear-gradient';
@@ -100,7 +101,6 @@ export default MenuScreen = ({ navigation }) => {
         }
         for (level in filter.price) {
           if (
-            !store.price ||
             (filter.price[level] === true && store.price !== level)
           ) {
             return;
@@ -132,7 +132,7 @@ export default MenuScreen = ({ navigation }) => {
             }
             for (level in filter.price) {
               if (
-                !store.price ||
+                !store.price &&
                 (filter.price[level] === true && store.price !== level)
               ) {
                 return;
@@ -148,6 +148,7 @@ export default MenuScreen = ({ navigation }) => {
             return store;
           }
         }
+        return store
       }
     });
   };
@@ -193,9 +194,9 @@ export default MenuScreen = ({ navigation }) => {
           ]);
 
           // deal
-          schedule[item]["deal"] = schedule[item]["deal"].concat(
+          schedule[item]["deal"] = 
             hh[0].infos[i].items
-          );
+      
         });
       }
     }
@@ -216,8 +217,8 @@ export default MenuScreen = ({ navigation }) => {
       var req = new FormData();
       req.append("lat", currentLocation.coords.latitude);
       req.append("lng", currentLocation.coords.longitude);
-      req.append("latDelta", 0.0122);
-      req.append("lngDelta", 0.0081);
+      // req.append("latDelta", 0.0122);
+      // req.append("lngDelta", 0.0081);
 
       var config = {
         method: "post",
@@ -308,7 +309,8 @@ var requestOptions = {
       headers: {},
     })
       .then((response) =>
-        response.data.map((store) => ({
+        
+         response.data.map((store) => ({
           name: store.name,
           rating: store.rating,
           cuisine: `${store.cuisine}`,
@@ -327,11 +329,12 @@ var requestOptions = {
         }))
       )
       .then((data) => {
+        console.log('search done',data);
         setResult(data);
-        // scrollRef.current?.scrollTo({
-        //   y: 0,
-        //   animated: true,
-        // });
+        scrollRef.current?.scrollTo({
+          y: 0,
+          animated: true,
+        });
         setIndicator(false);
       })
       .catch((e) => {
@@ -364,7 +367,7 @@ var requestOptions = {
           <View
             style={{
               alignSelf: "center",
-              marginRight: "2%",
+              marginRight:20,
               width: 42,
               height: 42,
               borderRadius: 100,
@@ -393,8 +396,8 @@ var requestOptions = {
         <View
           style={{
             flexDirection: "row",
-            width: "92%",
-            justifyContent:'space-around',
+            display:'flex',
+            marginLeft:20,
           }}
         >
           <TouchableOpacity
@@ -407,6 +410,7 @@ var requestOptions = {
             ]}>
            {open ? <View style={{width: 2*dp, height: 2*dp, backgroundColor: '#008515', shadowColor: '#008515',
     shadowOffset: { width: 0, height: 1 },
+    paddingHorizontal:'2%',
     shadowOpacity: 0.8,
     shadowRadius: 2, borderRadius: 9999}} />:null}
             <Text style={{ marginVertical: 7, marginLeft:2*dp, fontSize:12, fontWeight:500 }}>
@@ -419,7 +423,7 @@ var requestOptions = {
               {
                 flexDirection: "row",
                 backgroundColor: "#F9EEC8",
-                marginRight: "3%",
+                right:20,
                 borderWidth: 1,
                 borderColor: "white",
                 justifyContent: "space-between",
@@ -555,21 +559,22 @@ const styles = StyleSheet.create({
   },
 
   scrollView: {
-    marginHorizontal: 15,
+    marginHorizontal: 20,
     width: "100%",
     flexGrow: 1,
   },
   inputContainer: {
+    display: "flex",
     flexDirection: "row",
-    justifyContent: "space-around",
+
   },
   searchArea: {
     width: "100%",
-    padding: "1%",
     alignItems: "center",
     justifyContent: "center",
     borderTopColor: "grey",
     borderTopWidth: 0,
+
     paddingTop: statusBarHeight,
     backgroundColor: "#F9EEC8",
     shadowColor: "rgb(129, 129, 129)",
@@ -582,7 +587,6 @@ const styles = StyleSheet.create({
     borderColor: "grey",
   },
   input: {
-    maxWidth: "80%",
     height: 42,
     flexGrow: 1,
     borderWidth: 1,
@@ -590,8 +594,9 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 20,
     display: "flex",
-
-    margin: 10,
+    marginRight:14,
+    marginLeft:20,
+    marginVertical: 10,
     backgroundColor: "#FFFEFA",
     shadowColor: "#C58A00",
     shadowOffset: { width: 0, height: 2 },
@@ -623,12 +628,11 @@ const styles = StyleSheet.create({
   },
   filter: {
     paddingHorizontal: 10,
-    marginLeft: "12%",
-    marginRight: "-2%",
+    marginLeft:16,
+    marginRight: 20,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 15,
-    alignSelf: "flex-start",
     shadowColor: "#c58a00",
     shadowOffset: { width: 1, height: 1 },
     shadowOpacity: 0.8,

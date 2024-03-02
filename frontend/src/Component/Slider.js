@@ -35,7 +35,6 @@ const Slider = (props) => {
   };
 
   const handleOnViewableItemsChanged = useRef(({viewableItems}) => {
-    console.log(scrollX);
     setIndex(viewableItems[0].index);
   }).current;
 
@@ -50,13 +49,14 @@ const Slider = (props) => {
     renderItem={({item}) => <SlideItem item={!props.img?item:{img:{uri:'http://spring-boot-repo-tpsi.s3.amazonaws.com/'+props.img._id+'_'+item.id}}} />}
     horizontal
     pagingEnabled
+    // disableIntervalMomentum={true}
     snapToAlignment="center"
     showsHorizontalScrollIndicator={false}
     onScroll={handleOnScroll}
     onViewableItemsChanged={handleOnViewableItemsChanged}
-    // viewabilityConfig={viewabilityConfig}
+    viewabilityConfig={viewabilityConfig}
   />
-  {/* <Pagination data={!props.img?Slides:props.img.photos} scrollX={scrollX} index={index} /> */}
+  <Pagination data={!props.img?Slides:props.img.photos} scrollX={scrollX} index={index} />
     </View>
   );
 };
@@ -66,9 +66,6 @@ export default Slider;
 const styles = StyleSheet.create({
     container: {
         width:'100%',
-        flexGrow:1
-
-
-  
+        flexGrow:1,
       },
 });

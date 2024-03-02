@@ -7,11 +7,14 @@ import {
   Image,
   ActivityIndicator,
   Button,
+  FlatList,
+  Keyboard,
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import Constants from 'expo-constants';
 
+import { Svg, Path } from "react-native-svg";
+import Constants from "expo-constants";
 import ModalFilter from "../../Component/ModalFilter";
 import * as Icon from "react-native-feather";
 import { Divider } from "react-native-elements";
@@ -28,8 +31,22 @@ const image = require("../../Image/store.jpg");
 const latitudeDelta = 0.0122;
 const longitudeDelta = 0.0081;
 
-const CARD_WIDTH = width * 0.85;
-const SPACING_FOR_CARD_INSET = width * 0.08;
+const CARD_WIDTH = width - 40;
+
+const OpenNow = (prop) => {
+  if (prop.bar.days[moment().format("dddd")].time.length > 0) {
+    const start =
+      prop.bar.days[moment().format("dddd")].time[0].split(" - ")[0];
+    const end = prop.bar.days[moment().format("dddd")].time[0].split(" - ")[1];
+
+    if (moment().format("HH:mm") > start && moment().format("HH:mm") < end) {
+      return (
+        <Text style={{ color: "#008515", fontWeight: 700 }}>Live Now</Text>
+      );
+    }
+  }
+  return <Text style={{ color: "red", fontWeight: 700 }}>Unavailable Now</Text>;
+};
 
 const validatehh = (hh) => {
   let schedule = {
@@ -83,18 +100,165 @@ const validatehh = (hh) => {
 };
 
 export default MapScreen = ({ navigation }) => {
-  
   const [region, setRegion] = useState(null);
   const [refresh, setrefresh] = useState(false);
   const [data, setData] = useState([]);
   const [searchVal, setsearch] = useState("");
   const [indicator, setIndicator] = useState(true);
-  const [open, setopen] = useState(false)
+  const [open, setopen] = useState(false);
   const [modal, setmodal] = useState(false);
   let mapAnimation = new Animated.Value(0);
   const [mapIndex, setInd] = useState();
   const _map = useRef(null);
-  const [loc, setLoc] = useState()
+  const [loc, setLoc] = useState();
+
+  const MapCard = React.memo((props) => {
+    const data = props.store;
+
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate("Detail", { store: data });
+        }}
+      >
+        <View style={styles.card}>
+          <Image
+            source={
+              data.photoResult[0] && data.photoResult[0]["photos"][0]
+                ? {
+                    uri:
+                      "http://spring-boot-repo-tpsi.s3.amazonaws.com/" +
+                      data.photoResult[0]._id +
+                      "_" +
+                      data.photoResult[0]["photos"][0].id,
+                  }
+                : image
+            }
+            style={styles.cardImage}
+          />
+          <View style={styles.textContent}>
+            <Icon.Bookmark
+              height={22}
+              fill={"#D3D3D3E5"}
+              stroke={"white"}
+              style={{ position: "absolute", right: 8, top: 6 }}
+            />
+            <Text numberOfLines={2} style={styles.cardtitle}>
+              {data.name}
+            </Text>
+            {data.hh[0] &&
+            data.hh[0].infos[0].days.includes(moment().format("dddd")) ? (
+              <>
+                <Text
+                  style={{
+                    color: "#999999",
+                    fontWeight: 500,
+                    fontSize: 12,
+                    marginTop: 8,
+                  }}
+                >
+                  <Text>Today:</Text>
+                  <OpenNow bar={data} />
+                </Text>
+                <Text style={{ fontWeight: 600, fontSize: 12 }}>
+                  {data.hh[0].infos[0].start_time +
+                    " - " +
+                    data.hh[0].infos[0].end_time}
+                </Text>
+              </>
+            ) : (
+              <Text
+                style={{
+                  color: "#999999",
+                  fontWeight: 500,
+                  fontSize: 12,
+                  marginTop: 8,
+                }}
+              >
+                No happy hours today
+              </Text>
+            )}
+            {/* off */}
+            <View
+              style={{
+                position: "absolute",
+                display: data.off ? "flex" : "none",
+                bottom: 10,
+                left: 8,
+                zIndex: 7,
+                flexDirection: "row",
+              }}
+            >
+              <View
+                style={{
+                  backgroundColor: "#FFE68D",
+
+                  width: 64,
+                  height: 22,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: 8,
+                }}
+              >
+                <Text style={{ fontSize: 12, fontWeight: 600 }}>
+                  {data.off ? data.off.toFixed(0) + "% off" : null}
+                </Text>
+              </View>
+              <View
+                style={{
+                  height: 22,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginLeft: 8,
+                }}
+              >
+                <Text
+                  style={{
+                    color: "#989898",
+                    fontSize: 10,
+                    fontWeight: 500,
+                  }}
+                >
+                  of usual price
+                </Text>
+              </View>
+            </View>
+
+            <View
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                marginTop: 11,
+              }}
+            >
+              <View style={styles.rating}>
+                <Image
+                  style={{
+                    width: 11,
+                    height: 11,
+                    alignSelf: "flex-start",
+                  }}
+                  source={require("../../Image/G.png")}
+                />
+                <Text
+                  style={[
+                    styles.cuisine,
+                    { fontWeight: "600", marginBottom: 12 },
+                  ]}
+                >
+                  {data.rating + " • "}
+                </Text>
+              </View>
+              <Text style={styles.cuisine}>
+                {data.cuisine}
+                {data.price ? " • " + "$".repeat(+data.price) : null}
+              </Text>
+            </View>
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  });
   mapStyle = [
     {
       featureType: "poi",
@@ -293,7 +457,6 @@ export default MapScreen = ({ navigation }) => {
     req.append("lng", region.longitude);
     req.append("latDelta", region.latitudeDelta);
     req.append("lngDelta", region.longitudeDelta);
- 
 
     await axios({
       method: "post",
@@ -334,7 +497,7 @@ export default MapScreen = ({ navigation }) => {
           },
           1000
         );
-        _scrollView.current?.scrollTo({ x: 0, animated: true });
+        _scrollView.current?.scrollToIndex({ index: 0, animated: true });
       })
       .catch((error) => console.log(error));
   };
@@ -345,15 +508,38 @@ export default MapScreen = ({ navigation }) => {
       if (status !== "granted") {
         console.log("Please grant location permissions");
         return;
+      } else {
+        const locationSubscription = await Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.Highest,
+            timeInterval: 1000,
+            distanceInterval: 1,
+          },
+          (location) => {
+            setLoc({
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
+            });
+            console.log(
+              "New location update: " +
+                location.coords.latitude +
+                ", " +
+                location.coords.longitude
+            );
+          }
+        );
       }
+
       let currentLocation = await Location.getCurrentPositionAsync({});
       console.log("Location:");
       console.log(currentLocation);
-      setLoc(currentLocation.coords)
+      setLoc(currentLocation.coords);
 
       var req = new FormData();
-      req.append("lat", currentLocation.coords.latitude);
-      req.append("lng", currentLocation.coords.longitude);
+      // req.append("lat", currentLocation.coords.latitude);
+      // req.append("lng", currentLocation.coords.longitude);
+      req.append("lat", 40.730824);
+      req.append("lng", -73.99733);
       req.append("latDelta", latitudeDelta);
       req.append("lngDelta", longitudeDelta);
 
@@ -363,34 +549,40 @@ export default MapScreen = ({ navigation }) => {
         headers: {},
         data: req,
       })
-        .then((response) =>
-          response.data.map((store) => ({
-            name: store.name,
-            rating: store.rating,
-            cuisine: `${store.cuisine}`,
-            hours: store.hours,
-            latitude: store.latitude,
-            longitude: store.longitude,
-            location: store.location,
-            price: store.price,
-            photoResult: store.photoResult,
-            hh: store.hhResult,
-            website: store.website,
-            comments: store.comments,
-            number: store.number,
-            off: findDeal(store.hhResult),
-            days: validatehh(store.hhResult),
-            ...store,
-          }))
-        )
+        .then((response) => {
+          try {
+            return response.data.map((store) => ({
+              name: store.name,
+              rating: store.rating,
+              cuisine: `${store.cuisine}`,
+              hours: store.hours,
+              latitude: store.latitude,
+              longitude: store.longitude,
+              location: store.location,
+              price: store.price,
+              photoResult: store.photoResult,
+              hh: store.hhResult,
+              website: store.website,
+              comments: store.comments,
+              number: store.number,
+              off: findDeal(store.hhResult),
+              days: validatehh(store.hhResult),
+              ...store,
+            }));
+          } catch (e) {
+            console.log(e);
+          }
+        })
         .then((stores) => {
           setData(stores);
           setFilteredData(stores);
           setIndicator(false);
           _map.current.animateToRegion(
             {
-              latitude:  currentLocation.coords.latitude,
-              longitude:  currentLocation.coords.longitude,
+              // latitude: currentLocation.coords.latitude,
+              // longitude: currentLocation.coords.longitude,
+              latitude: 40.730824,
+              longitude: -73.99733,
               latitudeDelta: latitudeDelta,
               longitudeDelta: longitudeDelta,
             },
@@ -398,6 +590,7 @@ export default MapScreen = ({ navigation }) => {
           );
         })
         .catch((error) => console.log(error));
+      return () => locationSubscription.remove();
     };
 
     getPermissions();
@@ -423,7 +616,7 @@ export default MapScreen = ({ navigation }) => {
 
   const onMarkerPress = (mapEventData) => {
     const markerID = mapEventData._targetInst.return.index;
-    console.log(markerID)
+    console.log(markerID);
     //console.log(filteredData[markerID].name)
     setInd(markerID);
 
@@ -443,12 +636,9 @@ export default MapScreen = ({ navigation }) => {
     //   longitudeDelta: longitudeDelta,
     // });
     setrefresh(true);
-    let x = markerID * CARD_WIDTH + markerID * 20;
-    if (Platform.OS === "ios") {
-      x = x - SPACING_FOR_CARD_INSET;
-    }
-
-    _scrollView.current.scrollTo({ x: x, y: 0, animated: true });
+    let x = markerID * CARD_WIDTH + markerID * 16;
+    console.log(Filtering(filteredData)[markerID].name);
+    _scrollView.current?.scrollToIndex({ index: markerID, animated: true });
   };
 
   const _scrollView = React.useRef(null);
@@ -487,20 +677,20 @@ export default MapScreen = ({ navigation }) => {
           hh: store.hhResult,
           comments: store.comments,
           off: findDeal(store.hhResult),
+          days: validatehh(store.hhResult),
           ...store,
         }))
       )
       .then((data) => {
         setData(data);
         setFilteredData(data);
-        _scrollView.current?.scrollTo({ x: 0, animated: true });
+        _scrollView.current?.scrollToIndex({ index: 0, animated: true });
         setsearch("");
         setIndicator(false);
         _map.current.animateToRegion(
           {
-            latitude:  currentLocation.coords.latitude,
-            longitude:  currentLocation.coords.longitude,
-        
+            latitude: currentLocation.coords.latitude,
+            longitude: currentLocation.coords.longitude,
           },
           1000
         );
@@ -525,7 +715,6 @@ export default MapScreen = ({ navigation }) => {
           ) {
             return;
           }
-          
         }
         if (
           filter.selectedCuisine &&
@@ -557,7 +746,6 @@ export default MapScreen = ({ navigation }) => {
               ) {
                 return;
               }
-             
             }
             if (
               filter.selectedCuisine &&
@@ -573,7 +761,12 @@ export default MapScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={styles.container}
+      onTouchStart={() => {
+        Keyboard.dismiss();
+      }}
+    >
       <ModalFilter
         filter={filter}
         filterVal={filterVal}
@@ -591,6 +784,7 @@ export default MapScreen = ({ navigation }) => {
             value={searchVal}
             onChangeText={setsearch}
             placeholder="  Search store name"
+            returnKeyType="search"
             onSubmitEditing={() => {
               searchResult();
             }}
@@ -606,12 +800,13 @@ export default MapScreen = ({ navigation }) => {
               textAlign: "center",
               display: "flex",
               borderWidth: 1.5,
-              borderColor: "white",
-              backgroundColor: "#F9EEC8",
+              borderColor: "#D3D3D3",
+              backgroundColor: "white",
               shadowColor: "#C58A00",
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.4,
               shadowRadius: 2,
+              marginRight: 20,
             }}
           >
             <TouchableOpacity
@@ -619,31 +814,40 @@ export default MapScreen = ({ navigation }) => {
                 setmodal(true);
               }}
             >
-              <Icon.Filter color={"grey"} height={27} />
+              <Icon.Sliders color={"grey"} height={16} />
             </TouchableOpacity>
           </View>
         </View>
         <View style={{ flexDirection: "row", width: "100%" }}>
-        <TouchableOpacity
-            style={[styles.filter,{backgroundColor: open ? "#FFD029" : "white",}]}
+          <TouchableOpacity
+            style={[
+              styles.filter,
+              { backgroundColor: open ? "#FFD029" : "white" },
+            ]}
             onPress={() => setopen(!open)}
           >
             <Text>{open ? "✓ " : null}Open Now</Text>
           </TouchableOpacity>
+
           <TouchableOpacity
-            style={[styles.filter,{backgroundColor: percent ? "#FFD029" : "white",}]}
+            style={[
+              styles.filter,
+              { backgroundColor: "#ffffffb2", width: 115, height: 32 },
+            ]}
             onPress={() => hidePercent(!percent)}
           >
-            <Text>{percent ? "✓ " : null}Hide Percentage</Text>
+            <Text>
+              <Text>rating</Text>
+              <Text>%</Text>
+            </Text>
           </TouchableOpacity>
-       
         </View>
       </View>
-      <View style={{position:'absolute',top:'40%',zIndex:17}}>{!indicator?null:<ActivityIndicator
-          size="large"
-          color="white"
-          animating={indicator}
-        />}</View>
+      <View style={{ position: "absolute", top: "40%", zIndex: 17 }}>
+        {!indicator ? null : (
+          <ActivityIndicator size="large" color="white" animating={indicator} />
+        )}
+      </View>
 
       {/* <Text>{userLocation?(userLocation['coords']['latitude']+ ', '+userLocation['coords']['longitude']):"Waiting"}</Text> */}
       <MapView
@@ -661,12 +865,14 @@ export default MapScreen = ({ navigation }) => {
           onRegionChange(region, details)
         }
       >
-       {loc? <Marker
-          coordinate={{
-            latitude: loc.latitude,
-            longitude:loc.longitude,
-          }}
-        ></Marker>:null}
+        {loc ? (
+          <Marker
+            coordinate={{
+              latitude: loc.latitude,
+              longitude: loc.longitude,
+            }}
+          ></Marker>
+        ) : null}
         {filteredData
           ? Filtering(filteredData).map((marker, index) => {
               {
@@ -688,25 +894,54 @@ export default MapScreen = ({ navigation }) => {
                   }}
                   onPress={(e) => onMarkerPress(e)}
                 >
-                  <View
+                  {/* <View
                     style={[
                       styles.percent,
                       !percent
                         ? marker.off && marker.off > 50
-                          ? {zIndex:7}
-                          : { width: 10, height:10,}
-                        : { width: 10, height:10 },
-                        index===mapIndex?{backgroundColor:'red',zIndex:17}:null
+                          ? { zIndex: 7 }
+                          : { width: 10, height: 10 }
+                        : { width: 10, height: 10 },
+                      index === mapIndex
+                        ? { backgroundColor: "red", zIndex: 17 }
+                        : null,
                     ]}
+                  > */}
+                  <Svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width={27}
+                    height={32}
+                    fill="none"
                   >
-                    <Text style={{ fontWeight: "bold",color:index===mapIndex?'white':null}}>
+                    <Path
+                      fill="#F9EEC8"
+                      stroke="#8D8D8D"
+                      strokeWidth={1.5}
+                      d="M13.5 1.25A12.75 12.75 0 0 1 26.25 14c0 5.205-3.986 10.865-12.3 17.1a.75.75 0 0 1-.9 0C4.736 24.865.75 19.205.75 14A12.75 12.75 0 0 1 13.5 1.25Z"
+                    />
+                  </Svg>
+                  <View
+                    style={{
+                      bottom: 25,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontWeight: "700",
+                        fontSize: 10,
+                        color: index === mapIndex ? "white" : null,
+                      }}
+                    >
                       {!percent
-                        ? marker.off && marker.off > 50
+                        ? marker.off
                           ? marker.off.toFixed(0) + "%"
                           : ""
-                        : ""}
+                        : marker.rating}
                     </Text>
                   </View>
+                  {/* </View> */}
                 </Marker>
               );
             })
@@ -718,18 +953,20 @@ export default MapScreen = ({ navigation }) => {
           style={{
             position: "absolute",
             alignItems: "center",
-            bottom: height / 2 + 140,
+            bottom: 172,
           }}
         >
           <TouchableOpacity
             style={{
-              paddingHorizontal: 10,
-              paddingVertical: 7,
+              width: 77,
+              height: 28,
+              borderWidth: 1.5,
+              borderColor: "#d2d2d2",
               alignItems: "center",
               justifyContent: "center",
               borderRadius: 20,
               alignSelf: "center",
-              backgroundColor: "white",
+              backgroundColor: "#ffffff33",
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 1 },
               shadowOpacity: 0.8,
@@ -738,127 +975,41 @@ export default MapScreen = ({ navigation }) => {
             }}
             onPress={search}
           >
-            <Text>Search this area</Text>
+            <Text style={{ fontSize: 10, color: "#ffffff", fontWeight: 500 }}>
+              Search again
+            </Text>
           </TouchableOpacity>
         </View>
       ) : null}
 
-      <Animated.ScrollView
-        ref={_scrollView}
-        horizontal
-        pagingEnabled
-        scrollEventThrottle={1}
-        showsHorizontalScrollIndicator={false}
-        snapToInterval={CARD_WIDTH + 20}
-        snapToAlignment="center"
-        style={styles.scrollView}
-        contentInset={{
-          top: 0,
-          left: SPACING_FOR_CARD_INSET,
-          bottom: 0,
-          right: SPACING_FOR_CARD_INSET,
-        }}
-        contentContainerStyle={{
-          paddingHorizontal:
-            Platform.OS === "android" ? SPACING_FOR_CARD_INSET : 0,
-        }}
-        onScroll={(e) => {
-          // console.log(e.nativeEvent.contentOffset.x);
-          if (data !== []) {
-            let index = Math.floor(
-              e.nativeEvent.contentOffset.x / CARD_WIDTH + 0.3
-            ); // animate 30% away from landing on the next item
-            // console.log(index);
-            // setInd(index);
-          }
-        }}
-      >
-        {filteredData
-          ? Filtering(filteredData).map((data, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => {
-                  navigation.navigate("Detail", { store: data });
-                }}
-              >
-                <View style={styles.card}>
-                  <View
-                    style={[
-                      {
-                        position: "absolute",
-                        zIndex: 7,
-                        margin: "1%",
-                        display: data.off ? "flex" : "none",
-                      },
-                      styles.percent,
-                    ]}
-                  >
-                    <Text style={{ fontWeight: "bold" }}>
-                      {data.off ? data.off.toFixed(0) + "%" : null}
-                    </Text>
-                  </View>
-                  <Image
-                    source={
-                      data.photoResult[0] && data.photoResult[0]["photos"][0]
-                        ? {
-                            uri:
-                              "http://spring-boot-repo-tpsi.s3.amazonaws.com/" +
-                              data.photoResult[0]._id +
-                              "_" +
-                              data.photoResult[0]["photos"][0].id,
-                          }
-                        : image
-                    }
-                    style={styles.cardImage}
-                    resizeMode="cover"
-                  />
-                  <View style={styles.textContent}>
-                    <Text numberOfLines={3} style={styles.cardtitle}>
-                      {data.name}
-                    </Text>
-
-                    <Text numberOfLines={1} style={styles.cardDescription}>
-                      {data.cuisine}
-                    </Text>
-                    <View style={styles.rating}>
-                      <Image
-                        style={{ width: 20, height: 15, alignSelf: "center" }}
-                        source={require("../../Image/G.png")}
-                      />
-                      <Text style={styles.hh}>{data.rating}</Text>
-                    </View>
-                    {data.comments ? (
-                      <View style={styles.comment}>
-                        <Text numberOfLines={1} style={styles.hh}>
-                          {data.comments}
-                        </Text>
-                      </View>
-                    ) : null}
-                    <View
-                      style={{ position: "absolute", bottom: "9%", left: "7%" }}
-                    >
-                      {data.hh[0] &&
-                      data.hh[0].infos[0].days.includes(
-                        moment().format("dddd")
-                      ) ? (
-                        <>
-                          <Text style={styles.hh}>Today:</Text>
-                          <Text style={styles.hh}>
-                            {data.hh[0].infos[0].start_time +
-                              " - " +
-                              data.hh[0].infos[0].end_time}
-                          </Text>
-                        </>
-                      ) : (
-                        <Text style={styles.hh}>No happy hours today</Text>
-                      )}
-                    </View>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            ))
-          : null}
-      </Animated.ScrollView>
+      {filteredData ? (
+        <FlatList
+          ref={_scrollView}
+          horizontal
+          scrollEventThrottle={1}
+          initialScrollIndex={0}
+          onScrollToIndexFailed={(error) => {
+            _scrollView.current?.scrollToOffset({
+              offset: error.averageItemLength * error.index + error.index*8,
+              animated: true,
+            });
+            setTimeout(() => {
+              if ( _scrollView !== null) {
+                _scrollView.current?.scrollToIndex({
+                  index: error.index,
+                  animated: true,
+                });
+              }
+            }, 100);
+          }}
+          disableIntervalMomentum={true}
+          showsHorizontalScrollIndicator={false}
+          snapToInterval={CARD_WIDTH + 16}
+          style={styles.scrollView}
+          data={Filtering(filteredData)}
+          renderItem={({ item, ind }) => <MapCard store={item} key={ind} />}
+        />
+      ) : null}
     </View>
   );
 };
@@ -877,13 +1028,18 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
   },
+  cuisine: {
+    fontWeight: "500",
+    fontSize: 10,
+  },
 
   scrollView: {
     position: "absolute",
     bottom: "0%",
     left: 0,
     right: 0,
-    paddingVertical: 10,
+    paddingVertical: 8,
+    paddingLeft: 12,
   },
   card: {
     // padding: 10,
@@ -892,28 +1048,30 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     borderTopLeftRadius: 5,
     borderTopRightRadius: 5,
-    marginHorizontal: 10,
+    marginHorizontal: 8,
     shadowColor: "#000",
     shadowRadius: 5,
     shadowOpacity: 0.3,
     shadowOffset: { x: 2, y: -2 },
-    height: 160,
+    height: 152,
     width: CARD_WIDTH,
     overflow: "hidden",
   },
   cardImage: {
-    flex: 3,
-    width: "100%",
+    width: 156,
     height: "100%",
-    alignSelf: "center",
+    resizeMode: "cover",
   },
   textContent: {
     flex: 2,
-    padding: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
   },
   cardtitle: {
-    fontSize: 13,
+    fontSize: 18,
     // marginTop: 5,
+    fontWeight: 700,
+    marginRight: 25,
     fontWeight: "bold",
   },
   cardDescription: {
@@ -930,9 +1088,7 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
   },
-  hh: {
-    fontSize: 12,
-  },
+
   rating: {
     flexDirection: "row",
     display: "flex",
@@ -951,6 +1107,44 @@ const styles = StyleSheet.create({
     shadowRadius: 1,
     elevation: 1,
   },
+  inputContainer: {
+    display: "flex",
+    flexDirection: "row",
+    marginBottom: 12,
+  },
+  searchArea: {
+    width: "100%",
+    marginHorizontal: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: Constants.statusBarHeight,
+    shadowColor: "rgb(129, 129, 129)",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 2,
+    position: "absolute",
+    zIndex: 99,
+  },
+  divider: {
+    marginHorizontal: 6,
+    borderColor: "grey",
+  },
+  input: {
+    height: 42,
+    flexGrow: 1,
+    borderWidth: 1,
+    borderColor: "white",
+    padding: 10,
+    borderRadius: 20,
+    display: "flex",
+    marginLeft: 20,
+    marginRight: 14,
+    backgroundColor: "#FFFEFA",
+    shadowColor: "#C58A00",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 2,
+  },
   percent: {
     backgroundColor: "#FFE68D",
     padding: "4%",
@@ -965,51 +1159,11 @@ const styles = StyleSheet.create({
     shadowRadius: 1,
     elevation: 1,
   },
-  inputContainer: {
-    display: "flex",
-    flexDirection: "row",
-  },
-  searchArea: {
-    width: "100%",
-    padding: "1%",
-    alignItems: "center",
-    justifyContent: "center",
-    borderBottomColor: "grey",
-    borderTopColor: "grey",
-    borderWidth: 0.4,
-    borderTopWidth: 0,
-    paddingTop:Constants.statusBarHeight,
-    backgroundColor: "#F9EEC8",
-    shadowColor: "rgb(129, 129, 129)",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.4,
-    shadowRadius: 2,
-  },
-  divider: {
-    marginHorizontal: 6,
-    borderColor: "grey",
-  },
-  input: {
-    maxWidth: "80%",
-    height: 42,
-    flexGrow: 1,
-    borderWidth: 1,
-    borderColor: "white",
-    padding: 10,
-    borderRadius: 20,
-    display: "flex",
-
-    margin: 10,
-    backgroundColor: "#FFFEFA",
-    shadowColor: "#C58A00",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.4,
-    shadowRadius: 2,
-  },
-  filter:{
+  filter: {
     paddingHorizontal: 10,
     paddingVertical: 7,
-    marginLeft: "5%",
+    marginLeft: 20,
+    height: 32,
     marginRight: "-2%",
     alignItems: "center",
     justifyContent: "center",
@@ -1021,5 +1175,5 @@ const styles = StyleSheet.create({
     shadowRadius: 1,
     elevation: 5,
     marginBottom: "1%",
-  }
+  },
 });

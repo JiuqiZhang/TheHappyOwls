@@ -62,7 +62,7 @@ export default StoreCard = (props) => {
       <View>
         <View style={{ top: 20, position: "absolute", right: 0 }}>
           <Text style={[styles.ratingText, { color: "#686868" }]}>
-            {props.store.distance + " miles"}
+            {props.store.distance.toFixed(1) + " mi"}
           </Text>
         </View>
         <View
@@ -78,7 +78,7 @@ export default StoreCard = (props) => {
         </View>
         <View style={[styles.flexcontainer, styles.row]}></View>
 
-        <Text style={{ marginBottom: 13, fontWeight: "700", fontSize: 14 }}>
+        <Text style={{ marginBottom: 9, fontWeight: "700", fontSize: 14 }}>
           {props.store.days[moment().format("dddd")].time.length > 0
             ? "Today: " + props.store.days[moment().format("dddd")].time
             : "No happy hours today"}
@@ -86,8 +86,8 @@ export default StoreCard = (props) => {
 
         <View style={{ display: "flex", flexDirection: "row" }}>
           <Text style={styles.cuisine}>
-            {props.store.cuisine}
-            {" • " + "$".repeat(+props.store.price)+" • "}
+            {props.store.cuisine + " • "}
+            {props.store.price?"$".repeat(+props.store.price)+" • ":null}
           </Text>
           <View style={styles.rating}>
             <Image
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     height: 220,
     width: "100%",
     resizeMode: "cover",
-    borderRadius: 20,
+    borderRadius: 10,
     alignSelf: "center",
     marginTop: "5%",
   },

@@ -1,5 +1,26 @@
 {
   "expo": {
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 31,
+            "targetSdkVersion": 31,
+            "buildToolsVersion": "31.0.0"
+          },
+          "ios": {
+            "supportsTablet": true,
+            "bundleIdentifier": "com.theHappyOwls.Tpsi",
+            "buildNumber": "1.35",
+            "deploymentTarget": "25.0",
+            "config": {
+              "googleMapsApiKey": "AIzaSyBWQ5iFtnT2EQSo1Yi4D6pc-edq7MJkaPA"
+            }
+          }
+        }
+      ]
+    ],
     "name": "TPSI",
     "slug": "tpsi",
     "version": "1.0.0",
@@ -14,15 +35,6 @@
     "assetBundlePatterns": [
       "**/*"
     ],
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.theHappyOwls.Tpsi",
-      "buildNumber": "1.34",
-      
-      "config":{
-        "googleMapsApiKey":"AIzaSyBWQ5iFtnT2EQSo1Yi4D6pc-edq7MJkaPA"
-      }
-    },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
@@ -38,6 +50,9 @@
         "projectId": "40d7be24-514b-46dd-9855-93c6b6e5e274"
       }
     },
-    "owner": "9ussel7hang"
+    "owner": "9ussel7hang",
+    "ios": {
+      "bundleIdentifier": "com.theHappyOwls.Tpsi"
+    }
   }
 }

@@ -26,7 +26,7 @@ const SlideItem = ({ item }) => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => setVisible(true)}>
+      <View onPress={() => setVisible(true)}>
         <Animated.Image
           source={item.img}
           resizeMode="contain"
@@ -41,7 +41,7 @@ const SlideItem = ({ item }) => {
             },
           ]}
         />
-      </TouchableOpacity>
+      </View>
       {/* <Modal
         testID={"modal"}
         isVisible={visible}
@@ -68,11 +68,10 @@ const styles = StyleSheet.create({
   },
   image: {
     minWidth: "100%",
-    height: 300,
+    height: 328,
 
     width: "100%",
 
-    marginTop: "8%",
     resizeMode: "cover",
   },
   imageModal: {

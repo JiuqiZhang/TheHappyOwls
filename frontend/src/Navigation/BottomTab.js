@@ -13,24 +13,24 @@ export default TabScreen = ({ navigation }) => {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarStyle:{
-          bottom:'3%',
-          position:'absolute',
-          height:'7%',
-          marginHorizontal:"5%",
-          paddingVertical:'1%',
-          borderRadius: 60,
-    alignItems: "center",
-    justifyContent: "center",
+    //     tabBarStyle:{
+    //       bottom:'3%',
+    //       position:'absolute',
+    //       height:'7%',
+    //       marginHorizontal:"5%",
+    //       paddingVertical:'1%',
+    //       borderRadius: 60,
+    // alignItems: "center",
+    // justifyContent: "center",
 
 
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
-    elevation: 5,
+    // shadowColor: "#000",
+    // shadowOffset: { width: 0, height: 1 },
+    // shadowOpacity: 0.8,
+    // shadowRadius: 2,
+    // elevation: 5,
 
-        },
+    //     },
         tabBarLabelStyle:{ position:'absolute',bottom:'-35%'},
         tabBarIcon: ({ focused, color, size }) => {
             let iconName;
@@ -53,7 +53,7 @@ export default TabScreen = ({ navigation }) => {
         options={{
           tabBarIcon: ({focused}) => <View><LinearGradient colors={focused?['#F9EEC8', '#FFD029', '#D9AA04' ]:['transparent']}
           start={{ x: -0.4, y: 0 }}  end={{ x: 1.6, y: 1 }}
-           style={[styles.shadow,{backgroundColor:focused?'#FED546':'white'}]}/><Entypo name="drink" size={24} color={focused?'black':'grey'} /></View>,
+           style={[styles.shadow,{backgroundColor:focused?'#FED546':'white'}]}/><Feather name="search" size={24} color={focused?'black':'grey'} /></View>,
          
           
         }}
@@ -66,7 +66,7 @@ export default TabScreen = ({ navigation }) => {
         options={{
           tabBarIcon: ({focused}) => <View><LinearGradient colors={focused?['#F9EEC8', '#FFD029', '#D9AA04' ]:['transparent']}
           start={{ x: -0.4, y: 0 }}  end={{ x: 1.6, y: 1 }}
-           style={[styles.shadow,{backgroundColor:focused?'#FED546':'white'}]}/><Feather name="map-pin" size={24}  color={focused?'black':'grey'}  /></View>,
+           style={[styles.shadow,{backgroundColor:focused?'#FED546':'white'}]}/><Feather name="map" size={24}  color={focused?'black':'grey'}  /></View>,
           
         }}
       />
@@ -88,7 +88,7 @@ export default TabScreen = ({ navigation }) => {
         options={{
           tabBarIcon: ({focused}) => <View><LinearGradient colors={focused?['#F9EEC8', '#FFD029', '#D9AA04' ]:['transparent']}
           start={{ x: -0.4, y: 0 }}  end={{ x: 1.6, y: 1 }}
-           style={[styles.shadow,{backgroundColor:focused?'#FED546':'white'}]}/><AntDesign name="user" size={24} color={focused?'black':'grey'} /></View>,
+           style={[styles.shadow,{backgroundColor:focused?'#FED546':'white'}]}/><Feather name="user" size={24} color={focused?'black':'grey'} /></View>,
           
         }}
       />
@@ -98,7 +98,7 @@ export default TabScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   shadow:{
-    position:'absolute',height:55, width:55,zIndex:-1,borderRadius:999,alignSelf:'center',marginTop:'-7%',
+    position:'absolute',height:55, width:55,zIndex:-1,borderRadius:999,alignSelf:'center',marginTop:-10,
     overflow: 'hidden',
     shadowColor: '#727272',
     shadowRadius: 3,
