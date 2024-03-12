@@ -28,6 +28,7 @@ const statusBarHeight = Constants.statusBarHeight;
 const dp = PixelRatio.get()
 
 export default MenuScreen = ({ navigation }) => {
+  const [msg, setmsg] = useState({open:new Date(),location:'location got at',makeRequestAt:'make request at',response:'got response at'})
   const [indicator, setIndicator] = useState(true);
   const [data, setData] = useState();
   const [search, setsearch] = useState("");
@@ -35,6 +36,7 @@ export default MenuScreen = ({ navigation }) => {
   const [result, setResult] = useState("");
   const scrollRef = useRef();
   const [filteredData, setFilteredData] = useState();
+  const [loc, setLoc] = useState()
   const [open, setopen] = useState(false);
 
   const filterVal = {
@@ -209,10 +211,31 @@ export default MenuScreen = ({ navigation }) => {
       if (status !== "granted") {
         console.log("Please grant location permissions");
         return;
+      } else {
+        const locationSubscription = await Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.Highest,
+            timeInterval: 1000,
+            distanceInterval: 1,
+          },
+          (location) => {
+            setLoc({
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
+            });
+          }
+        );
       }
+      
       let currentLocation = await Location.getCurrentPositionAsync({});
       console.log("Location:");
       console.log(currentLocation);
+      setLoc(currentLocation.coords);
+      setmsg((prevState) => ({
+        ...prevState,
+        location:(new Date()-prevState.open)/1000
+      }))
+     
 
       var req = new FormData();
       req.append("lat", currentLocation.coords.latitude);
@@ -232,11 +255,20 @@ var requestOptions = {
   body: req,
   redirect: 'follow'
 };
+setmsg((prevState) => ({
+  ...prevState,
+  makeRequestAt:(new Date()-prevState.open)/ 1000
+}))
       
 
       await axios(config)
-        .then((response) =>
-          response.data.map((store) => ({
+        .then((response) =>{
+          setmsg((prevState) => ({
+            ...prevState,
+            response:(new Date()-prevState.open)/1000
+          }))
+
+          return response.data.map((store) => ({
             name: store.name,
             rating: store.rating,
             cuisine: `${store.cuisine}`,
@@ -254,6 +286,7 @@ var requestOptions = {
             off: findDeal(store.hhResult),
             ...store,
           }))
+        }
         )
         .then((stores) => {
           // console.log(stores);
@@ -305,7 +338,7 @@ var requestOptions = {
 
     await axios({
       method: "get",
-      url: "https://data.tpsi.io/api/v1/stores/Search?search=" + search,
+      url: "https://data.tpsi.io/api/v1/stores/searchWithDistance?search=" + search+'&lat='+loc.latitude+'&lng='+loc.longitude,
       headers: {},
     })
       .then((response) =>
@@ -329,7 +362,6 @@ var requestOptions = {
         }))
       )
       .then((data) => {
-        console.log('search done',data);
         setResult(data);
         scrollRef.current?.scrollTo({
           y: 0,
@@ -475,6 +507,7 @@ var requestOptions = {
           </View>
         </View>
       </View>
+      <Text>{'Testing:'+JSON.stringify(msg)}</Text>
 {/* {!filteredData?<Text style={{top:'5%'}}>No stores within your area, please try map page or search.</Text>:null} */}
       {!indicator ? (
         !result ? (

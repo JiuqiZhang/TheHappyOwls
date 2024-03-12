@@ -4,7 +4,7 @@ import { Image } from "react-native-elements";
 import moment from "moment/moment";
 import { Divider } from "react-native-elements";
 import { LinearGradient } from "expo-linear-gradient";
-export default StoreCard = (props) => {
+export default StoreCard = React.memo((props) => {
   const OpenNow = () => {
     if (props.store.days[moment().format("dddd")].time.length > 0) {
       const start =
@@ -115,7 +115,7 @@ export default StoreCard = (props) => {
         })} */}
     </View>
   );
-};
+})
 const styles = StyleSheet.create({
   container: {
     width: "90%",
@@ -127,14 +127,14 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   ratingText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "500",
     margin: 4,
   },
   image: {
     maxWidth: "100%",
     height: "100%",
-    height: 220,
+    height: 200,
     width: "100%",
     resizeMode: "cover",
     borderRadius: 10,

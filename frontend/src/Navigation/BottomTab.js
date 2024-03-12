@@ -47,6 +47,16 @@ export default TabScreen = ({ navigation }) => {
       }}
  
     >
+     <Tab.Screen
+        name="Map"
+        component={MapScreen}
+        options={{
+          tabBarIcon: ({focused}) => <View><LinearGradient colors={focused?['#F9EEC8', '#FFD029', '#D9AA04' ]:['transparent']}
+          start={{ x: -0.4, y: 0 }}  end={{ x: 1.6, y: 1 }}
+           style={[styles.shadow,{backgroundColor:focused?'#FED546':'white'}]}/><Feather name="map" size={24}  color={focused?'black':'grey'}  /></View>,
+          
+        }}
+      />
       <Tab.Screen
         name="Search"
         component={Menu}
@@ -60,16 +70,7 @@ export default TabScreen = ({ navigation }) => {
         
       />
 
-      <Tab.Screen
-        name="Map"
-        component={MapScreen}
-        options={{
-          tabBarIcon: ({focused}) => <View><LinearGradient colors={focused?['#F9EEC8', '#FFD029', '#D9AA04' ]:['transparent']}
-          start={{ x: -0.4, y: 0 }}  end={{ x: 1.6, y: 1 }}
-           style={[styles.shadow,{backgroundColor:focused?'#FED546':'white'}]}/><Feather name="map" size={24}  color={focused?'black':'grey'}  /></View>,
-          
-        }}
-      />
+     
       <Tab.Screen
         name="Saved"
         component={ProfileScreen}
