@@ -2,10 +2,9 @@ import React, {Text} from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 
 
-
+import SignupScreen from '../screens/Auth/SignupScreen';
 
 import MainStack from './MainStack';
-import AuthStack from './AuthStack';
 import { useSelector } from 'react-redux';
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
@@ -19,7 +18,7 @@ const MyTheme = {
     },
   };
 export default function Routes() {
-    const {email, firstName, lastName} = useSelector(state => state.userReducer);
+    const  user = useSelector(state => state.user);
 
 
     return (
@@ -29,10 +28,12 @@ export default function Routes() {
           headerShown: false,
 
         }}>
+         {user.email?null:<Stack.Screen
+          name="onBoard"
+          component={SignupScreen}
+        />}
         {MainStack(Stack)}
-        {/* {!email ? MainStack(Stack)
-            : AuthStack(Stack)
-        } */}
+
             </Stack.Navigator>
         </NavigationContainer>
 

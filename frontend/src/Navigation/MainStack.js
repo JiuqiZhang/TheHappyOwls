@@ -4,24 +4,38 @@ import DetailPage from "../screens/Store_detail/DetailPage";
 import InfoScreen from '../screens/Profile/InfoScreen';
 import FeedbackScreen from '../screens/Profile/FeedbackScreen';
 import SecurityScreen from '../screens/Profile/SecurityScreen';
-import EmailConfirm from '../screens/Auth/EmailConfirm';
-import Signup from '../screens/Auth/Signup';
+import SignupScreen from '../screens/Auth/SignupScreen';
+import SignupNameScreen from '../screens/Auth/SignupNameScreen';
+// import EmailConfirm from '../screens/Auth/EmailConfirm';
+import { useSelector } from 'react-redux';
 
 import Login from '../screens/Auth/Login';
 export default function MainStack(Stack){
+  const  user = useSelector(state => state.user);
     return(
 
-<>
+<>     
         <Stack.Screen
           name="Home"
           component={TabScreen}
           options={{ title: "Happy Owls" }}
+        />
+          <Stack.Screen
+          name="Signup"
+          component={SignupScreen}
+
+        />
+                  <Stack.Screen
+          name="SignupName"
+          component={SignupNameScreen}
+
         />
         <Stack.Screen
           name="Detail"
           component={DetailPage}
 
         />
+        
           <Stack.Screen
           name="Info"
           component={InfoScreen}
@@ -37,18 +51,6 @@ export default function MainStack(Stack){
           component={SecurityScreen}
 
         />
-        {/* {AuthStack(Stack)} */}
-        <Stack.Screen
-          name="Login"
-          component={EmailConfirm}
-
-        />
-         <Stack.Screen
-          name="Signup"
-          component={Signup}
-        />
-          
-        {/* <Stack.Screen name="Map" component={MapScreen} /> */}
 
 </>
     )

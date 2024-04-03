@@ -57,12 +57,12 @@ export default DetailPage = ({ navigation, route }) => {
 
       if (moment().format("HH:mm") > start && moment().format("HH:mm") < end) {
         return (
-          <TouchableOpacity onPress={()=>{isModal(true)}}  ><Text style={ { color: "green",fontWeight:600 }}>Open<Text style={{color:'black'}}> • {data.days[moment().format("dddd")].time}</Text></Text><View  style={{position:'absolute',right:20,bottom:-4}}><Icon.ArrowRight color={"black"} width={24} height={24} /></View></TouchableOpacity>
+          <TouchableOpacity onPress={()=>{isModal(true)}}  ><Text style={ { color: "green",fontWeight:'600' }}>Open<Text style={{color:'black'}}> • {data.days[moment().format("dddd")].time}</Text></Text><View  style={{position:'absolute',right:20,bottom:-4}}><Icon.ArrowRight color={"black"} width={24} height={24} /></View></TouchableOpacity>
         );
       }
     }
     return (
-      <TouchableOpacity onPress={()=>{isModal(true)}}  ><Text style={{ color: "red",fontWeight:600 }}>Unavailable Now<Text style={{color:'black'}}> • {data.days[moment().format("dddd")].time}</Text></Text><View style={{position:'absolute',right:20,bottom:-4}}><Icon.ArrowRight color={"black"} width={24} height={24} /></View></TouchableOpacity>
+      <TouchableOpacity onPress={()=>{isModal(true)}}  ><Text style={{ color: "red",fontWeight:'600' }}>Unavailable Now<Text style={{color:'black'}}> • {data.days[moment().format("dddd")].time}</Text></Text><View style={{position:'absolute',right:20,bottom:-4}}><Icon.ArrowRight color={"black"} width={24} height={24} /></View></TouchableOpacity>
     );
    
   };
@@ -90,7 +90,7 @@ let ss = Math.floor(diff / 1000) % 60;
 let mm = Math.floor(diff / 1000 / 60) % 60;
 let hh = Math.floor(diff / 1000 / 60 / 60);
     return <View style={{backgroundColor:'#F9EEC8',height:36,justifyContent: 'center',
-    alignItems: 'center'}}><Text style={{fontSize:12, fontWeight:500, margin:'auto'}}>{(hh!=0?hh+' hr ':'')+mm+' mins left for this merchant’s Happy Hour'}</Text></View>;
+    alignItems: 'center'}}><Text style={{fontSize:12, fontWeight:'500', margin:'auto'}}>{(hh!=0?hh+' hr ':'')+mm+' mins left for this merchant’s Happy Hour'}</Text></View>;
      
   }
     
@@ -505,7 +505,7 @@ let hh = Math.floor(diff / 1000 / 60 / 60);
         <Divider
           orientation="horizontal"
           width={2}
-          style={[styles.divider,styles.shadow,{marginHorizontal:'-10%'}]}
+          style={[styles.divider,{marginHorizontal:'-10%'}]}
           color={"#EDEDED"}
         />
 
@@ -514,10 +514,10 @@ let hh = Math.floor(diff / 1000 / 60 / 60);
           <View style={[styles.row, { justifyContent: "space-between" }]}>
             <View style={{ width: "67%" }}>
               <Text
-                style={[{
+                style={{
                   fontSize: 20,
                   fontWeight: "600",
-                },styles.shadow]}
+                }}
               >
                 Happy Hour Deals{"\n"}
               </Text>
@@ -544,17 +544,17 @@ let hh = Math.floor(diff / 1000 / 60 / 60);
                             height: 20,
                           }}
                         />
-                        <Text style={[{ fontSize: 14, fontWeight: "400",},styles.shadow]}>
+                        <Text style={{ fontSize: 14, fontWeight: "400",}}>
                           {" "}
                           {deal.name}
                         </Text>
                       </View>
                       <View style={{ width: "12%" }}>
                         <Text
-                          style={[{
+                          style={{
                             textDecorationLine: "line-through",
                             fontSize: 12,
-                          },styles.shadow]}
+                          }}
                         >
                           {deal.regular_price
                             ? "$" + deal.regular_price
@@ -562,7 +562,7 @@ let hh = Math.floor(diff / 1000 / 60 / 60);
                         </Text>
                       </View>
                       <View style={{ width: "30%", alignItems: "flex-start" }}>
-                        <Text style={[{ fontSize: 14, fontWeight: "700" },styles.shadow]}>
+                        <Text style={{ fontSize: 14, fontWeight: "700" }}>
                           Now ${deal.discounted_price}
                         </Text>
                       </View>
@@ -571,7 +571,7 @@ let hh = Math.floor(diff / 1000 / 60 / 60);
                       <Divider
                         orientation="horizontal"
                         width={1}
-                        style={[styles.divider,styles.shadow]}
+                        style={styles.divider}
                         color={"#EDEDED"}
                       />
                     ) : null}
@@ -590,7 +590,7 @@ let hh = Math.floor(diff / 1000 / 60 / 60);
         <Divider
           orientation="horizontal"
           width={2}
-          style={[styles.divider,styles.shadow,{marginHorizontal:'-10%'}]}
+          style={[styles.divider,{marginHorizontal:'-10%'}]}
           color={"#EDEDED"}
         />
         <View style={styles.card}>
@@ -850,15 +850,5 @@ const styles = StyleSheet.create({
     fontSize: 10,
     marginTop: 5,
   },
-  shadow:{
-    
-    shadowColor: "#000000",
-    shadowOffset: {
-      width: 1,
-      height: 4,
-    },
-    shadowOpacity:  0.15,
-    shadowRadius: 1.05,
-    elevation: 10,
-  }
+ 
 });

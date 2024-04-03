@@ -9,6 +9,9 @@ import { useSelector } from "react-redux";
 import { Divider } from "react-native-elements";
 import * as Icon from "react-native-feather";
 import ResetPassword from "../Auth/ResetPassword";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Dispatch } from "redux";
+import { setEmail, setNameFirst, setNameLast } from "../../redux/actions";
 export default ProfileScreen = ({navigation}) => {
   const state = useSelector((state) => state.userReducer);
   return (
@@ -116,7 +119,9 @@ export default ProfileScreen = ({navigation}) => {
         <Text style={styles.subtitle}>Password:{state.email}</Text>
         <Divider width={1.5} />
       </View> */}
-      <Button title="Login/Signup" onPress={()=>{ navigation.navigate("Login");}}/>
+      <Button title="Logout" onPress={()=>{dispatch(setEmail(null));
+        dispatch(setNameFirst(null));
+        dispatch(setNameLast(null));}}/>
     </View>
   );
 };

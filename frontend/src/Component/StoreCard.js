@@ -1,29 +1,42 @@
 import React from "react";
-import { Text, View, StyleSheet, Linking } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity} from "react-native";
 import { Image } from "react-native-elements";
+import * as Icon from "react-native-feather";
 import moment from "moment/moment";
 import { Divider } from "react-native-elements";
 import { LinearGradient } from "expo-linear-gradient";
+import { useSelector } from "react-redux";
 export default StoreCard = React.memo((props) => {
-  const OpenNow = () => {
-    if (props.store.days[moment().format("dddd")].time.length > 0) {
-      const start =
-        props.store.days[moment().format("dddd")].time[0].split(" - ")[0];
-      const end =
-        props.store.days[moment().format("dddd")].time[0].split(" - ")[1];
+  const  user = useSelector(state => state.user);
+  const addToFav = async(id) =>{
+    var formdata = new FormData();
 
-      if (moment().format("HH:mm") > start && moment().format("HH:mm") < end) {
-        return (
-          <Text style={[styles.ratingText, { color: "green" }]}>Open</Text>
-        );
-      }
-    }
-    return (
-      <Text style={[styles.ratingText, { color: "red" }]}>Unavailable</Text>
-    );
-  };
+    formdata.append("username", user.email);
+    formdata.append("storeID", id);
+    
+    var requestOptions = {
+      method: 'POST',
+      body: formdata,
+    };
+    
+    await fetch("https://data.tpsi.io/api/v1/stores/addStoreToUserFavorite", requestOptions)
+      .then(response => response.text())
+      .then(result => console.log(result))
+      .catch(error => console.log('error', error));
+
+}
   return (
     <View style={styles.container}>
+     <TouchableOpacity style={{ position: "absolute", right: 9, top: 10, zIndex: 17 }} onPress={user.email?()=>{addToFav(props.store._id)}:()=>{props.navigation.navigate("Saved")}}>
+          <Icon.Bookmark
+            width={29}
+            height={35}
+            fill={props.store.userFavorite?"#FFD029":'#999999'}
+            stroke={"#5C4A0A"}
+            strokeWidth={1}
+            
+          />
+          </TouchableOpacity>
       <LinearGradient
         colors={["#F9EEC8", "#FFD029", "#D9AA04"]}
         start={{ x: -0.4, y: 0.4 }}

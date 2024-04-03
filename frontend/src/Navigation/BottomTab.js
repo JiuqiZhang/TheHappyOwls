@@ -3,12 +3,15 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { AntDesign, Feather, Entypo } from "@expo/vector-icons";
 import Menu from "../screens/Store_Menu/Menu";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import OnBoardScreen from "../screens/OnBoarding/OnBoardScreen";
 import MapScreen from "../screens/Map/MapScreen";
+import Saved from "../screens/Saved/Saved";
 import { LinearGradient } from "expo-linear-gradient";
 import { View,StyleSheet} from "react-native";
 const Tab = createBottomTabNavigator();
+import { useSelector } from "react-redux";
 export default TabScreen = ({ navigation }) => {
+  const  user = useSelector(state => state.user);
   return (
     <Tab.Navigator
       screenOptions={{
@@ -47,16 +50,6 @@ export default TabScreen = ({ navigation }) => {
       }}
  
     >
-     <Tab.Screen
-        name="Map"
-        component={MapScreen}
-        options={{
-          tabBarIcon: ({focused}) => <View><LinearGradient colors={focused?['#F9EEC8', '#FFD029', '#D9AA04' ]:['transparent']}
-          start={{ x: -0.4, y: 0 }}  end={{ x: 1.6, y: 1 }}
-           style={[styles.shadow,{backgroundColor:focused?'#FED546':'white'}]}/><Feather name="map" size={24}  color={focused?'black':'grey'}  /></View>,
-          
-        }}
-      />
       <Tab.Screen
         name="Search"
         component={Menu}
@@ -70,22 +63,33 @@ export default TabScreen = ({ navigation }) => {
         
       />
 
-     
       <Tab.Screen
+        name="Map"
+        component={MapScreen}
+        options={{
+          tabBarIcon: ({focused}) => <View><LinearGradient colors={focused?['#F9EEC8', '#FFD029', '#D9AA04' ]:['transparent']}
+          start={{ x: -0.4, y: 0 }}  end={{ x: 1.6, y: 1 }}
+           style={[styles.shadow,{backgroundColor:focused?'#FED546':'white'}]}/><Feather name="map" size={24}  color={focused?'black':'grey'}  /></View>,
+          
+        }}
+      />
+
+<Tab.Screen
         name="Saved"
-        component={ProfileScreen}
+        component={user.email?Saved:OnBoardScreen}
+
         options={{
           tabBarIcon: ({focused}) => <View><LinearGradient colors={focused?['#F9EEC8', '#FFD029', '#D9AA04' ]:['transparent']}
           start={{ x: -0.4, y: 0 }}  end={{ x: 1.6, y: 1 }}
            style={[styles.shadow,{backgroundColor:focused?'#FED546':'white'}]}/><Entypo name="bookmark" size={24} color={focused?'black':'grey'} /></View>,
          
-          
         }}
       />
+    
 
       <Tab.Screen
         name="Profile"
-        component={ProfileScreen}
+        component={user.email?ProfileScreen:OnBoardScreen}
         options={{
           tabBarIcon: ({focused}) => <View><LinearGradient colors={focused?['#F9EEC8', '#FFD029', '#D9AA04' ]:['transparent']}
           start={{ x: -0.4, y: 0 }}  end={{ x: 1.6, y: 1 }}

@@ -1,5 +1,5 @@
 import Login from "../screens/Auth/Login";
-import Signup from "../screens/Auth/Signup";
+import SignupScreen from "../screens/Auth/SignupScreen";
 export default function MainStack(Stack){
     return(
 
@@ -10,7 +10,7 @@ export default function MainStack(Stack){
         />
         <Stack.Screen
           name="Signup"
-          component={Signup}
+          component={SignupScreen}
         />
         </>
 

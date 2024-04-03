@@ -10,20 +10,21 @@
             "buildToolsVersion": "31.0.0"
           },
           "ios": {
-            "deploymentTarget": "14.0"
+            "deploymentTarget": "17.0"
           }
         }
-      ]
+      ],
+      "expo-apple-authentication"
     ],
     "name": "TPSI",
     "slug": "tpsi",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/app.png",
+    "icon": "./assets/app.jpg",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/tpsi.png",
-      "resizeMode": "contain",
+      "image": "./assets/app.jpg",
+      "resizeMode": "cover",
       "backgroundColor": "#FCFCEF"
     },
     "assetBundlePatterns": [
@@ -32,10 +33,11 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.theHappyOwls.Tpsi",
-      "buildNumber": "1.39",
+      "buildNumber": "1.43",
       "config": {
         "googleMapsApiKey": "AIzaSyBWQ5iFtnT2EQSo1Yi4D6pc-edq7MJkaPA"
-      }
+      },
+      "usesAppleSignIn": true
     },
     "android": {
       "adaptiveIcon": {

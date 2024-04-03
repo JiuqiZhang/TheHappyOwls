@@ -4,9 +4,10 @@ import * as Icon from 'react-native-feather'
 import { Divider } from "react-native-elements"
 import InputBox from "../../Component/InputBox"
 import { useSelector } from "react-redux";
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
 export default InfoScreen = ({ navigation }) => {
-    const state = useSelector((state) => state.userReducer);
+    const user = useSelector((state) => state.user);
     return(<View style={styles.container}><TouchableOpacity
         style={styles.back}
         onPress={() => {
@@ -16,16 +17,20 @@ export default InfoScreen = ({ navigation }) => {
     </TouchableOpacity>
     <Text style={styles.title}>Edit Personal Info</Text>
   <View style={styles.wrapper}>
-  <InputBox label="First name" value={state.firstName} />
-    <InputBox label="Last name"  value={state.firstName} />
+  <InputBox label="First name" value={user.firstName} />
+    <InputBox label="Last name"  value={user.lastName} />
   </View>
   
    <Divider width={1.5}/>
    <View style={styles.wrapper}>
    <Text style={styles.email}>Email</Text>
        <View style={styles.wrapper}>
-   <Text>{state.email||"-"}</Text>
-   <Text>{JSON.stringify(state)}</Text></View>
+   <Text>{user.email||"-"}</Text>
+   <Text>{JSON.stringify(user)}</Text></View>
+{/* 
+   <TouchableOpacity onPress={()=>{AsyncStorage.clear();}}>
+    <Text>Reset</Text>
+   </TouchableOpacity> */}
    </View>
 
    </View>)

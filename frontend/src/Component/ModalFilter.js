@@ -34,23 +34,6 @@ export default FilterModal = ({filter, setFilter,data, modal, setmodal, setFilte
 
 
 
-    const showFiltered = () =>{
-    
-
-     
-     let res = data
-
-     //sort
-      if (filter.sortBy){
-        res = res.sort(
-          (a,b)=>{return a[filter.sortBy]-b[filter.sortBy]}
-         )
-       }
-
-
-     setmodal(false)
-
-    }
 
     return (
       <Modal
@@ -119,12 +102,7 @@ export default FilterModal = ({filter, setFilter,data, modal, setmodal, setFilte
                       value={filter.sortBy===type}
                      
                       onValueChange={() => {
-                        if(filter.sortBy === type){
-                          setFilter((filter) => ({
-                          ...filter,
-                          sortBy:null
-                        }));
-                        }else{
+                        if(filter.sortBy !== type){
                           setFilter((filter) => ({
                           ...filter,
                           sortBy:type
@@ -292,10 +270,10 @@ export default FilterModal = ({filter, setFilter,data, modal, setmodal, setFilte
                 height: "100%",
               }}
             >
-              <TouchableOpacity onPress={()=>{setFilter(filterVal);setmodal(false);setFilteredData(data)}}>
+              <TouchableOpacity onPress={()=>{setFilter(filterVal);setFilteredData(data);setmodal(false);}}>
                 <Text style={{ alignSelf: "center", textDecorationLine:'underline'}}>Clear All</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={{backgroundColor:'#FFD029',borderRadius:15,padding:"3%",paddingHorizontal:'5%'}} onPress={()=>{showFiltered()}}>
+              <TouchableOpacity style={{backgroundColor:'#FFD029',borderRadius:15,padding:"3%",paddingHorizontal:'5%'}} onPress={()=>{setmodal(false)}}>
                 <Text style={{ alignSelf: "center" }}>Show</Text>
               </TouchableOpacity>
             </View>
