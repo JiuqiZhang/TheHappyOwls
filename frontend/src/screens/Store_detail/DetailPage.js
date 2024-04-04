@@ -50,19 +50,28 @@ export default DetailPage = ({ navigation, route }) => {
   };
   const OpenNow = () => {
     if (data.days[moment().format("dddd")].time.length > 0) {
-      const start =
-        data.days[moment().format("dddd")].time[0].split(" - ")[0];
-      const end =
-        data.days[moment().format("dddd")].time[0].split(" - ")[1];
+     for (let i = 0; i<data.days[moment().format("dddd")].time.length;i++){
+      let start =
+      data.days[moment().format("dddd")].time[i].split(" - ")[0];
+    let end =
+      data.days[moment().format("dddd")].time[i].split(" - ")[1];
+   if (start.length>end.length){
+    if (moment().format("HH:mm") > start || moment().format("HH:mm") < '0'+end) {
+      return (
+        <TouchableOpacity onPress={()=>{isModal(true)}}  ><Text style={ { color: "green",fontWeight:'600' }}>Open<Text style={{color:'black'}}> • {data.days[moment().format("dddd")].time.toString()}</Text></Text><View  style={{position:'absolute',right:20,bottom:-4}}><Icon.ArrowRight color={"black"} width={24} height={24} /></View></TouchableOpacity>
+      );
+    }
+   }
 
-      if (moment().format("HH:mm") > start && moment().format("HH:mm") < end) {
-        return (
-          <TouchableOpacity onPress={()=>{isModal(true)}}  ><Text style={ { color: "green",fontWeight:'600' }}>Open<Text style={{color:'black'}}> • {data.days[moment().format("dddd")].time}</Text></Text><View  style={{position:'absolute',right:20,bottom:-4}}><Icon.ArrowRight color={"black"} width={24} height={24} /></View></TouchableOpacity>
-        );
-      }
+    if (moment().format("HH:mm") > start && moment().format("HH:mm") < end) {
+      return (
+        <TouchableOpacity onPress={()=>{isModal(true)}}  ><Text style={ { color: "green",fontWeight:'600' }}>Open<Text style={{color:'black'}}> • {data.days[moment().format("dddd")].time.toString()}</Text></Text><View  style={{position:'absolute',right:20,bottom:-4}}><Icon.ArrowRight color={"black"} width={24} height={24} /></View></TouchableOpacity>
+      );
+    }
+     }
     }
     return (
-      <TouchableOpacity onPress={()=>{isModal(true)}}  ><Text style={{ color: "red",fontWeight:'600' }}>Unavailable Now<Text style={{color:'black'}}> • {data.days[moment().format("dddd")].time}</Text></Text><View style={{position:'absolute',right:20,bottom:-4}}><Icon.ArrowRight color={"black"} width={24} height={24} /></View></TouchableOpacity>
+      <TouchableOpacity onPress={()=>{isModal(true)}}  ><Text style={{ color: "red",fontWeight:'600' }}>Unavailable Now<Text style={{color:'black'}}> • {data.days[moment().format("dddd")].time.toString()}</Text></Text><View style={{position:'absolute',right:20,bottom:-4}}><Icon.ArrowRight color={"black"} width={24} height={24} /></View></TouchableOpacity>
     );
    
   };

@@ -57,10 +57,10 @@ export default MenuScreen = ({ navigation }) => {
       Sunday: false,
     },
     items: {
-      Beer: false,
-      Wine: false,
-      Cocktail: false,
-      Food: false,
+      'Beer': false,
+      'Wine': false,
+      'Cocktail': false,
+      'Food': false,
     },
     price: {
       1: false,
@@ -125,19 +125,24 @@ export default MenuScreen = ({ navigation }) => {
             return;
           }
         
-        // for (item in filter.items) {
-        //   if (filter.items[item] === true) {
-        //     //if stroe doesn't have that item
-        //     return;
-        //   }
-        // }
+      
         if (
           
           store.cuisine[0] !== filter.selectedCuisine && filter.selectedCuisine!==null
         ) {
           return;
         }
-        return store;
+        if (Object.values(filter.items).indexOf(true) > -1) {
+          for (const key of Object.keys(filter.items)) {
+           
+            if (filter.items[key] && store.items.includes(key)){
+              return store
+            }
+        }
+        return
+       }
+
+        return store
       } else {
         if (store.days[moment().format("dddd")].time.length > 0) {
           if (
@@ -164,7 +169,16 @@ export default MenuScreen = ({ navigation }) => {
             ) {
               return;
             }
-            return store;
+            if (Object.values(filter.items).indexOf(true) > -1) {
+              for (const key of Object.keys(filter.items)) {
+                if (filter.items[key] && store.items.includes(key)){
+                  return store
+                }
+            }
+            return
+           }
+    
+            return store
           }
         }
         return;
@@ -172,7 +186,24 @@ export default MenuScreen = ({ navigation }) => {
     });
   };
 
+  const validateItem = (hh) =>{
+    let res = []
+    if (hh.length > 0) {
+      for (i = 0; i < hh[0].infos.length; i++) {
+        // time
+        hh[0].infos[i].items.map((item) => {
+         if (!(res.includes(item.type))){
+          res.push(item.type)
+         }
+        });
+      }
+    }
+
+    return res;
+
+  }
   const validatehh = (hh) => {
+
     let schedule = {
       Monday: {
         time: [],
@@ -220,7 +251,7 @@ export default MenuScreen = ({ navigation }) => {
 
     return schedule;
   };
-  useEffect(()=>{console.log(filter.selectedCuisine,typeof(filter.selectedCuisine))},[filter])
+  // useEffect(()=>{console.log(filter.selectedCuisine,typeof(filter.selectedCuisine))},[filter])
   useEffect(() => {
     const getPerm = async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -301,6 +332,7 @@ export default MenuScreen = ({ navigation }) => {
             number: store.number,
             days: validatehh(store.hhResult),
             off: findDeal(store.hhResult),
+            items:validateItem(store.hhResult),
             ...store,
           }));
         })
@@ -378,7 +410,7 @@ export default MenuScreen = ({ navigation }) => {
           number: store.number,
           days: validatehh(store.hhResult),
           off: findDeal(store.hhResult),
-
+          items:validateItem(store.hhResult),
           ...store,
         }))
       )
@@ -604,7 +636,7 @@ export default MenuScreen = ({ navigation }) => {
                     navigation.navigate("Detail", { store: item });
                   }}
                   >
-                    <StoreCard store={item} navigation={navigation}/>
+                    <StoreCard store={item} navigation={navigation}  change={filter === filterVal || !open ? setData:setFilteredData}/>
                   </TouchableOpacity>
                 )}
               />
@@ -628,7 +660,7 @@ export default MenuScreen = ({ navigation }) => {
                   navigation.navigate("Detail", { store: object });
                 }}
               >
-                <StoreCard store={object} navigation={navigation}/>
+                <StoreCard store={object} navigation={navigation} change={setResult}/>
               </TouchableOpacity>
             ))}
           </ScrollView>

@@ -37,16 +37,26 @@ const longitudeDelta = 0.0081;
 
 const CARD_WIDTH = width - 40;
 
-const openNow = (prop) => {
-  if (prop.days[moment().format("dddd")].time.length > 0) {
-    const start = prop.days[moment().format("dddd")].time[0].split(" - ")[0];
-    const end = prop.days[moment().format("dddd")].time[0].split(" - ")[1];
-
-    if (moment().format("HH:mm") > start && moment().format("HH:mm") < end) {
-      return true;
-    }
+const openNow = (data) => {
+  if (data.days[moment().format("dddd")].time.length > 0) {
+    for (let i = 0; i<data.days[moment().format("dddd")].time.length;i++){
+     let start =
+     data.days[moment().format("dddd")].time[i].split(" - ")[0];
+   let end =
+     data.days[moment().format("dddd")].time[i].split(" - ")[1];
+  if (start.length>end.length){
+   if (moment().format("HH:mm") > start || moment().format("HH:mm") < '0'+end) {
+     return true
+   }
   }
-  return false;
+
+   if (moment().format("HH:mm") > start && moment().format("HH:mm") < end) {
+     return true
+   }
+    }
+   }
+   return false
+  
 };
 
 const validatehh = (hh) => {
@@ -113,6 +123,31 @@ export default MapScreen = ({ navigation }) => {
   const _map = useRef(null);
   const [loc, setLoc] = useState();
   const  user = useSelector(state => state.user);
+  const removeFav = async(id) =>{
+    var formdata = new FormData();
+
+    formdata.append("username", user.email);
+    formdata.append("storeID", id);
+    
+    var requestOptions = {
+      method: 'POST',
+      body: formdata,
+    };
+    
+    await fetch("https://data.tpsi.io/api/v1/stores/removeStoreToUserFavorite", requestOptions)
+    .then((res) => {
+      if (res) {
+        setFilteredData((stores) => {
+          return stores.map((store) => {return store._id == id ? {...store,userFavorite:false} : store});
+        });
+      }
+    })
+    .catch((error) => console.log("error", error));
+  }
+
+
+   
+
   const addToFav = async(id) =>{
     var formdata = new FormData();
     formdata.append("username", user.email);
@@ -122,10 +157,17 @@ export default MapScreen = ({ navigation }) => {
       method: 'POST',
       body: formdata,
     };
-    
+
+
+
     await fetch("https://data.tpsi.io/api/v1/stores/addStoreToUserFavorite", requestOptions)
-      .then(response => response.text())
-      .then(result => console.log(result))
+    .then((res) => {
+      if (res) {
+        setFilteredData((stores) => {
+          return stores.map((store) => {return store._id == id ? {...store,userFavorite:true} : store});
+        });
+      }
+    })
       .catch(error => console.log('error', error));
 
 }
@@ -140,7 +182,7 @@ export default MapScreen = ({ navigation }) => {
         }}
       >
         <View style={styles.card}>
-          <TouchableOpacity style={{ position: "absolute", left: 9, top: 9, zIndex: 17 }} onPress={user.email?()=>{addToFav(data._id)}:()=>{navigation.navigate("Saved")}}>
+          <TouchableOpacity style={{ position: "absolute", left: 9, top: 9, zIndex: 17 }} onPress={user.email?()=>{!data.userFavorite ? addToFav(data._id) : removeFav(data._id);}:()=>{navigation.navigate("Saved")}}>
           <Icon.Bookmark
             width={27}
             height={32}
@@ -190,7 +232,7 @@ export default MapScreen = ({ navigation }) => {
                   )}
                 </Text>
                 <Text style={{ fontWeight: '600', fontSize: 12 }}>
-                  {data.days[moment().format("dddd")].time}
+                {data.days[moment().format("dddd")].time.toString()}
                 </Text>
               </>
             ) : (
@@ -452,7 +494,22 @@ export default MapScreen = ({ navigation }) => {
   };
 
   const [filter, setFilter] = useState(filterVal);
+  const validateItem = (hh) =>{
+    let res = []
+    if (hh.length > 0) {
+      for (i = 0; i < hh[0].infos.length; i++) {
+        // time
+        hh[0].infos[i].items.map((item) => {
+         if (!(res.includes(item.type))){
+          res.push(item.type)
+         }
+        });
+      }
+    }
 
+    return res;
+
+  }
   const findDeal = (hh) => {
     var res = 1;
     if (hh.length > 0) {
@@ -508,6 +565,7 @@ export default MapScreen = ({ navigation }) => {
           website: store.website,
           number: store.number,
           off: findDeal(store.hhResult),
+          items:validateItem(store.hhResult),
           days: validatehh(store.hhResult),
           ...store,
         }))
@@ -589,6 +647,7 @@ export default MapScreen = ({ navigation }) => {
               comments: store.comments,
               number: store.number,
               off: findDeal(store.hhResult),
+              items:validateItem(store.hhResult),
               days: validatehh(store.hhResult),
               ...store,
             }));
@@ -719,6 +778,7 @@ export default MapScreen = ({ navigation }) => {
           hh: store.hhResult,
           comments: store.comments,
           off: findDeal(store.hhResult),
+          items:validateItem(store.hhResult),
           days: validatehh(store.hhResult),
           ...store,
         }))
@@ -759,17 +819,28 @@ export default MapScreen = ({ navigation }) => {
             return;
           }
         }
-        for (level in filter.price) {
-          if (filter.price[level] === true && store.price !== level) {
+        
+          if (JSON.stringify(filter.price) !== JSON.stringify(filterVal.price) && filter.price[store.price]!==true) {
             return;
           }
-        }
+        
+     
         if (
-          store.cuisine[0] !== filter.selectedCuisine && filter.selectedCuisine 
+          
+          store.cuisine[0] !== filter.selectedCuisine && filter.selectedCuisine!==null
         ) {
           return;
         }
-        return store;
+        if (Object.values(filter.items).indexOf(true) > -1) {
+          for (const key of Object.keys(filter.items)) {
+            if (filter.items[key] &&  store.items.includes(key)){
+              return store
+            }
+        }
+        return
+       }
+
+        return store
       } else {
         if (store.days[moment().format("dddd")].time.length > 0) {
           if (
@@ -786,25 +857,32 @@ export default MapScreen = ({ navigation }) => {
                 return;
               }
             }
-            for (level in filter.price) {
-              if (
-                !store.price ||
-                (filter.price[level] === true && store.price !== level)
-              ) {
-                return;
-              }
+            if (JSON.stringify(filter.price) !== JSON.stringify(filterVal.price) && filter.price[store.price]!==true) {
+              return;
             }
+          
+            
             if (
-              
-              store.cuisine[0] !== filter.selectedCuisine && filter.selectedCuisine 
+              store.cuisine[0] !== filter.selectedCuisine && filter.selectedCuisine!==null
             ) {
               return;
             }
-            return store;
+            if (Object.values(filter.items).indexOf(true) > -1) {
+              for (const key of Object.keys(filter.items)) {
+                if (filter.items[key] &&  store.items.includes(key)){
+                  return store
+                }
+            }
+            return
+           }
+    
+            return store
           }
         }
+        return;
       }
     });
+
   };
 
   return (

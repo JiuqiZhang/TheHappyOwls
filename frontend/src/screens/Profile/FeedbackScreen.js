@@ -4,13 +4,17 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
+  Keyboard,
   TextInput,
 } from "react-native";
 import * as Icon from "react-native-feather";
 export default FeedbackScreen = ({ navigation }) => {
   const [text, changeText] = React.useState("");
   return (
-    <View style={styles.container}>
+    <View  style={styles.container} onTouchStart={() => {
+      Keyboard.dismiss();
+    }}>
+    
       <TouchableOpacity
         style={styles.back}
         onPress={() => {
@@ -19,7 +23,8 @@ export default FeedbackScreen = ({ navigation }) => {
       >
         <Icon.X color={"black"} />
       </TouchableOpacity>
-      <Text style={styles.title}>Share your feedback</Text>
+  
+    <Text style={styles.title}>Share your feedback</Text>
       <Text>
         Your opinion means the world to us, and we're always striving to make
         things even better for you.
@@ -43,7 +48,9 @@ export default FeedbackScreen = ({ navigation }) => {
           onChangeText={changeText}
         />
       </View>
-      <TouchableOpacity
+     
+
+    <TouchableOpacity
         onPress={() => {
           console.log(text);
         }}

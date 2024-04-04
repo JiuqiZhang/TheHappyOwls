@@ -2,9 +2,13 @@ import * as AppleAuthentication from "expo-apple-authentication";
 import { View, StyleSheet, Text } from "react-native";
 import React, { useState } from "react";
 import { jwtDecode } from "jwt-decode";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { setEmail, setNameFirst, setNameLast } from "../redux/actions";
 import "core-js/stable/atob";
-export default function AppleAuth({navigation}) {
+export default function AppleAuth({ navigation }) {
   const [user, setUser] = useState();
+  const dispatch = useDispatch()
   return (
     <View style={styles.container}>
       {!user ? (
@@ -25,19 +29,27 @@ export default function AppleAuth({navigation}) {
               });
 
               setUser(credential);
-  
-              if (credential.identityToken){
-  const profile = fetch("https://data.tpsi.io/api/v1/users/checkEmail?email="+jwtDecode(credential.identityToken).email, {method:'post'})
-  .then(response => response.text())
-  .then(result => console.log(result))
-  .catch(error => console.log('error', error));
-  if (typeof(profile)===Object){
-    console.log('exisited')
-  }else{
-      navigation.navigate("SignupName",{email:jwtDecode(credential.identityToken).email});
 
-  }
-               
+              if (credential.identityToken) {
+                axios
+                  .post(
+                    "https://data.tpsi.io/api/v1/users/checkEmail?email=" +
+                      jwtDecode(credential.identityToken).email
+                  )
+                  .then((response) => response.data)
+                  .then((res) => {
+                    if (res.firstname) {
+                      dispatch(setEmail(jwtDecode(credential.identityToken).email));
+                      dispatch(setNameFirst(res.firstname));
+                      dispatch(setNameLast(res.lastname));
+                      navigation.navigate("Home");
+                    } else {
+                      navigation.navigate("SignupName", {
+                        email: jwtDecode(credential.identityToken).email,
+                      });
+                    }
+                  })
+                  .catch((error) => console.log("error", error));
               }
               // signed in
             } catch (e) {
@@ -45,13 +57,13 @@ export default function AppleAuth({navigation}) {
                 // handle that the user canceled the sign-in flow
               } else {
                 // handle other errors
-                console.log(e)
+                console.log(e);
               }
             }
           }}
         />
       ) : (
-        <Text>{jwtDecode(user.identityToken).email}</Text>
+        <Text>{"Welcome, TPSI Fam!"}</Text>
       )}
     </View>
   );
@@ -59,16 +71,13 @@ export default function AppleAuth({navigation}) {
 
 const styles = StyleSheet.create({
   container: {
-
-
-    width:'100%',
-    alignSelf:'center'
-
+    width: "100%",
+    alignSelf: "center",
   },
   button: {
-    width:353,
+    width: 353,
     marginHorizontal: 20,
     height: 48,
-    alignSelf:'center'
+    alignSelf: "center",
   },
 });

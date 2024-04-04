@@ -1,25 +1,21 @@
-import {
-  Text,
-  StyleSheet,
-  View,
-  Button,
-  TouchableOpacity,
-} from "react-native";
-import { useSelector } from "react-redux";
+import { Text, StyleSheet, View, Button, TouchableOpacity } from "react-native";
+import { useSelector,useDispatch } from "react-redux";
 import { Divider } from "react-native-elements";
 import * as Icon from "react-native-feather";
 import ResetPassword from "../Auth/ResetPassword";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Dispatch } from "redux";
 import { setEmail, setNameFirst, setNameLast } from "../../redux/actions";
-export default ProfileScreen = ({navigation}) => {
-  const state = useSelector((state) => state.userReducer);
+export default ProfileScreen = ({ navigation }) => {
+  const dispatch = useDispatch();
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Settings</Text>
-      <TouchableOpacity  onPress={() => {
-                  navigation.navigate("Info");
-                }} style={styles.section}>
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate("Info");
+        }}
+        style={styles.section}
+      >
         <View style={styles.box}>
           <View style={styles.row}>
             <Icon.User style={{ marginVertical: "2%" }} color={"grey"} />
@@ -32,9 +28,12 @@ export default ProfileScreen = ({navigation}) => {
         </View>
         <Divider width={1.5} />
       </TouchableOpacity>
-      <TouchableOpacity style={styles.section} onPress={() => {
-                  navigation.navigate("Security");
-                }}>
+      <TouchableOpacity
+        style={styles.section}
+        onPress={() => {
+          navigation.navigate("Security");
+        }}
+      >
         <View style={styles.box}>
           <View style={styles.row}>
             <Icon.Lock style={{ marginVertical: "2%" }} color={"grey"} />
@@ -49,14 +48,17 @@ export default ProfileScreen = ({navigation}) => {
       </TouchableOpacity>
 
       <Text style={styles.title}>Support</Text>
-      <TouchableOpacity style={styles.section} onPress={() => {
-                  navigation.navigate("Feedback");
-                }}>
+      <TouchableOpacity
+        style={styles.section}
+        onPress={() => {
+          navigation.navigate("Feedback");
+        }}
+      >
         <View style={styles.box}>
           <View style={styles.row}>
             <Icon.Edit3 style={{ marginVertical: "2%" }} color={"grey"} />
             <Text style={[styles.datafield, { marginVertical: 7 }]}>
-            Give us feedback
+              Give us feedback
             </Text>
           </View>
 
@@ -64,7 +66,6 @@ export default ProfileScreen = ({navigation}) => {
         </View>
         <Divider width={1.5} />
       </TouchableOpacity>
-     
 
       <Text style={styles.title}>Legal</Text>
       <TouchableOpacity style={styles.section}>
@@ -72,7 +73,7 @@ export default ProfileScreen = ({navigation}) => {
           <View style={styles.row}>
             <Icon.BookOpen style={{ marginVertical: "2%" }} color={"grey"} />
             <Text style={[styles.datafield, { marginVertical: 7 }]}>
-            Terms of Service
+              Terms of Service
             </Text>
           </View>
 
@@ -80,14 +81,13 @@ export default ProfileScreen = ({navigation}) => {
         </View>
         <Divider width={1.5} />
       </TouchableOpacity>
-     
 
       <TouchableOpacity style={styles.section}>
         <View style={styles.box}>
           <View style={styles.row}>
             <Icon.BookOpen style={{ marginVertical: "2%" }} color={"grey"} />
             <Text style={[styles.datafield, { marginVertical: 7 }]}>
-            Privacy Policy
+              Privacy Policy
             </Text>
           </View>
 
@@ -119,9 +119,14 @@ export default ProfileScreen = ({navigation}) => {
         <Text style={styles.subtitle}>Password:{state.email}</Text>
         <Divider width={1.5} />
       </View> */}
-      <Button title="Logout" onPress={()=>{dispatch(setEmail(null));
-        dispatch(setNameFirst(null));
-        dispatch(setNameLast(null));}}/>
+      <Button
+        title="Logout"
+        onPress={() => {
+          dispatch(setEmail(null));
+          dispatch(setNameFirst(null));
+          dispatch(setNameLast(null));
+        }}
+      />
     </View>
   );
 };

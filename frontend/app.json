@@ -20,11 +20,11 @@
     "slug": "tpsi",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/app.jpg",
+    "icon": "./assets/app.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/app.jpg",
-      "resizeMode": "cover",
+      "image": "./assets/app.png",
+      "resizeMode": "contain",
       "backgroundColor": "#FCFCEF"
     },
     "assetBundlePatterns": [
@@ -33,7 +33,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.theHappyOwls.Tpsi",
-      "buildNumber": "1.43",
+      "buildNumber": "1.46",
       "config": {
         "googleMapsApiKey": "AIzaSyBWQ5iFtnT2EQSo1Yi4D6pc-edq7MJkaPA"
       },
@@ -47,7 +47,7 @@
       "package": "com.theHappyOwls.Tpsi"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/app.png"
     },
     "extra": {
       "eas": {

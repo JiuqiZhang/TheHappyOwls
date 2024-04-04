@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, View, StyleSheet, TouchableOpacity} from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 import { Image } from "react-native-elements";
 import * as Icon from "react-native-feather";
 import moment from "moment/moment";
@@ -7,8 +7,8 @@ import { Divider } from "react-native-elements";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSelector } from "react-redux";
 export default StoreCard = React.memo((props) => {
-  const  user = useSelector(state => state.user);
-  const addToFav = async(id) =>{
+  const user = useSelector((state) => state.user);
+  const removeFav = async(id) =>{
     var formdata = new FormData();
 
     formdata.append("username", user.email);
@@ -19,24 +19,62 @@ export default StoreCard = React.memo((props) => {
       body: formdata,
     };
     
-    await fetch("https://data.tpsi.io/api/v1/stores/addStoreToUserFavorite", requestOptions)
-      .then(response => response.text())
-      .then(result => console.log(result))
-      .catch(error => console.log('error', error));
+    await fetch("https://data.tpsi.io/api/v1/stores/removeStoreToUserFavorite", requestOptions)
+    .then((res) => {
+      if (res) {
+        props.change((stores) => {
+          return stores.map((store) => {return store._id == props.store._id ? {...store,userFavorite:false} : store});
+        });
+      }
+    })
+    .catch((error) => console.log("error", error));
+  }
+  const addToFav = async (id) => {
+    var formdata = new FormData();
 
-}
+    formdata.append("username", user.email);
+    formdata.append("storeID", id);
+
+    var requestOptions = {
+      method: "POST",
+      body: formdata,
+    };
+
+    await fetch(
+      "https://data.tpsi.io/api/v1/stores/addStoreToUserFavorite",
+      requestOptions
+    )
+      .then((res) => {
+        if (res) {
+          props.change((stores) => {
+            return stores.map((store) => {return store._id == props.store._id ? {...store,userFavorite:true} : store});
+          });
+        }
+      })
+      .catch((error) => console.log("error", error));
+  };
   return (
     <View style={styles.container}>
-     <TouchableOpacity style={{ position: "absolute", right: 9, top: 10, zIndex: 17 }} onPress={user.email?()=>{addToFav(props.store._id)}:()=>{props.navigation.navigate("Saved")}}>
-          <Icon.Bookmark
-            width={29}
-            height={35}
-            fill={props.store.userFavorite?"#FFD029":'#999999'}
-            stroke={"#5C4A0A"}
-            strokeWidth={1}
-            
-          />
-          </TouchableOpacity>
+      <TouchableOpacity
+        style={{ position: "absolute", right: 9, top: 10, zIndex: 17 }}
+        onPress={
+          user.email
+            ? () => {
+                !props.store.userFavorite ? addToFav(props.store._id) : removeFav(props.store._id);
+              }
+            : () => {
+                props.navigation.navigate("Saved");
+              }
+        }
+      >
+        <Icon.Bookmark
+          width={29}
+          height={35}
+          fill={props.store.userFavorite ? "#FFD029" : "#999999"}
+          stroke={"#5C4A0A"}
+          strokeWidth={1}
+        />
+      </TouchableOpacity>
       <LinearGradient
         colors={["#F9EEC8", "#FFD029", "#D9AA04"]}
         start={{ x: -0.4, y: 0.4 }}
@@ -85,7 +123,7 @@ export default StoreCard = React.memo((props) => {
             justifyContent: "space-between",
           }}
         >
-          <Text style={[{ marginTop: 9,marginBottom:5 }, styles.text]}>
+          <Text style={[{ marginTop: 9, marginBottom: 5 }, styles.text]}>
             {props.store.name}
           </Text>
         </View>
@@ -100,14 +138,19 @@ export default StoreCard = React.memo((props) => {
         <View style={{ display: "flex", flexDirection: "row" }}>
           <Text style={styles.cuisine}>
             {props.store.cuisine + " • "}
-            {props.store.price?"$".repeat(+props.store.price)+" • ":null}
+            {props.store.price ? "$".repeat(+props.store.price) + " • " : null}
+            {props.store.items}
           </Text>
           <View style={styles.rating}>
             <Image
               style={{ width: 16, height: 16, alignSelf: "center" }}
               source={require("../Image/G.png")}
             />
-            <Text style={[styles.cuisine,{fontWeight:'600',marginBottom:12}]}>{props.store.rating}</Text>
+            <Text
+              style={[styles.cuisine, { fontWeight: "600", marginBottom: 12 }]}
+            >
+              {props.store.rating}
+            </Text>
           </View>
         </View>
       </View>
@@ -128,7 +171,7 @@ export default StoreCard = React.memo((props) => {
         })} */}
     </View>
   );
-})
+});
 const styles = StyleSheet.create({
   container: {
     width: "90%",
