@@ -261,7 +261,7 @@ export default MenuScreen = ({ navigation }) => {
       } else {
         const locationSubscription = await Location.watchPositionAsync(
           {
-            accuracy: Location.Accuracy.Highest,
+            accuracy: Location.Accuracy.Lowest,
             timeInterval: 1000,
             distanceInterval: 1,
           },
@@ -633,7 +633,7 @@ export default MenuScreen = ({ navigation }) => {
                   <TouchableOpacity
                     key={item.name}
                     onPress={() => {
-                    navigation.navigate("Detail", { store: item });
+                    navigation.navigate("Detail", { store: item,test:"123", change:filter === filterVal || !open ? ()=>setData:()=>setFilteredData});
                   }}
                   >
                     <StoreCard store={item} navigation={navigation}  change={filter === filterVal || !open ? setData:setFilteredData}/>

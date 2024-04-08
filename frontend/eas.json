@@ -11,17 +11,20 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true
+      // "autoIncrement": true,
+      "ios": {
+        "image": "latest"
+      }
     }
   },
+
   "submit": {
     "production": {
-      "ios":{
+      "ios": {
         "appleId": "jz3337@nyu.edu",
         "ascAppId": "6469099879",
         "appleTeamId": "7LM7LP9Z5H"
-      },
-      
+      }
     }
   }
 }

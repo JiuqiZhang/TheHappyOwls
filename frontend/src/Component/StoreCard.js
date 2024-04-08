@@ -5,6 +5,7 @@ import * as Icon from "react-native-feather";
 import moment from "moment/moment";
 import { Divider } from "react-native-elements";
 import { LinearGradient } from "expo-linear-gradient";
+import axios from "axios";
 import { useSelector } from "react-redux";
 export default StoreCard = React.memo((props) => {
   const user = useSelector((state) => state.user);
@@ -19,7 +20,7 @@ export default StoreCard = React.memo((props) => {
       body: formdata,
     };
     
-    await fetch("https://data.tpsi.io/api/v1/stores/removeStoreToUserFavorite", requestOptions)
+    await axios({ method: "post",url:"https://data.tpsi.io/api/v1/stores/removeStoreToUserFavorite"})
     .then((res) => {
       if (res) {
         props.change((stores) => {
@@ -40,9 +41,10 @@ export default StoreCard = React.memo((props) => {
       body: formdata,
     };
 
-    await fetch(
-      "https://data.tpsi.io/api/v1/stores/addStoreToUserFavorite",
-      requestOptions
+    await axios({
+      method:'post',
+      url:"https://data.tpsi.io/api/v1/stores/addStoreToUserFavorite",
+      }
     )
       .then((res) => {
         if (res) {
@@ -139,7 +141,6 @@ export default StoreCard = React.memo((props) => {
           <Text style={styles.cuisine}>
             {props.store.cuisine + " • "}
             {props.store.price ? "$".repeat(+props.store.price) + " • " : null}
-            {props.store.items}
           </Text>
           <View style={styles.rating}>
             <Image

@@ -597,7 +597,7 @@ export default MapScreen = ({ navigation }) => {
       } else {
         await Location.watchPositionAsync(
           {
-            accuracy: Location.Accuracy.Highest,
+            accuracy: Location.Accuracy.Lowest,
             timeInterval: 1000,
             distanceInterval: 1,
           },
