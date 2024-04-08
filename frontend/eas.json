@@ -1,6 +1,6 @@
 {
   "cli": {
-    "version": ">= 5.4.0"
+    "version": ">= 0.34.0"
   },
   "build": {
     "development": {
@@ -10,11 +10,17 @@
     "preview": {
       "distribution": "internal"
     },
-    "production": {}
+    "production": {
+      // "autoIncrement": true,
+      "ios": {
+        "image": "latest"
+      }
+    }
   },
+
   "submit": {
     "production": {
-      "ios":{
+      "ios": {
         "appleId": "jz3337@nyu.edu",
         "ascAppId": "6469099879",
         "appleTeamId": "7LM7LP9Z5H"

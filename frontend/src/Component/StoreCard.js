@@ -1,106 +1,159 @@
 import React from "react";
-import { Text, View, StyleSheet, Linking } from "react-native";
-import { Image } from 'react-native-elements';
+import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
+import { Image } from "react-native-elements";
+import * as Icon from "react-native-feather";
 import moment from "moment/moment";
 import { Divider } from "react-native-elements";
-const week = ["M", "T", "W", "T", "F", "S", "S"];
-const days = {
-  0: "Monday",
-  1: "Tuesday",
-  2: "Wednesday",
-  3: "Thursday",
-  4: "Friday",
-  5: "Saturday",
-  6: "Sunday",
-};
-export default StoreCard = (props) => {
-  const OpenNow = () => {
-    if (props.store.days[moment().format("dddd")].time.length > 0) {
-      const start =
-        props.store.days[moment().format("dddd")].time[0].split(" - ")[0];
-      const end =
-        props.store.days[moment().format("dddd")].time[0].split(" - ")[1];
+import { LinearGradient } from "expo-linear-gradient";
+import axios from "axios";
+import { useSelector } from "react-redux";
+export default StoreCard = React.memo((props) => {
+  const user = useSelector((state) => state.user);
+  const removeFav = async(id) =>{
+    var formdata = new FormData();
 
-      if (moment().format("HH:mm") > start && moment().format("HH:mm")<  end) {
-        return (
-          <Text style={[styles.ratingText, { color: "green" }]}>Open</Text>
-        );
+    formdata.append("username", user.email);
+    formdata.append("storeID", id);
+    
+    var requestOptions = {
+      method: 'POST',
+      body: formdata,
+    };
+    
+    await axios({ method: "post",url:"https://data.tpsi.io/api/v1/stores/removeStoreToUserFavorite"})
+    .then((res) => {
+      if (res) {
+        props.change((stores) => {
+          return stores.map((store) => {return store._id == props.store._id ? {...store,userFavorite:false} : store});
+        });
       }
-    }
-    return (
-      <Text style={[styles.ratingText, { color: "red" }]}>Unavailable</Text>
-    );
+    })
+    .catch((error) => console.log("error", error));
+  }
+  const addToFav = async (id) => {
+    var formdata = new FormData();
+
+    formdata.append("username", user.email);
+    formdata.append("storeID", id);
+
+    var requestOptions = {
+      method: "POST",
+      body: formdata,
+    };
+
+    await axios({
+      method:'post',
+      url:"https://data.tpsi.io/api/v1/stores/addStoreToUserFavorite",
+      }
+    )
+      .then((res) => {
+        if (res) {
+          props.change((stores) => {
+            return stores.map((store) => {return store._id == props.store._id ? {...store,userFavorite:true} : store});
+          });
+        }
+      })
+      .catch((error) => console.log("error", error));
   };
   return (
     <View style={styles.container}>
-      <View
+      <TouchableOpacity
+        style={{ position: "absolute", right: 9, top: 10, zIndex: 17 }}
+        onPress={
+          user.email
+            ? () => {
+                !props.store.userFavorite ? addToFav(props.store._id) : removeFav(props.store._id);
+              }
+            : () => {
+                props.navigation.navigate("Saved");
+              }
+        }
+      >
+        <Icon.Bookmark
+          width={29}
+          height={35}
+          fill={props.store.userFavorite ? "#FFD029" : "#999999"}
+          stroke={"#5C4A0A"}
+          strokeWidth={1}
+        />
+      </TouchableOpacity>
+      <LinearGradient
+        colors={["#F9EEC8", "#FFD029", "#D9AA04"]}
+        start={{ x: -0.4, y: 0.4 }}
+        end={{ x: 1.6, y: 1 }}
         style={[
           {
             position: "absolute",
             zIndex: 7,
-            top:'7%',
-            right:'3%',
-            padding:'1%',
-            paddingHorizontal:'2%',
+            top: "9%",
+            left: "3%",
+            padding: "1%",
+            paddingHorizontal: "2%",
             display: props.store.off ? "flex" : "none",
           },
           styles.percent,
         ]}
       >
-        <Text style={{ fontWeight: "bold" }}>
+        <Text style={{ fontWeight: "700", fontSize: 16 }}>
           {props.store.off ? props.store.off.toFixed(0) + "% OFF" : null}
         </Text>
-      </View>
+      </LinearGradient>
       <Image
         style={styles.image}
         source={
-          props.store.photoResult[0]&&props.store.photoResult[0].photos[0]
+          props.store.photoResult[0] && props.store.photoResult[0].photos[0]
             ? {
                 uri:
                   "http://spring-boot-repo-tpsi.s3.amazonaws.com/" +
                   props.store.photoResult[0]._id +
                   "_" +
-                  props.store.photoResult[0].photos[0].id
+                  props.store.photoResult[0].photos[0].id,
               }
             : require("../Image/store.jpg")
         }
       />
-      <View
-        style={{
-          flexDirection: "row",
-          display: "flex",
-          justifyContent: "space-between",
-        }}
-      >
-        <View style={styles.rating}>
-          <OpenNow />
-          <Image
-            style={{ width: 20, height: 20, alignSelf: "center" }}
-            source={require("../Image/G.png")}
-          />
-          <Text style={styles.ratingText}>{props.store.rating}</Text>
-        </View>
-        <View style={styles.rating}>
+      <View>
+        <View style={{ top: 20, position: "absolute", right: 0 }}>
           <Text style={[styles.ratingText, { color: "#686868" }]}>
-            {props.store.distance+" miles"}
+            {props.store.distance.toFixed(1) + " mi"}
           </Text>
         </View>
-      </View>
-      <View style={[styles.flexcontainer, styles.row]}>
-        <Text style={styles.text}>{props.store.name}</Text>
-      </View>
+        <View
+          style={{
+            flexDirection: "row",
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+        >
+          <Text style={[{ marginTop: 9, marginBottom: 5 }, styles.text]}>
+            {props.store.name}
+          </Text>
+        </View>
+        <View style={[styles.flexcontainer, styles.row]}></View>
 
-   
-      <Text style={{margin:5,fontWeight: '700',fontSize:14}}>
-        {props.store.days[moment().format("dddd")].time.length > 0
-          ? "Today: " + props.store.days[moment().format("dddd")].time
-          : "No happy hours today"}
-      </Text>
-      <View style={{ display: "flex", flexDirection: "row" }}>
-        <Text style={styles.cuisine}>
-          {props.store.cuisine}
-          {" | " + "$".repeat(+props.store.price)}
+        <Text style={{ marginBottom: 9, fontWeight: "700", fontSize: 14 }}>
+          {props.store.days[moment().format("dddd")].time.length > 0
+            ? "Today: " + props.store.days[moment().format("dddd")].time
+            : "No happy hours today"}
         </Text>
+
+        <View style={{ display: "flex", flexDirection: "row" }}>
+          <Text style={styles.cuisine}>
+            {props.store.cuisine + " • "}
+            {props.store.price ? "$".repeat(+props.store.price) + " • " : null}
+          </Text>
+          <View style={styles.rating}>
+            <Image
+              style={{ width: 16, height: 16, alignSelf: "center" }}
+              source={require("../Image/G.png")}
+            />
+            <Text
+              style={[styles.cuisine, { fontWeight: "600", marginBottom: 12 }]}
+            >
+              {props.store.rating}
+            </Text>
+          </View>
+        </View>
       </View>
       {/* {week.map((day, index) => {
           return (
@@ -119,7 +172,7 @@ export default StoreCard = (props) => {
         })} */}
     </View>
   );
-};
+});
 const styles = StyleSheet.create({
   container: {
     width: "90%",
@@ -131,17 +184,17 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   ratingText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "500",
     margin: 4,
   },
   image: {
     maxWidth: "100%",
     height: "100%",
-    height: 220,
+    height: 200,
     width: "100%",
     resizeMode: "cover",
-    borderRadius: 20,
+    borderRadius: 10,
     alignSelf: "center",
     marginTop: "5%",
   },
@@ -171,13 +224,10 @@ const styles = StyleSheet.create({
   rating: {
     flexDirection: "row",
     display: "flex",
-    marginTop: 5,
   },
   cuisine: {
-  fontWeight:'500',
+    fontWeight: "500",
     fontSize: 12,
-    margin: 5,
-    marginTop: 0,
   },
   circle: {
     color: "#424241",
@@ -187,8 +237,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFB300",
   },
   percent: {
-    backgroundColor: 'rgb(249, 238, 200)',
-    borderRadius: 25,
+    backgroundColor: "rgb(249, 238, 200)",
+    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
@@ -196,6 +246,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 1,
     elevation: 1,
-    opacity:.85
   },
 });

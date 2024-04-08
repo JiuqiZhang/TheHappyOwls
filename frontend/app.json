@@ -1,5 +1,9 @@
 {
   "expo": {
+    "plugins": [
+     
+      "expo-apple-authentication"
+    ],
     "name": "TPSI",
     "slug": "tpsi",
     "version": "1.0.0",
@@ -7,7 +11,7 @@
     "icon": "./assets/app.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/tpsi.png",
+      "image": "./assets/app.png",
       "resizeMode": "contain",
       "backgroundColor": "#FCFCEF"
     },
@@ -17,11 +21,11 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.theHappyOwls.Tpsi",
-      "buildNumber": "1.34",
-      
-      "config":{
-        "googleMapsApiKey":"AIzaSyBWQ5iFtnT2EQSo1Yi4D6pc-edq7MJkaPA"
-      }
+      "buildNumber": "1.48",
+      "config": {
+        "googleMapsApiKey": "AIzaSyBWQ5iFtnT2EQSo1Yi4D6pc-edq7MJkaPA"
+      },
+      "usesAppleSignIn": true
     },
     "android": {
       "adaptiveIcon": {
@@ -31,7 +35,7 @@
       "package": "com.theHappyOwls.Tpsi"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/app.png"
     },
     "extra": {
       "eas": {

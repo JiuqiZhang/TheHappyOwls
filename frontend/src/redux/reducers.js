@@ -1,9 +1,9 @@
 import { SET_EMAIL, SET_NAME_LAST, SET_NAME_FIRST } from "./actions";
 
 const initialState = {
-    email:'',
-    firstName:'',
-    lastName:''
+    email:null,
+    firstName:null,
+    lastName:null
 }
 
 

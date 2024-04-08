@@ -4,6 +4,7 @@ import Constants from "expo-constants";
 import {
   StyleSheet,
   SafeAreaView,
+  PixelRatio,
   ScrollView,
   ActivityIndicator,
   TouchableOpacity,
@@ -13,9 +14,11 @@ import {
   Keyboard,
   Text,
   TextInput,
+  Dimensions,
 } from "react-native";
+import { useSelector } from "react-redux";
 import * as Location from "expo-location";
-
+import { LinearGradient } from "expo-linear-gradient";
 import * as Icon from "react-native-feather";
 import { Divider } from "react-native-elements";
 import StoreCard from "../../Component/StoreCard";
@@ -23,8 +26,15 @@ import axios from "axios";
 import { useRef } from "react";
 import moment from "moment/moment";
 const statusBarHeight = Constants.statusBarHeight;
+const dp = PixelRatio.get();
 
 export default MenuScreen = ({ navigation }) => {
+  const [msg, setmsg] = useState({
+    open: new Date(),
+    location: "location got at",
+    makeRequestAt: "make request at",
+    response: "got response at",
+  });
   const [indicator, setIndicator] = useState(true);
   const [data, setData] = useState();
   const [search, setsearch] = useState("");
@@ -32,6 +42,7 @@ export default MenuScreen = ({ navigation }) => {
   const [result, setResult] = useState("");
   const scrollRef = useRef();
   const [filteredData, setFilteredData] = useState();
+  const [loc, setLoc] = useState();
   const [open, setopen] = useState(false);
 
   const filterVal = {
@@ -46,10 +57,10 @@ export default MenuScreen = ({ navigation }) => {
       Sunday: false,
     },
     items: {
-      Beer: false,
-      Wine: false,
-      Cocktail: false,
-      Food: false,
+      'Beer': false,
+      'Wine': false,
+      'Cocktail': false,
+      'Food': false,
     },
     price: {
       1: false,
@@ -84,34 +95,54 @@ export default MenuScreen = ({ navigation }) => {
       "Wine Bar",
     ],
     selectedCuisine: null,
-    sortBy: null,
+    sortBy: 'distance',
   };
-
+  const  user = useSelector(state => state.user);
   const [filter, setFilter] = useState(filterVal);
   const Filtering = (data) => {
-    return data.filter((store) => {
+    let res = data
+    if (filter.sortBy){
+      if(filter.sortBy=='rating'){
+        res = res.sort(
+          (a,b)=>{return b[filter.sortBy]-a[filter.sortBy]}
+         )
+      }else{
+        res = res.sort(
+          (a,b)=>{return a[filter.sortBy]-b[filter.sortBy]}
+         )
+      }
+     
+     }
+    return res.filter((store) => {
       if (!open) {
         for (day in filter.hhdays) {
           if (filter.hhdays[day] === true && store.days[day].time.length <= 0) {
             return;
           }
         }
-        for (level in filter.price) {
-          if (
-            !store.price ||
-            (filter.price[level] === true && store.price !== level)
-          ) {
+        
+          if (JSON.stringify(filter.price) !== JSON.stringify(filterVal.price) && filter.price[store.price]!==true) {
             return;
           }
-          
-        }
+        
+      
         if (
-          filter.selectedCuisine &&
-          store.cuisine !== filter.selectedCuisine
+          
+          store.cuisine[0] !== filter.selectedCuisine && filter.selectedCuisine!==null
         ) {
           return;
         }
-        return store;
+        if (Object.values(filter.items).indexOf(true) > -1) {
+          for (const key of Object.keys(filter.items)) {
+           
+            if (filter.items[key] && store.items.includes(key)){
+              return store
+            }
+        }
+        return
+       }
+
+        return store
       } else {
         if (store.days[moment().format("dddd")].time.length > 0) {
           if (
@@ -128,29 +159,51 @@ export default MenuScreen = ({ navigation }) => {
                 return;
               }
             }
-            for (level in filter.price) {
-              if (
-                !store.price ||
-                (filter.price[level] === true && store.price !== level)
-              ) {
-                return;
-              }
-             
+            if (JSON.stringify(filter.price) !== JSON.stringify(filterVal.price) && filter.price[store.price]!==true) {
+              return;
             }
+          
+            
             if (
-              filter.selectedCuisine &&
-              store.cuisine !== filter.selectedCuisine
+              store.cuisine[0] !== filter.selectedCuisine && filter.selectedCuisine!==null
             ) {
               return;
             }
-            return store;
+            if (Object.values(filter.items).indexOf(true) > -1) {
+              for (const key of Object.keys(filter.items)) {
+                if (filter.items[key] && store.items.includes(key)){
+                  return store
+                }
+            }
+            return
+           }
+    
+            return store
           }
         }
+        return;
       }
     });
   };
 
+  const validateItem = (hh) =>{
+    let res = []
+    if (hh.length > 0) {
+      for (i = 0; i < hh[0].infos.length; i++) {
+        // time
+        hh[0].infos[i].items.map((item) => {
+         if (!(res.includes(item.type))){
+          res.push(item.type)
+         }
+        });
+      }
+    }
+
+    return res;
+
+  }
   const validatehh = (hh) => {
+
     let schedule = {
       Monday: {
         time: [],
@@ -191,31 +244,53 @@ export default MenuScreen = ({ navigation }) => {
           ]);
 
           // deal
-          schedule[item]["deal"] = schedule[item]["deal"].concat(
-            hh[0].infos[i].items
-          );
+          schedule[item]["deal"] = hh[0].infos[i].items;
         });
       }
     }
 
     return schedule;
   };
+  // useEffect(()=>{console.log(filter.selectedCuisine,typeof(filter.selectedCuisine))},[filter])
   useEffect(() => {
     const getPerm = async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         console.log("Please grant location permissions");
         return;
+      } else {
+        const locationSubscription = await Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.Lowest,
+            timeInterval: 1000,
+            distanceInterval: 1,
+          },
+          (location) => {
+            setLoc({
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
+            });
+          }
+        );
       }
+
       let currentLocation = await Location.getCurrentPositionAsync({});
       console.log("Location:");
       console.log(currentLocation);
+      setLoc(currentLocation.coords);
+      setmsg((prevState) => ({
+        ...prevState,
+        location: (new Date() - prevState.open) / 1000,
+      }));
 
       var req = new FormData();
       req.append("lat", currentLocation.coords.latitude);
       req.append("lng", currentLocation.coords.longitude);
-      req.append("latDelta", 0.0122);
-      req.append("lngDelta", 0.0081);
+      if (user.email){
+        req.append("username", user.email);
+      }
+      // req.append("latDelta", 0.0122);
+      // req.append("lngDelta", 0.0081);
 
       var config = {
         method: "post",
@@ -224,16 +299,24 @@ export default MenuScreen = ({ navigation }) => {
         data: req,
       };
 
-var requestOptions = {
-  method: 'POST',
-  body: req,
-  redirect: 'follow'
-};
-      
+      var requestOptions = {
+        method: "POST",
+        body: req,
+        redirect: "follow",
+      };
+      setmsg((prevState) => ({
+        ...prevState,
+        makeRequestAt: (new Date() - prevState.open) / 1000,
+      }));
 
       await axios(config)
-        .then((response) =>
-          response.data.map((store) => ({
+        .then((response) => {
+          setmsg((prevState) => ({
+            ...prevState,
+            response: (new Date() - prevState.open) / 1000,
+          }));
+
+          return response.data.map((store) => ({
             name: store.name,
             rating: store.rating,
             cuisine: `${store.cuisine}`,
@@ -249,9 +332,10 @@ var requestOptions = {
             number: store.number,
             days: validatehh(store.hhResult),
             off: findDeal(store.hhResult),
+            items:validateItem(store.hhResult),
             ...store,
-          }))
-        )
+          }));
+        })
         .then((stores) => {
           // console.log(stores);
           setData(stores);
@@ -296,13 +380,19 @@ var requestOptions = {
     if (search === "") {
       return;
     }
-    var req = new FormData();
-    req.append("search", search);
+
     setIndicator(true);
 
     await axios({
       method: "get",
-      url: "https://data.tpsi.io/api/v1/stores/Search?search=" + search,
+      url:
+        "https://data.tpsi.io/api/v1/stores/searchWithDistance?search=" +
+        search +
+        "&lat=" +
+        loc.latitude +
+        "&lng=" +
+        loc.longitude+(user.email?"&username=" +
+        user.email:''),
       headers: {},
     })
       .then((response) =>
@@ -320,16 +410,16 @@ var requestOptions = {
           number: store.number,
           days: validatehh(store.hhResult),
           off: findDeal(store.hhResult),
-
+          items:validateItem(store.hhResult),
           ...store,
         }))
       )
       .then((data) => {
         setResult(data);
-        // scrollRef.current?.scrollTo({
-        //   y: 0,
-        //   animated: true,
-        // });
+        scrollRef.current?.scrollTo({
+          y: 0,
+          animated: true,
+        });
         setIndicator(false);
       })
       .catch((e) => {
@@ -337,7 +427,13 @@ var requestOptions = {
       });
   };
   return (
-    <View style={styles.container} onTouchStart={()=>{Keyboard.dismiss()}}>
+    <View
+      style={styles.container}
+      onTouchStart={() => {
+        Keyboard.dismiss();
+      }}
+    >
+    
       <ModalFilter
         filter={filter}
         filterVal={filterVal}
@@ -362,7 +458,7 @@ var requestOptions = {
           <View
             style={{
               alignSelf: "center",
-              marginRight: "2%",
+              marginRight: 20,
               width: 42,
               height: 42,
               borderRadius: 100,
@@ -391,20 +487,53 @@ var requestOptions = {
         <View
           style={{
             flexDirection: "row",
-            width: "100%",
-            justifyContent: "space-between",
+            display: "flex",
+            marginLeft: 20,
           }}
         >
-          <TouchableOpacity
-            style={[
-              styles.filter,
-              { backgroundColor: open ? "#FFD029" : "white" },
-            ]}
-            onPress={() => setopen(!open)}
-          >
-            <Text style={{ marginVertical: 7 }}>
-              {open ? "✓ " : null}Open Now
-            </Text>
+          <TouchableOpacity onPress={() => setopen(!open)}>
+            <LinearGradient
+              colors={
+                open ? ["#F9EEC8", "#FFD029", "#D9AA04"] : ["transparent"]
+              }
+              start={{ x: -0.4, y: 0 }}
+              end={{ x: 1.6, y: 1 }}
+              style={[
+                styles.filter,
+                {
+                  backgroundColor: open ? "#FFD029" : "white",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  height: 32,
+                },
+              ]}
+            >
+              {open ? (
+                <View
+                  style={{
+                    width: 2 * dp,
+                    height: 2 * dp,
+                    backgroundColor: "#008515",
+                    shadowColor: "#008515",
+                    shadowOffset: { width: 0, height: 1 },
+                    paddingHorizontal: "2%",
+                    shadowOpacity: 0.8,
+                    shadowRadius: 2,
+                    borderRadius: 9999,
+                  }}
+                />
+              ) : null}
+              <Text
+                style={{
+                  marginVertical: 7,
+                  marginLeft: 2 * dp,
+                  fontSize: 12,
+                  fontWeight: '500',
+                }}
+              >
+                Live Now
+              </Text>
+            </LinearGradient>
           </TouchableOpacity>
           <View
             style={[
@@ -412,31 +541,20 @@ var requestOptions = {
               {
                 flexDirection: "row",
                 backgroundColor: "#F9EEC8",
-                marginRight: "3%",
-                borderWidth: 1.25,
+                right: 20,
+                borderWidth: 1,
                 borderColor: "white",
-                justifyContent: "space-evenly",
+                justifyContent: "space-between",
+                width: 269,
                 paddingVertical: 1,
+                height: 32,
               },
             ]}
           >
             {Object.entries(filter.hhdays).map((day, i) => {
               return (
                 <TouchableOpacity
-                  style={[
-                    {
-                      paddingVertical: 5,
-                      paddingHorizontal: "3%",
-                      borderRadius: 40,
-                    },
-                    filter.hhdays[day[0]] ?{
-                      backgroundColor: "white" ,
-                      shadowColor: "#C58A00",
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.4,
-                      shadowRadius: 2,
-                    }:null,
-                  ]}
+                  style={{ alignSelf: "center", height: 28, width: 28 }}
                   onPress={() => {
                     setFilter((filter) => ({
                       ...filter,
@@ -445,57 +563,96 @@ var requestOptions = {
                   }}
                   key={i}
                 >
-                  <Text
-                    style={
-                      moment().format("dddd") === day[0]
-                        ? { color: "#C48A00", fontWeight: "900" }
-                        : null
+                  <LinearGradient
+                    colors={
+                      filter.hhdays[day[0]]
+                        ? ["#F9EEC8", "#FFD029", "#D9AA04"]
+                        : ["transparent"]
                     }
+                    style={[
+                      filter.hhdays[day[0]]
+                        ? {
+                            shadowColor: "#C0A106",
+                            backgroundColor: "#F9C241",
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.4,
+                            borderWidth: 0.1,
+                            borderColor: "#F9C241",
+                            shadowRadius: 2,
+                            borderRadius: 999,
+                          }
+                        : null,
+                      {
+                        alignSelf: "center",
+                        height: 28,
+                        width: 28,
+                        borderRadius: 999,
+                      },
+                    ]}
+                    start={{ x: -0.1, y: 0.2 }}
+                    end={{ x: 1.1, y: 1 }}
                   >
-                    {day[0] !== "Thursday" ? day[0][0] : "TH"}
-                  </Text>
+                    <Text
+                      style={[
+                        {
+                          fontSize: 14,
+                          fontWeight:
+                            moment().format("dddd") === day[0] ? "800" : "500",
+                          textAlign: "center",
+                          marginVertical: "20%",
+                        },
+                      ]}
+                    >
+                      {day[0] !== "Thursday" ? day[0][0] : "TH"}
+                    </Text>
+                  </LinearGradient>
                 </TouchableOpacity>
               );
             })}
           </View>
         </View>
       </View>
-{/* {!filteredData?<Text style={{top:'5%'}}>No stores within your area, please try map page or search.</Text>:null} */}
+
+
+
+
+      {/* testing info */}
+      {/* <Text>{"Testing:" + JSON.stringify(msg)}</Text> */}
+      {/* {!filteredData?<Text style={{top:'5%'}}>No stores within your area, please try map page or search.</Text>:null} */}
       {!indicator ? (
         !result ? (
-          <View style={styles.scrollView} ref={scrollRef} keyboardShouldPersistTaps='handled'>
-            {filter !==filterVal||open
-              ? 
-              
+          data?<View
+            style={styles.scrollView}
+            ref={scrollRef}
+            keyboardShouldPersistTaps="handled"
+          >
+            
               <FlatList
-        data={Filtering(data)}
-        renderItem={({item}) =><TouchableOpacity
-              key={item.name}
-                    onPress={() => {
-                      navigation.navigate("Detail", { store: item });
-                    }}
-                  >
-                    <StoreCard store={item} />
-                  </TouchableOpacity>}
-      />
-    
-
-   
-
-
-              : filteredData?Filtering(filteredData).map((object, index) => (
+                data={filter === filterVal || !open ? Filtering(data):filteredData ? Filtering(filteredData):null}
+                renderItem={({ item }) => (
                   <TouchableOpacity
-                    key={index}
+                    key={item.name}
                     onPress={() => {
-                      navigation.navigate("Detail", { store: object });
-                    }}
+                    navigation.navigate("Detail", { store: item,test:"123", change:filter === filterVal || !open ? ()=>setData:()=>setFilteredData});
+                  }}
                   >
-                    <StoreCard store={object} />
+                    <StoreCard store={item} navigation={navigation}  change={filter === filterVal || !open ? setData:setFilteredData}/>
                   </TouchableOpacity>
-                )):null}
-          </View>
+                )}
+              />
+         
+          </View>: <ActivityIndicator
+          size="large"
+          color="grey"
+          style={{ top: "5%" }}
+          animating={indicator}
+        />
         ) : (
-          <ScrollView style={styles.scrollView} ref={scrollRef} keyboardShouldPersistTaps='handled'>
+          <ScrollView
+            style={styles.scrollView}
+            ref={scrollRef}
+            keyboardShouldPersistTaps="handled"
+          >
             {Filtering(result).map((object, index) => (
               <TouchableOpacity
                 key={index}
@@ -503,7 +660,7 @@ var requestOptions = {
                   navigation.navigate("Detail", { store: object });
                 }}
               >
-                <StoreCard store={object} />
+                <StoreCard store={object} navigation={navigation} change={setResult}/>
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -544,21 +701,21 @@ const styles = StyleSheet.create({
   },
 
   scrollView: {
-    marginHorizontal: 15,
+    marginHorizontal: 20,
     width: "100%",
     flexGrow: 1,
   },
   inputContainer: {
+    display: "flex",
     flexDirection: "row",
-    justifyContent: "space-around",
   },
   searchArea: {
     width: "100%",
-    padding: "1%",
     alignItems: "center",
     justifyContent: "center",
     borderTopColor: "grey",
     borderTopWidth: 0,
+
     paddingTop: statusBarHeight,
     backgroundColor: "#F9EEC8",
     shadowColor: "rgb(129, 129, 129)",
@@ -571,7 +728,6 @@ const styles = StyleSheet.create({
     borderColor: "grey",
   },
   input: {
-    maxWidth: "80%",
     height: 42,
     flexGrow: 1,
     borderWidth: 1,
@@ -579,8 +735,9 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 20,
     display: "flex",
-
-    margin: 10,
+    marginRight: 14,
+    marginLeft: 20,
+    marginVertical: 10,
     backgroundColor: "#FFFEFA",
     shadowColor: "#C58A00",
     shadowOffset: { width: 0, height: 2 },
@@ -612,16 +769,15 @@ const styles = StyleSheet.create({
   },
   filter: {
     paddingHorizontal: 10,
-    marginLeft: "5%",
-    marginRight: "-2%",
+    marginLeft: 16,
+    marginRight: 20,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 15,
-    alignSelf: "flex-start",
-    shadowColor: "#C58A00",
-    shadowOffset: { width: 0, height: 1 },
+    shadowColor: "#c58a00",
+    shadowOffset: { width: 1, height: 1 },
     shadowOpacity: 0.8,
-    shadowRadius: 1,
+    shadowRadius: 2,
     elevation: 5,
     marginBottom: "1%",
   },

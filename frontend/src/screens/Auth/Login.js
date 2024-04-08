@@ -8,9 +8,8 @@ import {
   Image,
   TouchableOpacity,
 } from "react-native";
-import { setEmail, setName } from "../../redux/actions";
+import { setEmail, setNameFirst, setNameLast } from "../../redux/actions";
 import { useSelector, useDispatch } from "react-redux";
-import validator from "validator";
 import emailjs from "@emailjs/browser";
 import * as Icon from "react-native-feather";
 import { Divider } from "react-native-elements";
@@ -20,9 +19,8 @@ export default Login = ({ navigation }) => {
   const [emailAddress, onChangeEmail] = React.useState("");
   const [emailError, setEmailError] = React.useState("");
   const [password, onChangePassword] = React.useState("");
-  const { email, name } = useSelector((state) => state.userReducer);
   const dispatch = useDispatch();
-
+  const user = useSelector((state) => state.user);
   useEffect(() => {
     const timer = setTimeout(() => {
       setEmailError("");
@@ -87,10 +85,10 @@ export default Login = ({ navigation }) => {
         }}
     ><Icon.X color={"black"} /></TouchableOpacity>
       <SafeAreaView>
-        <Image
-          style={styles.image}
-          source={require("../../../assets/icon.png")}
-        />
+        
+        <Text>{user.email}</Text>
+        <Text>{user.firstName}</Text>
+        <Text>{user.lastName}</Text>
         <View style={styles.inputView}>
           <View style={styles.inputContainer}>
             <Icon.Mail color={"grey"} />
@@ -130,7 +128,7 @@ export default Login = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.loginBtn} onPress={() => login()}>
+        <TouchableOpacity style={styles.loginBtn} onPress={() =>  dispatch(setNameLast('Zhang'))}>
           <Text style={{ color: "white" }}>LOGIN</Text>
         </TouchableOpacity>
       </SafeAreaView>

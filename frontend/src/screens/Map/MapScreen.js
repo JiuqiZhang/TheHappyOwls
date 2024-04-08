@@ -7,11 +7,14 @@ import {
   Image,
   ActivityIndicator,
   Button,
+  FlatList,
+  Keyboard,
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import Constants from 'expo-constants';
-
+import { MarkerOpen } from "../../Component/MarkerOpen";
+import { MarkerDefault } from "../../Component/MarkerDefault";
+import Constants from "expo-constants";
 import ModalFilter from "../../Component/ModalFilter";
 import * as Icon from "react-native-feather";
 import { Divider } from "react-native-elements";
@@ -24,12 +27,37 @@ import { Marker } from "react-native-maps";
 const { width, height } = Dimensions.get("window");
 import axios from "axios";
 import { Searchbar } from "../../Component/SearchBar";
+import { MarkerSelectOpen } from "../../Component/MarkerSelect";
+import { MarkerSelectDefault } from "../../Component/MarkerSelectDefault";
+import UserLoc from "../../Component/UserLoc";
 const image = require("../../Image/store.jpg");
 const latitudeDelta = 0.0122;
+import { useSelector } from "react-redux";
 const longitudeDelta = 0.0081;
 
-const CARD_WIDTH = width * 0.85;
-const SPACING_FOR_CARD_INSET = width * 0.08;
+const CARD_WIDTH = width - 40;
+
+const openNow = (data) => {
+  if (data.days[moment().format("dddd")].time.length > 0) {
+    for (let i = 0; i<data.days[moment().format("dddd")].time.length;i++){
+     let start =
+     data.days[moment().format("dddd")].time[i].split(" - ")[0];
+   let end =
+     data.days[moment().format("dddd")].time[i].split(" - ")[1];
+  if (start.length>end.length){
+   if (moment().format("HH:mm") > start || moment().format("HH:mm") < '0'+end) {
+     return true
+   }
+  }
+
+   if (moment().format("HH:mm") > start && moment().format("HH:mm") < end) {
+     return true
+   }
+    }
+   }
+   return false
+  
+};
 
 const validatehh = (hh) => {
   let schedule = {
@@ -83,18 +111,223 @@ const validatehh = (hh) => {
 };
 
 export default MapScreen = ({ navigation }) => {
-  
   const [region, setRegion] = useState(null);
   const [refresh, setrefresh] = useState(false);
   const [data, setData] = useState([]);
   const [searchVal, setsearch] = useState("");
   const [indicator, setIndicator] = useState(true);
-  const [open, setopen] = useState(false)
+  const [open, setopen] = useState(false);
   const [modal, setmodal] = useState(false);
   let mapAnimation = new Animated.Value(0);
-  const [mapIndex, setInd] = useState();
+  const [mapIndex, setInd] = useState(0);
   const _map = useRef(null);
-  const [loc, setLoc] = useState()
+  const [loc, setLoc] = useState();
+  const  user = useSelector(state => state.user);
+  const removeFav = async(id) =>{
+    var formdata = new FormData();
+
+    formdata.append("username", user.email);
+    formdata.append("storeID", id);
+    
+    var requestOptions = {
+      method: 'POST',
+      body: formdata,
+    };
+    
+    await fetch("https://data.tpsi.io/api/v1/stores/removeStoreToUserFavorite", requestOptions)
+    .then((res) => {
+      if (res) {
+        setFilteredData((stores) => {
+          return stores.map((store) => {return store._id == id ? {...store,userFavorite:false} : store});
+        });
+      }
+    })
+    .catch((error) => console.log("error", error));
+  }
+
+
+   
+
+  const addToFav = async(id) =>{
+    var formdata = new FormData();
+    formdata.append("username", user.email);
+    formdata.append("storeID", id);
+    
+    var requestOptions = {
+      method: 'POST',
+      body: formdata,
+    };
+
+
+
+    await fetch("https://data.tpsi.io/api/v1/stores/addStoreToUserFavorite", requestOptions)
+    .then((res) => {
+      if (res) {
+        setFilteredData((stores) => {
+          return stores.map((store) => {return store._id == id ? {...store,userFavorite:true} : store});
+        });
+      }
+    })
+      .catch(error => console.log('error', error));
+
+}
+
+  const MapCard = React.memo((props) => {
+    const data = props.store;
+
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate("Detail", { store: data });
+        }}
+      >
+        <View style={styles.card}>
+          <TouchableOpacity style={{ position: "absolute", left: 9, top: 9, zIndex: 17 }} onPress={user.email?()=>{!data.userFavorite ? addToFav(data._id) : removeFav(data._id);}:()=>{navigation.navigate("Saved")}}>
+          <Icon.Bookmark
+            width={27}
+            height={32}
+            fill={data.userFavorite?"#FFD029":'#999999'}
+            stroke={"#5C4A0A"}
+            strokeWidth={1}
+            
+          />
+          </TouchableOpacity>
+          <Image
+            source={
+              data.photoResult[0] && data.photoResult[0]["photos"][0]
+                ? {
+                    uri:
+                      "http://spring-boot-repo-tpsi.s3.amazonaws.com/" +
+                      data.photoResult[0]._id +
+                      "_" +
+                      data.photoResult[0]["photos"][0].id,
+                  }
+                : image
+            }
+            style={styles.cardImage}
+          />
+          <View style={styles.textContent}>
+            <Text numberOfLines={2} style={styles.cardtitle}>
+              {data.name}
+            </Text>
+            {data.days[moment().format("dddd")].time.length > 0 ? (
+              <>
+                <Text
+                  style={{
+                    color: "#999999",
+                    fontWeight: '500',
+                    fontSize: 12,
+                    marginTop: 8,
+                  }}
+                >
+                  <Text>Today:</Text>
+                  {openNow(data) ? (
+                    <Text style={{ color: "#008515", fontWeight: '700' }}>
+                      Live Now
+                    </Text>
+                  ) : (
+                    <Text style={{ color: "red", fontWeight: '700' }}>
+                      Unavailable Now
+                    </Text>
+                  )}
+                </Text>
+                <Text style={{ fontWeight: '600', fontSize: 12 }}>
+                {data.days[moment().format("dddd")].time.toString()}
+                </Text>
+              </>
+            ) : (
+              <Text
+                style={{
+                  color: "#999999",
+                  fontWeight: '500',
+                  fontSize: 12,
+                  marginTop: 8,
+                }}
+              >
+                No happy hours today
+              </Text>
+            )}
+            {/* off */}
+            <View
+              style={{
+                position: "absolute",
+                display: data.off ? "flex" : "none",
+                bottom: 10,
+                left: 8,
+                zIndex: 7,
+                flexDirection: "row",
+              }}
+            >
+              <View
+                style={{
+                  backgroundColor: "#FFE68D",
+
+                  width: 64,
+                  height: 22,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: 8,
+                }}
+              >
+                <Text style={{ fontSize: 12, fontWeight: '600' }}>
+                  {data.off ? data.off.toFixed(0) + "% off" : null}
+                </Text>
+              </View>
+              <View
+                style={{
+                  height: 22,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginLeft: 8,
+                }}
+              >
+                <Text
+                  style={{
+                    color: "#989898",
+                    fontSize: 10,
+                    fontWeight: '500',
+                  }}
+                >
+                  of usual price
+                </Text>
+              </View>
+            </View>
+
+            <View
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                marginTop: 11,
+              }}
+            >
+              <View style={styles.rating}>
+                <Image
+                  style={{
+                    width: 11,
+                    height: 11,
+                    alignSelf: "flex-start",
+                  }}
+                  source={require("../../Image/G.png")}
+                />
+                <Text
+                  style={[
+                    styles.cuisine,
+                    { fontWeight: "600", marginBottom: 12 },
+                  ]}
+                >
+                  {data.rating + " • "}
+                </Text>
+              </View>
+              <Text style={styles.cuisine}>
+                {data.cuisine}
+                {data.price ? " • " + "$".repeat(+data.price) : null}
+              </Text>
+            </View>
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  });
   mapStyle = [
     {
       featureType: "poi",
@@ -202,7 +435,7 @@ export default MapScreen = ({ navigation }) => {
   ];
 
   const [filteredData, setFilteredData] = useState();
-
+  const [searched, setsearched] = useState();
   const filterVal = {
     sortby: ["distance", "price", "rating"],
     discount: {
@@ -261,7 +494,22 @@ export default MapScreen = ({ navigation }) => {
   };
 
   const [filter, setFilter] = useState(filterVal);
+  const validateItem = (hh) =>{
+    let res = []
+    if (hh.length > 0) {
+      for (i = 0; i < hh[0].infos.length; i++) {
+        // time
+        hh[0].infos[i].items.map((item) => {
+         if (!(res.includes(item.type))){
+          res.push(item.type)
+         }
+        });
+      }
+    }
 
+    return res;
+
+  }
   const findDeal = (hh) => {
     var res = 1;
     if (hh.length > 0) {
@@ -290,10 +538,10 @@ export default MapScreen = ({ navigation }) => {
     setIndicator(true);
     var req = new FormData();
     req.append("lat", region.latitude);
+    if (user.email){req.append("username", user.email);}
     req.append("lng", region.longitude);
     req.append("latDelta", region.latitudeDelta);
     req.append("lngDelta", region.longitudeDelta);
- 
 
     await axios({
       method: "post",
@@ -317,6 +565,7 @@ export default MapScreen = ({ navigation }) => {
           website: store.website,
           number: store.number,
           off: findDeal(store.hhResult),
+          items:validateItem(store.hhResult),
           days: validatehh(store.hhResult),
           ...store,
         }))
@@ -334,7 +583,7 @@ export default MapScreen = ({ navigation }) => {
           },
           1000
         );
-        _scrollView.current?.scrollTo({ x: 0, animated: true });
+        _scrollView.current?.scrollToIndex({ index: 0, animated: true });
       })
       .catch((error) => console.log(error));
   };
@@ -345,15 +594,33 @@ export default MapScreen = ({ navigation }) => {
       if (status !== "granted") {
         console.log("Please grant location permissions");
         return;
+      } else {
+        await Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.Lowest,
+            timeInterval: 1000,
+            distanceInterval: 1,
+          },
+          (location) => {
+            setLoc({
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
+            });
+          }
+        );
       }
+
       let currentLocation = await Location.getCurrentPositionAsync({});
       console.log("Location:");
       console.log(currentLocation);
-      setLoc(currentLocation.coords)
+      setLoc(currentLocation.coords);
 
       var req = new FormData();
       req.append("lat", currentLocation.coords.latitude);
       req.append("lng", currentLocation.coords.longitude);
+      if(user.email){ req.append("username", user.email);}
+      // req.append("lat", 40.730824);
+      // req.append("lng", -73.99733);
       req.append("latDelta", latitudeDelta);
       req.append("lngDelta", longitudeDelta);
 
@@ -363,34 +630,41 @@ export default MapScreen = ({ navigation }) => {
         headers: {},
         data: req,
       })
-        .then((response) =>
-          response.data.map((store) => ({
-            name: store.name,
-            rating: store.rating,
-            cuisine: `${store.cuisine}`,
-            hours: store.hours,
-            latitude: store.latitude,
-            longitude: store.longitude,
-            location: store.location,
-            price: store.price,
-            photoResult: store.photoResult,
-            hh: store.hhResult,
-            website: store.website,
-            comments: store.comments,
-            number: store.number,
-            off: findDeal(store.hhResult),
-            days: validatehh(store.hhResult),
-            ...store,
-          }))
-        )
+        .then((response) => {
+          try {
+            return response.data.map((store) => ({
+              name: store.name,
+              rating: store.rating,
+              cuisine: `${store.cuisine}`,
+              hours: store.hours,
+              latitude: store.latitude,
+              longitude: store.longitude,
+              location: store.location,
+              price: store.price,
+              photoResult: store.photoResult,
+              hh: store.hhResult,
+              website: store.website,
+              comments: store.comments,
+              number: store.number,
+              off: findDeal(store.hhResult),
+              items:validateItem(store.hhResult),
+              days: validatehh(store.hhResult),
+              ...store,
+            }));
+          } catch (e) {
+            console.log(e);
+          }
+        })
         .then((stores) => {
           setData(stores);
           setFilteredData(stores);
           setIndicator(false);
           _map.current.animateToRegion(
             {
-              latitude:  currentLocation.coords.latitude,
-              longitude:  currentLocation.coords.longitude,
+              latitude: currentLocation.coords.latitude,
+              longitude: currentLocation.coords.longitude,
+              // latitude: 40.730824,
+              // longitude: -73.99733,
               latitudeDelta: latitudeDelta,
               longitudeDelta: longitudeDelta,
             },
@@ -398,34 +672,41 @@ export default MapScreen = ({ navigation }) => {
           );
         })
         .catch((error) => console.log(error));
+      return () => locationSubscription.remove();
     };
 
     getPermissions();
   }, []);
 
   const [percent, hidePercent] = useState(false);
+  useEffect(() => {
+    mapAnimation.addListener(({ value }) => {
+      if (
+        value / (CARD_WIDTH + 8) >= Filtering(filteredData).length ||
+        value / (CARD_WIDTH + 8) < 0
+      ) {
+        return;
+      }
+      setInd(value / (CARD_WIDTH + 8));
+      console.log(value / (CARD_WIDTH + 8));
+      _map.current.animateToRegion(
+        {
+          latitude:
+            Filtering(filteredData)[Math.round(value / (CARD_WIDTH + 8))]
+              .latitude,
+          longitude:
+            Filtering(filteredData)[Math.round(value / (CARD_WIDTH + 8))]
+              .longitude,
+          latitudeDelta: latitudeDelta,
+          longitudeDelta: longitudeDelta,
+        },
+        400
+      );
+    });
+  });
 
-  // const interpolations = data.map((marker, index) => {
-  //   const inputRange = [
-  //     (index - 1) * CARD_WIDTH,
-  //     index * CARD_WIDTH,
-  //     (index + 1) * CARD_WIDTH,
-  //   ];
-
-  //   const scale = mapAnimation.interpolate({
-  //     inputRange,
-  //     outputRange: [1, 1.5, 1],
-  //     extrapolate: "clamp",
-  //   });
-
-  //   return { scale };
-  // });
-
-  const onMarkerPress = (mapEventData) => {
-    const markerID = mapEventData._targetInst.return.index;
-    console.log(markerID)
-    //console.log(filteredData[markerID].name)
-    setInd(markerID);
+  const onMarkerPress = (mapEventData, index) => {
+    setInd(index);
 
     // _map.current.animateToRegion(
     //   {
@@ -437,18 +718,23 @@ export default MapScreen = ({ navigation }) => {
     //   350
     // );
     // setRegion({
-    //   latitude: filteredData[markerID]["latitude"],
-    //   longitude: filteredData[markerID]["longitude"],
+    //   latitude: filteredData[index]["latitude"],
+    //   longitude: filteredData[index]["longitude"],
     //   latitudeDelta: latitudeDelta,
     //   longitudeDelta: longitudeDelta,
     // });
-    setrefresh(true);
-    let x = markerID * CARD_WIDTH + markerID * 20;
-    if (Platform.OS === "ios") {
-      x = x - SPACING_FOR_CARD_INSET;
-    }
-
-    _scrollView.current.scrollTo({ x: x, y: 0, animated: true });
+    _scrollView.current?.scrollToIndex({ index: index, animated: true });
+  };
+  const returnToUser = () => {
+    _map.current.animateToRegion(
+      {
+        latitude: loc.latitude,
+        longitude: loc.longitude,
+        latitudeDelta: latitudeDelta,
+        longitudeDelta: longitudeDelta,
+      },
+      500
+    );
   };
 
   const _scrollView = React.useRef(null);
@@ -465,13 +751,18 @@ export default MapScreen = ({ navigation }) => {
     if (searchVal === "") {
       return;
     }
-    var req = new FormData();
-    req.append("search", search);
+   
     setIndicator(true);
-
     await axios({
       method: "get",
-      url: "https://data.tpsi.io/api/v1/stores/Search?search=" + searchVal,
+      url:
+        "https://data.tpsi.io/api/v1/stores/searchWithDistance?search=" +
+        searchVal +
+        "&lat=" +
+        loc.latitude +
+        "&lng=" +
+        loc.longitude +
+        (user.email?'&username='+user.email:''),
       headers: {},
     })
       .then((response) =>
@@ -487,22 +778,29 @@ export default MapScreen = ({ navigation }) => {
           hh: store.hhResult,
           comments: store.comments,
           off: findDeal(store.hhResult),
+          items:validateItem(store.hhResult),
+          days: validatehh(store.hhResult),
           ...store,
         }))
       )
       .then((data) => {
-        setData(data);
+        if (data.length < 1) {
+          setIndicator(false);
+          setFilteredData(null);
+          return;
+        }
         setFilteredData(data);
-        _scrollView.current?.scrollTo({ x: 0, animated: true });
-        setsearch("");
+        // _scrollView.current?.scrollToIndex({ index: 0, animated: true });
+        // setsearch("");
         setIndicator(false);
         _map.current.animateToRegion(
           {
-            latitude:  currentLocation.coords.latitude,
-            longitude:  currentLocation.coords.longitude,
-        
+            latitude: data[0].latitude,
+            longitude: data[0].longitude,
+            latitudeDelta: latitudeDelta,
+            longitudeDelta: longitudeDelta,
           },
-          1000
+          500
         );
       })
       .catch((e) => {
@@ -511,6 +809,9 @@ export default MapScreen = ({ navigation }) => {
   };
 
   const Filtering = (data) => {
+    if (!data) {
+      return;
+    }
     return data.filter((store) => {
       if (!open) {
         for (day in filter.hhdays) {
@@ -518,22 +819,28 @@ export default MapScreen = ({ navigation }) => {
             return;
           }
         }
-        for (level in filter.price) {
-          if (
-            !store.price ||
-            (filter.price[level] === true && store.price !== level)
-          ) {
+        
+          if (JSON.stringify(filter.price) !== JSON.stringify(filterVal.price) && filter.price[store.price]!==true) {
             return;
           }
-          
-        }
+        
+     
         if (
-          filter.selectedCuisine &&
-          store.cuisine !== filter.selectedCuisine
+          
+          store.cuisine[0] !== filter.selectedCuisine && filter.selectedCuisine!==null
         ) {
           return;
         }
-        return store;
+        if (Object.values(filter.items).indexOf(true) > -1) {
+          for (const key of Object.keys(filter.items)) {
+            if (filter.items[key] &&  store.items.includes(key)){
+              return store
+            }
+        }
+        return
+       }
+
+        return store
       } else {
         if (store.days[moment().format("dddd")].time.length > 0) {
           if (
@@ -550,30 +857,41 @@ export default MapScreen = ({ navigation }) => {
                 return;
               }
             }
-            for (level in filter.price) {
-              if (
-                !store.price ||
-                (filter.price[level] === true && store.price !== level)
-              ) {
-                return;
-              }
-             
+            if (JSON.stringify(filter.price) !== JSON.stringify(filterVal.price) && filter.price[store.price]!==true) {
+              return;
             }
+          
+            
             if (
-              filter.selectedCuisine &&
-              store.cuisine !== filter.selectedCuisine
+              store.cuisine[0] !== filter.selectedCuisine && filter.selectedCuisine!==null
             ) {
               return;
             }
-            return store;
+            if (Object.values(filter.items).indexOf(true) > -1) {
+              for (const key of Object.keys(filter.items)) {
+                if (filter.items[key] &&  store.items.includes(key)){
+                  return store
+                }
+            }
+            return
+           }
+    
+            return store
           }
         }
+        return;
       }
     });
+
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={styles.container}
+      onTouchStart={() => {
+        Keyboard.dismiss();
+      }}
+    >
       <ModalFilter
         filter={filter}
         filterVal={filterVal}
@@ -586,15 +904,37 @@ export default MapScreen = ({ navigation }) => {
       />
       <View style={styles.searchArea}>
         <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            value={searchVal}
-            onChangeText={setsearch}
-            placeholder="  Search store name"
-            onSubmitEditing={() => {
-              searchResult();
-            }}
-          />
+          <View
+            style={[
+              {
+                flexDirection: "row",
+                alignItems: "center",
+              },
+              styles.input,
+            ]}
+          >
+            <Icon.Search color={"grey"} style={{}} height={16} />
+            <TextInput
+              style={{ height: 42, flex: 1 }}
+              value={searchVal}
+              onChangeText={setsearch}
+              placeholder={" Search store name"}
+              returnKeyType="search"
+              onSubmitEditing={() => {
+                searchResult();
+              }}
+            />
+
+            {searchVal === "" ? null : (
+              <TouchableOpacity
+                onPress={() => {
+                  setsearch(""), setFilteredData(data);
+                }}
+              >
+                <Icon.X color={"grey"} height={16} />
+              </TouchableOpacity>
+            )}
+          </View>
           <View
             style={{
               alignSelf: "center",
@@ -606,12 +946,13 @@ export default MapScreen = ({ navigation }) => {
               textAlign: "center",
               display: "flex",
               borderWidth: 1.5,
-              borderColor: "white",
-              backgroundColor: "#F9EEC8",
+              borderColor: "#D3D3D3",
+              backgroundColor: "white",
               shadowColor: "#C58A00",
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.4,
               shadowRadius: 2,
+              marginRight: 20,
             }}
           >
             <TouchableOpacity
@@ -619,31 +960,50 @@ export default MapScreen = ({ navigation }) => {
                 setmodal(true);
               }}
             >
-              <Icon.Filter color={"grey"} height={27} />
+              <Icon.Sliders
+                style={{ transform: [{ rotate: "90deg" }] }}
+                color={"grey"}
+                height={16}
+              />
             </TouchableOpacity>
           </View>
         </View>
         <View style={{ flexDirection: "row", width: "100%" }}>
-        <TouchableOpacity
-            style={[styles.filter,{backgroundColor: open ? "#FFD029" : "white",}]}
+          <TouchableOpacity
+            style={[
+              styles.filter,
+              {
+                backgroundColor: open ? "#FFD029" : "white",
+                width: 98,
+                height: 32,
+              },
+            ]}
             onPress={() => setopen(!open)}
           >
-            <Text>{open ? "✓ " : null}Open Now</Text>
+            <Text style={{ fontSize: 12 }}>{open ? "✓ " : null}Live Now</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.filter,{backgroundColor: percent ? "#FFD029" : "white",}]}
+            style={[
+              styles.filter,
+              {
+                backgroundColor: percent ? "#FFD029" : "white",
+                width: 98,
+                height: 32,
+              },
+            ]}
             onPress={() => hidePercent(!percent)}
           >
-            <Text>{percent ? "✓ " : null}Hide Percentage</Text>
+            <Text style={{ fontSize: 12 }}>
+              {percent ? "✓ " : null}Discount %
+            </Text>
           </TouchableOpacity>
-       
         </View>
       </View>
-      <View style={{position:'absolute',top:'40%',zIndex:17}}>{!indicator?null:<ActivityIndicator
-          size="large"
-          color="white"
-          animating={indicator}
-        />}</View>
+      <View style={{ position: "absolute", top: "40%", zIndex: 17 }}>
+        {!indicator ? null : (
+          <ActivityIndicator size="large" color="white" animating={indicator} />
+        )}
+      </View>
 
       {/* <Text>{userLocation?(userLocation['coords']['latitude']+ ', '+userLocation['coords']['longitude']):"Waiting"}</Text> */}
       <MapView
@@ -661,12 +1021,16 @@ export default MapScreen = ({ navigation }) => {
           onRegionChange(region, details)
         }
       >
-       {loc? <Marker
-          coordinate={{
-            latitude: loc.latitude,
-            longitude:loc.longitude,
-          }}
-        ></Marker>:null}
+        {loc ? (
+          <Marker
+            coordinate={{
+              latitude: loc.latitude,
+              longitude: loc.longitude,
+            }}
+          >
+            <UserLoc />
+          </Marker>
+        ) : null}
         {filteredData
           ? Filtering(filteredData).map((marker, index) => {
               {
@@ -686,50 +1050,141 @@ export default MapScreen = ({ navigation }) => {
                     latitude: marker.latitude,
                     longitude: marker.longitude,
                   }}
-                  onPress={(e) => onMarkerPress(e)}
+                  onPress={(e) => onMarkerPress(e, index)}
                 >
+                  {mapIndex === index ? (
+                    openNow(marker) ? (
+                      <MarkerSelectOpen />
+                    ) : (
+                      <MarkerSelectDefault />
+                    )
+                  ) : openNow(marker) ? (
+                    <MarkerOpen />
+                  ) : (
+                    <MarkerDefault />
+                  )}
                   <View
-                    style={[
-                      styles.percent,
-                      !percent
-                        ? marker.off && marker.off > 50
-                          ? {zIndex:7}
-                          : { width: 10, height:10,}
-                        : { width: 10, height:10 },
-                        index===mapIndex?{backgroundColor:'red',zIndex:17}:null
-                    ]}
+                    style={{
+                      bottom: mapIndex === index ? 42 : 26,
+                      zIndex: 7,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
                   >
-                    <Text style={{ fontWeight: "bold",color:index===mapIndex?'white':null}}>
-                      {!percent
-                        ? marker.off && marker.off > 50
+                    <Text
+                      style={{
+                        fontWeight: "700",
+                        fontSize: mapIndex === index ? 16 : 10,
+                      }}
+                    >
+                      {percent
+                        ? marker.off
                           ? marker.off.toFixed(0) + "%"
                           : ""
-                        : ""}
+                        : marker.rating}
                     </Text>
                   </View>
+                  {/* </View> */}
                 </Marker>
               );
             })
           : null}
       </MapView>
+      <View
+        style={{
+          position: "absolute",
+          alignItems: "center",
+          bottom: 172,
+          right: 20,
+        }}
+      >
+        <View
+          style={{
+            alignSelf: "center",
+            width: 42,
+            height: 42,
+            borderRadius: 100,
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+            display: "flex",
+            borderWidth: 1.5,
+            borderColor: "#D3D3D3",
+            backgroundColor: "white",
+            shadowColor: "#C58A00",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.4,
+            shadowRadius: 2,
+            transform: [{ rotate: "270deg" }],
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => {
+              returnToUser();
+            }}
+          >
+            <Icon.Navigation
+              style={{ transform: [{ rotate: "90deg" }] }}
+              color={"grey"}
+              height={16}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
 
-      {refresh ? (
+      {searchVal ? (
         <View
           style={{
             position: "absolute",
             alignItems: "center",
-            bottom: height / 2 + 140,
+            bottom: 172,
           }}
         >
           <TouchableOpacity
             style={{
-              paddingHorizontal: 10,
-              paddingVertical: 7,
+              width: 98,
+              height: 32,
+              borderWidth: 1.5,
+              borderColor: "#d2d2d2",
               alignItems: "center",
               justifyContent: "center",
               borderRadius: 20,
               alignSelf: "center",
-              backgroundColor: "white",
+              backgroundColor: "#ffffff33",
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.8,
+              shadowRadius: 1,
+              elevation: 5,
+            }}
+            onPress={() => {
+              setsearch(""), setFilteredData(data);
+            }}
+          >
+            <Text style={{ fontSize: 10, color: "#ffffff", fontWeight: '600' }}>
+              Clear search
+            </Text>
+          </TouchableOpacity>
+        </View>
+      ) : refresh ? (
+        <View
+          style={{
+            position: "absolute",
+            alignItems: "center",
+            bottom: 172,
+          }}
+        >
+          <TouchableOpacity
+            style={{
+              width: 98,
+              height: 32,
+              borderWidth: 1.5,
+              borderColor: "#d2d2d2",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 20,
+              alignSelf: "center",
+              backgroundColor: "#ffffff33",
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 1 },
               shadowOpacity: 0.8,
@@ -738,127 +1193,64 @@ export default MapScreen = ({ navigation }) => {
             }}
             onPress={search}
           >
-            <Text>Search this area</Text>
+            <Text style={{ fontSize: 10, color: "#ffffff", fontWeight: '600' }}>
+              Search this area
+            </Text>
           </TouchableOpacity>
         </View>
       ) : null}
 
-      <Animated.ScrollView
-        ref={_scrollView}
-        horizontal
-        pagingEnabled
-        scrollEventThrottle={1}
-        showsHorizontalScrollIndicator={false}
-        snapToInterval={CARD_WIDTH + 20}
-        snapToAlignment="center"
-        style={styles.scrollView}
-        contentInset={{
-          top: 0,
-          left: SPACING_FOR_CARD_INSET,
-          bottom: 0,
-          right: SPACING_FOR_CARD_INSET,
-        }}
-        contentContainerStyle={{
-          paddingHorizontal:
-            Platform.OS === "android" ? SPACING_FOR_CARD_INSET : 0,
-        }}
-        onScroll={(e) => {
-          // console.log(e.nativeEvent.contentOffset.x);
-          if (data !== []) {
-            let index = Math.floor(
-              e.nativeEvent.contentOffset.x / CARD_WIDTH + 0.3
-            ); // animate 30% away from landing on the next item
-            // console.log(index);
-            // setInd(index);
-          }
-        }}
-      >
-        {filteredData
-          ? Filtering(filteredData).map((data, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => {
-                  navigation.navigate("Detail", { store: data });
-                }}
-              >
-                <View style={styles.card}>
-                  <View
-                    style={[
-                      {
-                        position: "absolute",
-                        zIndex: 7,
-                        margin: "1%",
-                        display: data.off ? "flex" : "none",
-                      },
-                      styles.percent,
-                    ]}
-                  >
-                    <Text style={{ fontWeight: "bold" }}>
-                      {data.off ? data.off.toFixed(0) + "%" : null}
-                    </Text>
-                  </View>
-                  <Image
-                    source={
-                      data.photoResult[0] && data.photoResult[0]["photos"][0]
-                        ? {
-                            uri:
-                              "http://spring-boot-repo-tpsi.s3.amazonaws.com/" +
-                              data.photoResult[0]._id +
-                              "_" +
-                              data.photoResult[0]["photos"][0].id,
-                          }
-                        : image
-                    }
-                    style={styles.cardImage}
-                    resizeMode="cover"
-                  />
-                  <View style={styles.textContent}>
-                    <Text numberOfLines={3} style={styles.cardtitle}>
-                      {data.name}
-                    </Text>
+      {filteredData ? (
+        <Animated.FlatList
+          ref={_scrollView}
+          horizontal
+          scrollEventThrottle={1}
+          initialScrollIndex={0}
+          onMomentumScrollEnd={Animated.event(
+            [
+              {
+                nativeEvent: {
+                  contentOffset: {
+                    x: mapAnimation,
+                  },
+                },
+              },
+            ],
+            { useNativeDriver: true }
+          )}
+          // onScrollToIndexFailed={(error) => {
+          //   console.log(error.index,Filtering(filteredData)[error.index].name)
+          //   _scrollView.current?.scrollToOffset({
+          //     offset: (CARD_WIDTH+8) * error.index,
+          //     animated: true,
+          //   });
+          //   //  _scrollView.current?.scrollToItem({
+          //   //   item: <MapCard store={Filtering(filteredData)[error.index]} key={error.index} />,
+          //   //   animated: true,
+          //   // });
 
-                    <Text numberOfLines={1} style={styles.cardDescription}>
-                      {data.cuisine}
-                    </Text>
-                    <View style={styles.rating}>
-                      <Image
-                        style={{ width: 20, height: 15, alignSelf: "center" }}
-                        source={require("../../Image/G.png")}
-                      />
-                      <Text style={styles.hh}>{data.rating}</Text>
-                    </View>
-                    {data.comments ? (
-                      <View style={styles.comment}>
-                        <Text numberOfLines={1} style={styles.hh}>
-                          {data.comments}
-                        </Text>
-                      </View>
-                    ) : null}
-                    <View
-                      style={{ position: "absolute", bottom: "9%", left: "7%" }}
-                    >
-                      {data.hh[0] &&
-                      data.hh[0].infos[0].days.includes(
-                        moment().format("dddd")
-                      ) ? (
-                        <>
-                          <Text style={styles.hh}>Today:</Text>
-                          <Text style={styles.hh}>
-                            {data.hh[0].infos[0].start_time +
-                              " - " +
-                              data.hh[0].infos[0].end_time}
-                          </Text>
-                        </>
-                      ) : (
-                        <Text style={styles.hh}>No happy hours today</Text>
-                      )}
-                    </View>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            ))
-          : null}
-      </Animated.ScrollView>
+          //   setTimeout(() => {
+          //     if ( _scrollView !== null) {
+          //       _scrollView.current?.scrollToIndex({
+          //         index: error.index,
+          //         animated: true,
+          //       });
+          //     }
+          //   }, 150);
+          // }}
+          disableIntervalMomentum={true}
+          showsHorizontalScrollIndicator={false}
+          snapToInterval={CARD_WIDTH + 8}
+          style={styles.scrollView}
+          data={Filtering(filteredData)}
+          getItemLayout={(_, index) => ({
+            length: CARD_WIDTH + 8, //  WIDTH + (MARGIN_HORIZONTAL * 2)
+            offset: (CARD_WIDTH + 8) * index, //  ( WIDTH + (MARGIN_HORIZONTAL*2) ) * (index)
+            index,
+          })}
+          renderItem={({ item, ind }) => <MapCard store={item} key={ind} />}
+        />
+      ) : null}
     </View>
   );
 };
@@ -877,13 +1269,18 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
   },
+  cuisine: {
+    fontWeight: "500",
+    fontSize: 10,
+  },
 
   scrollView: {
     position: "absolute",
     bottom: "0%",
     left: 0,
     right: 0,
-    paddingVertical: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
   },
   card: {
     // padding: 10,
@@ -892,28 +1289,30 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     borderTopLeftRadius: 5,
     borderTopRightRadius: 5,
-    marginHorizontal: 10,
+    marginHorizontal: 4,
     shadowColor: "#000",
     shadowRadius: 5,
     shadowOpacity: 0.3,
     shadowOffset: { x: 2, y: -2 },
-    height: 160,
+    height: 152,
     width: CARD_WIDTH,
     overflow: "hidden",
   },
   cardImage: {
-    flex: 3,
-    width: "100%",
+    width: 156,
     height: "100%",
-    alignSelf: "center",
+    resizeMode: "cover",
   },
   textContent: {
     flex: 2,
-    padding: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
   },
   cardtitle: {
-    fontSize: 13,
+    fontSize: 18,
     // marginTop: 5,
+    fontWeight: '700',
+    marginRight: 25,
     fontWeight: "bold",
   },
   cardDescription: {
@@ -930,9 +1329,7 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
   },
-  hh: {
-    fontSize: 12,
-  },
+
   rating: {
     flexDirection: "row",
     display: "flex",
@@ -951,6 +1348,46 @@ const styles = StyleSheet.create({
     shadowRadius: 1,
     elevation: 1,
   },
+  inputContainer: {
+    display: "flex",
+    flexDirection: "row",
+    marginBottom: 12,
+  },
+  searchArea: {
+    width: "100%",
+    marginHorizontal: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: Constants.statusBarHeight,
+    shadowColor: "rgb(129, 129, 129)",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 2,
+    position: "absolute",
+    zIndex: 99,
+  },
+  divider: {
+    marginHorizontal: 6,
+    borderColor: "grey",
+  },
+  input: {
+    height: 42,
+    flexGrow: 1,
+    borderWidth: 1,
+    borderColor: "white",
+    flex: 1,
+    paddingHorizontal: 10,
+    borderRadius: 20,
+    display: "flex",
+    marginLeft: 20,
+    marginRight: 14,
+    fontSize: 12,
+    backgroundColor: "#FFFEFA",
+    shadowColor: "#C58A00",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 2,
+  },
   percent: {
     backgroundColor: "#FFE68D",
     padding: "4%",
@@ -965,51 +1402,11 @@ const styles = StyleSheet.create({
     shadowRadius: 1,
     elevation: 1,
   },
-  inputContainer: {
-    display: "flex",
-    flexDirection: "row",
-  },
-  searchArea: {
-    width: "100%",
-    padding: "1%",
-    alignItems: "center",
-    justifyContent: "center",
-    borderBottomColor: "grey",
-    borderTopColor: "grey",
-    borderWidth: 0.4,
-    borderTopWidth: 0,
-    paddingTop:Constants.statusBarHeight,
-    backgroundColor: "#F9EEC8",
-    shadowColor: "rgb(129, 129, 129)",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.4,
-    shadowRadius: 2,
-  },
-  divider: {
-    marginHorizontal: 6,
-    borderColor: "grey",
-  },
-  input: {
-    maxWidth: "80%",
-    height: 42,
-    flexGrow: 1,
-    borderWidth: 1,
-    borderColor: "white",
-    padding: 10,
-    borderRadius: 20,
-    display: "flex",
-
-    margin: 10,
-    backgroundColor: "#FFFEFA",
-    shadowColor: "#C58A00",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.4,
-    shadowRadius: 2,
-  },
-  filter:{
+  filter: {
     paddingHorizontal: 10,
     paddingVertical: 7,
-    marginLeft: "5%",
+    marginLeft: 20,
+    height: 32,
     marginRight: "-2%",
     alignItems: "center",
     justifyContent: "center",
@@ -1021,5 +1418,5 @@ const styles = StyleSheet.create({
     shadowRadius: 1,
     elevation: 5,
     marginBottom: "1%",
-  }
+  },
 });
