@@ -11,18 +11,16 @@ import {
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as Icon from "react-native-feather";
 import { Divider } from "react-native-elements";
-import { setEmail,setName } from "../../redux/actions";
+import { setEmail,setNameFirst,setNameLast } from "../../redux/actions";
 import { useSelector, useDispatch } from "react-redux";
-import validator from "validator";
-import emailjs from "@emailjs/browser";
+
 // import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { useForm, Controller} from "react-hook-form";
 
-export default Signup = ({ navigation }) => {
-
-  const [emailError, setEmailError] = React.useState("");
+export default Signup = ({ navigation,route }) => {
+  const email = route.params.email;
   const [pswdError, setPswdError] = React.useState("");
-  const { email, name } = useSelector((state) => state.userReducer);
+  // const { email, name } = useSelector((state) => state.userReducer);
   const [format, setFormat] = React.useState(true);
   const {
     control,
@@ -33,49 +31,36 @@ export default Signup = ({ navigation }) => {
     defaultValues: {
       firstName: "",
       lastName: "",
-      email: "",
       password: "",
       repassword: "",
+      dob:""
     },
   });
 
-  const [date, setDate] = useState(new Date(1598051730000));
-  const [mode, setMode] = useState("date");
-  const [show, setShow] = useState(false);
 
-  const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate;
-    setShow(false);
-    setDate(currentDate);
-    console.log(currentDate);
-  };
   const dispatch = useDispatch();
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setEmailError("");
+
       setPswdError("");
     }, 3000);
     return () => clearTimeout(timer);
-  }, [emailError, pswdError]);
+  }, [ pswdError]);
 
-  const signup = ()=>{
-    handleSubmit(onsubmit)
-    console.log('submit')
-  }
   const onSubmit = (data) => {
     console.log(data)
     var myHeaders = new Headers();
 myHeaders.append("Content-Type", "application/json");
 
 var raw = JSON.stringify({
-  "username": data.email, //email
-  "lastname": "Zhan",
-  "firstname": "Vi",
-  "birthday": "01/09/1999",
-  "address": "1232qaasd",
+  "username": email, //email
+  "lastname": data.lastName,
+  "firstname": data.firstName,
+  "birthday": data.dob,
+  "address": "placeholder",
   "password": data.password,
-  "phone": "9174289859"
+  "phone": "XXXXXXXXX"
 });
 
 var requestOptions = {
@@ -89,28 +74,33 @@ fetch("http://ec2-34-203-231-63.compute-1.amazonaws.com:8080/api/v1/users/AddUse
   .then(response => response.text())
   .then(result => console.log(result))
   .catch(error => console.log('error', error));
-    if (validateEmail(data.email) && data.password === data.repassword) {
-        dispatch(setEmail(data.email));
-        emailjs
-          .send(
-            "happyhour",
-            "template_prk74qi",
-            {
-              to_email: data.email,
-              email: data.email,
-              from_name: "The Happy Owls",
-            },
-            "rfsak_qMYsWxckmdR"
-          )
-          .then(
-            function (response) {
-              console.log("SUCCESS!", response.status, response.text);
-            },
-            function (error) {
-              console.log("FAILED...", error);
-            }
-          );
-        console.log(data.email, data.password);
+    if (data.password === data.repassword) {
+        dispatch(setEmail(email));
+        console.log(data.lastName)
+        dispatch(setNameLast(data.lastname));
+        console.log(data.firstName)
+        dispatch(setNameFirst(data.firstname));
+        // emailjs
+        //   .send(
+        //     "happyhour",
+        //     "template_prk74qi",
+        //     {
+        //       to_email: data.email,
+        //       email: data.email,
+        //       from_name: "The Happy Owls",
+        //     },
+        //     "rfsak_qMYsWxckmdR"
+        //   )
+        //   .then(
+        //     function (response) {
+        //       console.log("SUCCESS!", response.status, response.text);
+        //     },
+        //     function (error) {
+        //       console.log("FAILED...", error);
+        //     }
+        //   );
+        // console.log(data.email, data.password);
+        navigation.navigate("Profile")
       
     }else{
         setPswdError('Passwords not match.')
@@ -118,18 +108,18 @@ fetch("http://ec2-34-203-231-63.compute-1.amazonaws.com:8080/api/v1/users/AddUse
 
   };
 
-  const validateEmail = (emailAddress) => {
-    if (!validator.isEmail(emailAddress)) {
-      setEmailError("Invalid email format!");
-      console.log("invalid");
-      return false;
-    }
-    return true;
-  };
+ 
 
   return (
-    <View style={styles.container}>
-      <SafeAreaView>
+    <SafeAreaView style={styles.container}>
+    <TouchableOpacity
+       style={styles.back}
+       onPress={() => {
+           navigation.navigate("Profile");
+       }}
+   ><Icon.X color={"black"} /></TouchableOpacity>
+     <Text style={styles.title}>Sign up</Text>   
+     <Divider orientation="vertical" width={9}  style={styles.maindivider}/>
         <View style={styles.inputView}>
           <View style={styles.inputContainer}>
             <Icon.User color={"grey"} />
@@ -177,30 +167,6 @@ fetch("http://ec2-34-203-231-63.compute-1.amazonaws.com:8080/api/v1/users/AddUse
           {errors.lastName && (
             <Text style={styles.error}>Last name is required.</Text>
           )}
-          <View style={styles.inputContainer}>
-            <Icon.Mail color={"grey"} />
-            <Divider orientation="vertical" style={styles.divider} />
-            <Controller
-              control={control}
-              rules={{
-                required: true,
-              }}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  placeholder="Email"
-                  onBlur={onBlur}
-                  style={styles.input}
-                  onChangeText={onChange}
-                  value={value}
-                />
-              )}
-              name="email"
-            />
-          </View>
-          {errors.email && <Text style={styles.error}>Email is required.</Text>}
-          {emailError !== "" ? (
-            <Text style={styles.error}>{emailError}</Text>
-          ) : null}
           <View style={styles.inputContainer}>
             <Icon.Lock color={"grey"} />
             <Divider orientation="vertical" style={styles.divider} />
@@ -254,17 +220,31 @@ fetch("http://ec2-34-203-231-63.compute-1.amazonaws.com:8080/api/v1/users/AddUse
           ) : null}
         </View>
         <View style={styles.inputContainer}>
-          <Icon.Calendar color={"grey"} />
-          <Divider orientation="vertical" style={styles.divider} />
-
-          <DateTimePicker
-            testID="dateTimePicker"
-            value={date}
-            mode={mode}
-            style={{ marginLeft: -10 }}
-            onChange={onChange}
-          />
-        </View>
+            <Icon.Calendar color={"grey"} />
+            <Divider orientation="vertical" style={styles.divider} />
+            <Controller
+              control={control}
+              rules={{
+                required: true,
+                minLength:8,
+              }}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  placeholder="Date of Birth (mmddyyyy)"
+                  onChangeText={onChange}
+                  value={value}
+                  onBlur={onBlur}
+                  style={styles.input}
+                  maxLength={8}
+                  keyboardType="numeric"
+                />
+              )}
+              name="dob"
+            />
+          </View>
+          {errors.dob && (
+            <Text style={styles.error}>Please enter your Date of Birth as mmddyyyy.</Text>
+          )}
         {/* <Button title="Submit" onPress={handleSubmit(onSubmit)} /> */}
         <TouchableOpacity
           style={styles.loginBtn}
@@ -274,7 +254,7 @@ fetch("http://ec2-34-203-231-63.compute-1.amazonaws.com:8080/api/v1/users/AddUse
           <Text style={{ color: "white" }}>Sign up</Text>
         </TouchableOpacity>
       </SafeAreaView>
-    </View>
+
   );
 };
 
@@ -282,8 +262,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 24,
-    backgroundColor: "white",
+
     alignItems: "center",
+  },
+  title:{
+    fontSize:18,
+    fontWeight:'400'
+  },
+maindivider: {
+    marginVertical: 10,
+    borderColor: "black",
   },
   inputView: {
     alignItems: "center",
@@ -293,11 +281,16 @@ const styles = StyleSheet.create({
   error: {
     color: "red",
   },
+  back: {
+    position: "absolute",
+    left: "4%",
+    top: "6%",
+},
 
   inputContainer: {
     minHeight: 50,
     height: 50,
-    maxWidth: "80%",
+    maxWidth: "90%",
     borderWidth: 1,
     borderColor: "grey",
     padding: 10,
@@ -311,7 +304,7 @@ const styles = StyleSheet.create({
     borderColor: "grey",
   },
   input: {
-    minWidth: "80%",
+    minWidth: "90%",
   },
 
   loginText: {
@@ -319,7 +312,7 @@ const styles = StyleSheet.create({
   },
   loginBtn: {
     minWidth: "80%",
-    borderRadius: 25,
+    borderRadius: 10,
     height: 50,
     alignItems: "center",
     justifyContent: "center",
