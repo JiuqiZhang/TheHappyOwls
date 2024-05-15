@@ -1,6 +1,6 @@
 import * as AppleAuthentication from "expo-apple-authentication";
 import { View, StyleSheet, Text } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import { useDispatch } from "react-redux";
@@ -8,7 +8,8 @@ import { setEmail, setNameFirst, setNameLast } from "../redux/actions";
 import "core-js/stable/atob";
 export default function AppleAuth({ navigation }) {
   const [user, setUser] = useState();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
+
   return (
     <View style={styles.container}>
       {!user ? (
@@ -20,6 +21,7 @@ export default function AppleAuth({ navigation }) {
           cornerRadius={5}
           style={styles.button}
           onPress={async () => {
+            console.log('hh')
             try {
               const credential = await AppleAuthentication.signInAsync({
                 requestedScopes: [
@@ -27,10 +29,13 @@ export default function AppleAuth({ navigation }) {
                   AppleAuthentication.AppleAuthenticationScope.EMAIL,
                 ],
               });
-
               setUser(credential);
+     
+              console.log(credential)
+
 
               if (credential.identityToken) {
+                console.log('sign sent')
                 axios
                   .post(
                     "https://data.tpsi.io/api/v1/users/checkEmail?email=" +
@@ -39,20 +44,36 @@ export default function AppleAuth({ navigation }) {
                   .then((response) => response.data)
                   .then((res) => {
                     if (res.firstname) {
-                      dispatch(setEmail(jwtDecode(credential.identityToken).email));
+                      console.log('first hrere')
+                      dispatch(
+                        setEmail(jwtDecode(credential.identityToken).email)
+                      );
+
                       dispatch(setNameFirst(res.firstname));
                       dispatch(setNameLast(res.lastname));
                       navigation.navigate("Home");
+           
                     } else {
-                      navigation.navigate("SignupName", {
-                        email: jwtDecode(credential.identityToken).email,
-                      });
+                      console.log('2nd hrere')
+                      if (user.fullName.familyName!==null) {
+                        dispatch(
+                          setEmail(jwtDecode(credential.identityToken).email)
+                        );
+
+                        dispatch(setNameFirst(user.fullName.givenName));
+                        dispatch(setNameLast(user.fullName.familyName));
+                        navigation.navigate("Home");
+                      } 
                     }
+                    console.log('not hrere')
+                    navigation.navigate("SignupName", {
+                          email: jwtDecode(credential.identityToken).email,
+                        });
                   })
                   .catch((error) => console.log("error", error));
               }
-              // signed in
             } catch (e) {
+              console.log(e);
               if (e.code === "ERR_REQUEST_CANCELED") {
                 // handle that the user canceled the sign-in flow
               } else {
@@ -63,7 +84,9 @@ export default function AppleAuth({ navigation }) {
           }}
         />
       ) : (
-        <Text>{"Welcome, TPSI Fam!"}</Text>
+        <Text>
+          {"Welcome, TPSI Fam!"+JSON.stringify(user.identityToken) }
+        </Text>
       )}
     </View>
   );

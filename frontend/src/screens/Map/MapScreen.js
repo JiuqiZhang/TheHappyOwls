@@ -494,6 +494,7 @@ export default MapScreen = ({ navigation }) => {
   };
 
   const [filter, setFilter] = useState(filterVal);
+  const [message, setMessage] = useState(null)
   const validateItem = (hh) =>{
     let res = []
     if (hh.length > 0) {
@@ -591,10 +592,13 @@ export default MapScreen = ({ navigation }) => {
   useEffect(() => {
     const getPermissions = async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
+      setMessage("Please grant location permissions to use TPSI service.")
       if (status !== "granted") {
         console.log("Please grant location permissions");
+        setMessage("Please grant location permissions to use TPSI service.")
         return;
       } else {
+        setMessage(null)
         await Location.watchPositionAsync(
           {
             accuracy: Location.Accuracy.Lowest,
@@ -610,10 +614,20 @@ export default MapScreen = ({ navigation }) => {
         );
       }
 
-      let currentLocation = await Location.getCurrentPositionAsync({});
-      console.log("Location:");
-      console.log(currentLocation);
-      setLoc(currentLocation.coords);
+
+      var currentLocation = await Location.getLastKnownPositionAsync();
+        console.log("Location:");
+        console.log(currentLocation);
+        if (currentLocation) {setLoc(currentLocation.coords)}
+        else {
+          currentLocation = await Location.getCurrentPositionAsync( {
+            accuracy: Location.Accuracy.Lowest,
+          });
+          console.log("Location:");
+          console.log(currentLocation);
+          setLoc(currentLocation.coords);
+        }
+     
 
       var req = new FormData();
       req.append("lat", currentLocation.coords.latitude);
@@ -898,6 +912,8 @@ export default MapScreen = ({ navigation }) => {
         setFilter={setFilter}
         setFilteredData={setFilteredData}
         data={data}
+        open={open}
+        setopen={setopen}
         modal={modal}
         setmodal={setmodal}
         screen={"map"}
@@ -915,7 +931,7 @@ export default MapScreen = ({ navigation }) => {
           >
             <Icon.Search color={"grey"} style={{}} height={16} />
             <TextInput
-              style={{ height: 42, flex: 1 }}
+  
               value={searchVal}
               onChangeText={setsearch}
               placeholder={" Search store name"}
@@ -936,8 +952,9 @@ export default MapScreen = ({ navigation }) => {
             )}
           </View>
           <View
-            style={{
+             style={{
               alignSelf: "center",
+              marginRight: 20,
               width: 42,
               height: 42,
               borderRadius: 100,
@@ -946,13 +963,12 @@ export default MapScreen = ({ navigation }) => {
               textAlign: "center",
               display: "flex",
               borderWidth: 1.5,
-              borderColor: "#D3D3D3",
-              backgroundColor: "white",
+              borderColor: "white",
+              backgroundColor: "#F9EEC8",
               shadowColor: "#C58A00",
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.4,
               shadowRadius: 2,
-              marginRight: 20,
             }}
           >
             <TouchableOpacity
@@ -963,25 +979,13 @@ export default MapScreen = ({ navigation }) => {
               <Icon.Sliders
                 style={{ transform: [{ rotate: "90deg" }] }}
                 color={"grey"}
-                height={16}
+                height={20}
               />
             </TouchableOpacity>
           </View>
         </View>
         <View style={{ flexDirection: "row", width: "100%" }}>
-          <TouchableOpacity
-            style={[
-              styles.filter,
-              {
-                backgroundColor: open ? "#FFD029" : "white",
-                width: 98,
-                height: 32,
-              },
-            ]}
-            onPress={() => setopen(!open)}
-          >
-            <Text style={{ fontSize: 12 }}>{open ? "✓ " : null}Live Now</Text>
-          </TouchableOpacity>
+
           <TouchableOpacity
             style={[
               styles.filter,
@@ -1000,15 +1004,18 @@ export default MapScreen = ({ navigation }) => {
         </View>
       </View>
       <View style={{ position: "absolute", top: "40%", zIndex: 17 }}>
-        {!indicator ? null : (
-          <ActivityIndicator size="large" color="white" animating={indicator} />
+        {!message ? null : (
+         <>
+         <ActivityIndicator size="large" color="white" animating={indicator} />
+         <Text style={{color:'white',fontWeight:'bold'}}>{message}</Text>
+         </>
         )}
       </View>
 
       {/* <Text>{userLocation?(userLocation['coords']['latitude']+ ', '+userLocation['coords']['longitude']):"Waiting"}</Text> */}
       <MapView
         ref={_map}
-        provider={PROVIDER_GOOGLE}
+        provider={MapView.PROVIDER_GOOGLE}
         initialRegion={{
           latitude: 40.7295,
           longitude: -73.9965,
@@ -1355,7 +1362,6 @@ const styles = StyleSheet.create({
   },
   searchArea: {
     width: "100%",
-    marginHorizontal: 20,
     alignItems: "center",
     justifyContent: "center",
     paddingTop: Constants.statusBarHeight,

@@ -20,7 +20,7 @@ export default ProfileScreen = ({ navigation }) => {
           <View style={styles.row}>
             <Icon.User style={{ marginVertical: "2%" }} color={"grey"} />
             <Text style={[styles.datafield, { marginVertical: 7 }]}>
-              Personal info
+              Personal account
             </Text>
           </View>
 
@@ -68,7 +68,7 @@ export default ProfileScreen = ({ navigation }) => {
       </TouchableOpacity>
 
       <Text style={styles.title}>Legal</Text>
-      <TouchableOpacity style={styles.section}>
+      {/* <TouchableOpacity style={styles.section}>
         <View style={styles.box}>
           <View style={styles.row}>
             <Icon.BookOpen style={{ marginVertical: "2%" }} color={"grey"} />
@@ -80,9 +80,11 @@ export default ProfileScreen = ({ navigation }) => {
           <Icon.ArrowRight style={{ marginVertical: "2%" }} color={"grey"} />
         </View>
         <Divider width={1.5} />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
-      <TouchableOpacity style={styles.section}>
+      <TouchableOpacity style={styles.section} disabled={true} onPress={() => {
+          navigation.navigate("Policy");
+        }}>
         <View style={styles.box}>
           <View style={styles.row}>
             <Icon.BookOpen style={{ marginVertical: "2%" }} color={"grey"} />

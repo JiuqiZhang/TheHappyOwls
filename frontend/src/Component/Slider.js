@@ -2,6 +2,7 @@ import {Animated, FlatList, StyleSheet, Text, View} from 'react-native';
 import React, {useRef, useState} from 'react';
 import SlideItem from './SlideItems';
 import Pagination from './Pagination';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 const Slides = [
     {
       id: 1,
@@ -43,7 +44,8 @@ const Slider = (props) => {
   }).current;
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1 }}>
+
   <FlatList
     data={!props.img?Slides:props.img.photos}
     renderItem={({item}) => <SlideItem item={!props.img?item:{img:{uri:'http://spring-boot-repo-tpsi.s3.amazonaws.com/'+props.img._id+'_'+item.id}}} />}
@@ -57,7 +59,7 @@ const Slider = (props) => {
     viewabilityConfig={viewabilityConfig}
   />
   <Pagination data={!props.img?Slides:props.img.photos} scrollX={scrollX} index={index} />
-    </View>
+   </View>
   );
 };
 

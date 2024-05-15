@@ -29,6 +29,8 @@ export default function SignupNameScreen({ route, navigation }) {
         dispatch(setEmail(email));
         dispatch(setNameFirst(first));
         dispatch(setNameLast(last));
+        setFirst('')
+        setLast('')
         navigation.navigate("Home")
       }})
       .catch((error) => console.log("error", error));

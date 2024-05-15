@@ -6,6 +6,7 @@ import FeedbackScreen from '../screens/Profile/FeedbackScreen';
 import SecurityScreen from '../screens/Profile/SecurityScreen';
 import SignupScreen from '../screens/Auth/SignupScreen';
 import SignupNameScreen from '../screens/Auth/SignupNameScreen';
+import Privacy_policy from '../screens/Profile/Privacy_policy';
 // import EmailConfirm from '../screens/Auth/EmailConfirm';
 import { useSelector } from 'react-redux';
 
@@ -51,6 +52,12 @@ export default function MainStack(Stack){
           component={SecurityScreen}
 
         />
+                         <Stack.Screen
+          name="Policy"
+          component={Privacy_policy}
+
+        />
+
 
 </>
     )

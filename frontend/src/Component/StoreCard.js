@@ -10,17 +10,17 @@ import { useSelector } from "react-redux";
 export default StoreCard = React.memo((props) => {
   const user = useSelector((state) => state.user);
   const removeFav = async(id) =>{
-    var formdata = new FormData();
+    // var formdata = new FormData();
 
-    formdata.append("username", user.email);
-    formdata.append("storeID", id);
+    // formdata.append("username", user.email);
+    // formdata.append("storeID", id);
     
-    var requestOptions = {
-      method: 'POST',
-      body: formdata,
-    };
+    // var requestOptions = {
+    //   method: 'POST',
+    //   body: formdata,
+    // };
     
-    await axios({ method: "post",url:"https://data.tpsi.io/api/v1/stores/removeStoreToUserFavorite"})
+    await axios({ method: "post",url:"https://data.tpsi.io/api/v1/stores/removeStoreToUserFavorite?username="+user.email+"&storeID="+id,})
     .then((res) => {
       if (res) {
         props.change((stores) => {
@@ -31,19 +31,19 @@ export default StoreCard = React.memo((props) => {
     .catch((error) => console.log("error", error));
   }
   const addToFav = async (id) => {
-    var formdata = new FormData();
+    // var formdata = new FormData();
 
-    formdata.append("username", user.email);
-    formdata.append("storeID", id);
+    // formdata.append("username", user.email);
+    // formdata.append("storeID", id);
 
-    var requestOptions = {
-      method: "POST",
-      body: formdata,
-    };
+    // var requestOptions = {
+    //   method: "POST",
+    //   body: formdata,
+    // };
 
     await axios({
       method:'post',
-      url:"https://data.tpsi.io/api/v1/stores/addStoreToUserFavorite",
+      url:"https://data.tpsi.io/api/v1/stores/addStoreToUserFavorite?username="+user.email+"&storeID="+id,
       }
     )
       .then((res) => {
@@ -123,10 +123,11 @@ export default StoreCard = React.memo((props) => {
             flexDirection: "row",
             display: "flex",
             justifyContent: "space-between",
+            width:'85%'
           }}
         >
           <Text style={[{ marginTop: 9, marginBottom: 5 }, styles.text]}>
-            {props.store.name}
+            {props.store.name+JSON.stringify(props.store.tags)}
           </Text>
         </View>
         <View style={[styles.flexcontainer, styles.row]}></View>

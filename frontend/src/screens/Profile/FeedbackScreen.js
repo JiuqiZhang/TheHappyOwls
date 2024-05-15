@@ -53,6 +53,7 @@ export default FeedbackScreen = ({ navigation }) => {
     <TouchableOpacity
         onPress={() => {
           console.log(text);
+          changeText("")
         }}
         style={styles.btn}
       >

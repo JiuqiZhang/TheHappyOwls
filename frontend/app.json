@@ -1,19 +1,20 @@
 {
   "expo": {
     "plugins": [
-     
-      "expo-apple-authentication"
+      "expo-apple-authentication",
+      "expo-build-properties",
+      "expo-secure-store"
     ],
     "name": "TPSI",
     "slug": "tpsi",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/app.png",
+    "icon": "./assets/app.jpeg",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/app.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#FCFCEF"
+      "backgroundColor": "#FFD029"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -21,7 +22,10 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.theHappyOwls.Tpsi",
-      "buildNumber": "1.48",
+      "infoPlist": {
+        "NSLocationAlwaysUsageDescription": "App would like to access user location to provide nearby happy hour infos, distance from all stores, and map navigations to nearby stores."
+      },
+      "buildNumber": "1.55",
       "config": {
         "googleMapsApiKey": "AIzaSyBWQ5iFtnT2EQSo1Yi4D6pc-edq7MJkaPA"
       },

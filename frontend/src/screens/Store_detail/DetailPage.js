@@ -10,6 +10,7 @@ import {
   Modal,
   Dimensions,
 } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import DropDownPicker from 'react-native-dropdown-picker';
 import { LinearGradient } from "expo-linear-gradient";
 import Constants from "expo-constants";
@@ -40,52 +41,52 @@ export default DetailPage = ({ navigation, route }) => {
   const [description, setDescription] = useState(false);
   const [more, setMore] = useState(false);
   const data = route.params.store;
-  const removeFav = async(id) =>{
-    var formdata = new FormData();
+  // const removeFav = async(id) =>{
+  //   var formdata = new FormData();
 
-    formdata.append("username", user.email);
-    formdata.append("storeID", id);
+  //   formdata.append("username", user.email);
+  //   formdata.append("storeID", id);
     
-    var requestOptions = {
-      method: 'POST',
-      body: formdata,
-    };
+  //   var requestOptions = {
+  //     method: 'POST',
+  //     body: formdata,
+  //   };
     
-    await fetch("https://data.tpsi.io/api/v1/stores/removeStoreToUserFavorite", requestOptions)
-    .then((res) => {
-      if (res) {
+  //   await fetch("https://data.tpsi.io/api/v1/stores/removeStoreToUserFavorite", requestOptions)
+  //   .then((res) => {
+  //     if (res) {
         
-        route.params.change((stores) => {
-          return stores.map((store) => {return store._id == props.store._id ? {...store,userFavorite:false} : store});
-        });
-      }
-    })
-    .catch((error) => console.log("error", error));
-  }
-  const addToFav = async (id) => {
-    var formdata = new FormData();
+  //       route.params.change((stores) => {
+  //         return stores.map((store) => {return store._id == props.store._id ? {...store,userFavorite:false} : store});
+  //       });
+  //     }
+  //   })
+  //   .catch((error) => console.log("error", error));
+  // }
+  // const addToFav = async (id) => {
+  //   var formdata = new FormData();
 
-    formdata.append("username", user.email);
-    formdata.append("storeID", id);
+  //   formdata.append("username", user.email);
+  //   formdata.append("storeID", id);
 
-    var requestOptions = {
-      method: "POST",
-      body: formdata,
-    };
+  //   var requestOptions = {
+  //     method: "POST",
+  //     body: formdata,
+  //   };
 
-    await fetch(
-      "https://data.tpsi.io/api/v1/stores/addStoreToUserFavorite",
-      requestOptions
-    )
-      .then((res) => {
-        if (res) {
-          route.params.change((stores) => {
-            return stores.map((store) => {return store._id == props.store._id ? {...store,userFavorite:true} : store});
-          });
-        }
-      })
-      .catch((error) => console.log("error", error));
-  };
+  //   await fetch(
+  //     "https://data.tpsi.io/api/v1/stores/addStoreToUserFavorite",
+  //     requestOptions
+  //   )
+  //     .then((res) => {
+  //       if (res) {
+  //         route.params.change((stores) => {
+  //           return stores.map((store) => {return store._id == props.store._id ? {...store,userFavorite:true} : store});
+  //         });
+  //       }
+  //     })
+  //     .catch((error) => console.log("error", error));
+  // };
   const week = ["M", "Tu", "W", "Th", "F", "Sa", "Su"];
   const days = {
     0: "Monday",
@@ -101,6 +102,7 @@ export default DetailPage = ({ navigation, route }) => {
       for (let i = 0; i < data.days[moment().format("dddd")].time.length; i++) {
         let start = data.days[moment().format("dddd")].time[i].split(" - ")[0];
         let end = data.days[moment().format("dddd")].time[i].split(" - ")[1];
+       
         if (start.length > end.length) {
           if (
             moment().format("HH:mm") > start ||
@@ -126,7 +128,9 @@ export default DetailPage = ({ navigation, route }) => {
             );
           }
         }
-
+if(start.length<5){
+  start='0'+start
+}
         if (
           moment().format("HH:mm") > start &&
           moment().format("HH:mm") < end
@@ -204,7 +208,7 @@ export default DetailPage = ({ navigation, route }) => {
           <Text style={{ fontSize: 12, fontWeight: "500", margin: "auto" }}>
             {(hh != 0 ? hh + " hr " : "") +
               mm +
-              " mins left for this merchant’s Happy Hour"}
+              " mins untill this merchant’s Happy Hour"}
           </Text>
         </View>
       );
@@ -221,7 +225,7 @@ export default DetailPage = ({ navigation, route }) => {
     getLoc();
   }, []);
   return (
-    <View style={styles.container}>
+    <GestureHandlerRootView style={styles.container}>
       <ScrollView>
         <Slider img={data.photoResult[0]} />
         <MinLeft />
@@ -502,15 +506,16 @@ export default DetailPage = ({ navigation, route }) => {
 
                 <TouchableOpacity
                   style={{ alignItems: "center" }}
-                  onPress={
-          user.email
-            ? () => {
-                !data.userFavorite ? addToFav(data._id) : removeFav(data._id);
-              }
-            : () => {
-                navigation.navigate("Saved");
-              }
-        }
+                  onPress={()=>{isModal(!modal)}}
+        //           onPress={
+        //   user.email
+        //     ? () => {
+        //         !data.userFavorite ? addToFav(data._id) : removeFav(data._id);
+        //       }
+        //     : () => {
+        //         navigation.navigate("Saved");
+        //       }
+        // }
                 >
                   <View style={styles.directionIcon}>
                     <LinearGradient
@@ -519,10 +524,11 @@ export default DetailPage = ({ navigation, route }) => {
                       end={{ x: 1.6, y: 1 }}
                       style={styles.directionIcon}
                     >
-                      <MaterialIcons name={data.userFavorite?"bookmark":"bookmark-border"} size={24} color={data.userFavorite?"white":"black" } />
+                     <MaterialIcons name={'calendar-today'} size={24} color={"black" } />
+                      {/* <MaterialIcons name={data.userFavorite?"calendar":"bookmark-border"} size={24} color={data.userFavorite?"white":"black" } /> */}
                     </LinearGradient>
                   </View>
-                  <Text style={styles.directionFont}>Save</Text>
+                  <Text style={styles.directionFont}>Schedule</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -747,9 +753,9 @@ export default DetailPage = ({ navigation, route }) => {
                   </TouchableOpacity>
                 ) : null}
               </>
-            ) : (
-              <Text>No HH deals today</Text>
-            )}
+            ) : data.days[moment().format("dddd")].time.length > 0?(<Text>Happy hour menu not available</Text>):(<Text>No HH deals today</Text>)
+
+            }
           </View>
           <Divider
             orientation="horizontal"
@@ -793,9 +799,14 @@ export default DetailPage = ({ navigation, route }) => {
                   return (
                     <TabView.Item key={ind} style={styles.offerCard}>
                  
-                      <>
+                      <View>
                      {today.start_time? <Text style={{fontSize:12, fontWeight:'600',marginBottom:17}}>Hours: {today.start_time} - {today.end_time}</Text>:null}
-                        {today.menus.length > 0 ? (
+                        {today.menus.length == 0 ? (
+           
+                          <Text>No Daily Special Deals Today</Text>
+
+                        ):
+                        (
                           today.menus.map((deal, i) => {
                             return (
                    
@@ -833,18 +844,15 @@ export default DetailPage = ({ navigation, route }) => {
                                 </View>
                             );
                           })
-                        ) : (
-                          <Text>No Daily Special Deals Today</Text>
                         )}
-                      </>
+                      </View>
                     </TabView.Item>
                   );
                 })}
               </TabView>
             ) : (
               <>
-                <Text style={styles.times}>Daily Special Deals{"\n"}</Text>
-                <Text>No Daily Special Deals This Week</Text>
+                <Text>No Daily Special Deals This Week{'\n\n'}</Text>
               </>
             )}
           </View>
@@ -861,7 +869,7 @@ export default DetailPage = ({ navigation, route }) => {
           </View>
         </TouchableOpacity>
       </ScrollView>
-    </View>
+    </GestureHandlerRootView>
   );
 };
 const styles = StyleSheet.create({
