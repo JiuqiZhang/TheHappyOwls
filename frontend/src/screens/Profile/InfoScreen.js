@@ -29,7 +29,7 @@ export default InfoScreen = ({ navigation }) => {
       >
         <Icon.ArrowLeft color={"black"} />
       </TouchableOpacity>
-      <Text style={styles.title}>Edit Personal Info</Text>
+      <Text style={styles.title}>Account Setting</Text>
       <View style={styles.wrapper}>
         <InputBox label="First name" value={user.firstName} />
         <InputBox label="Last name" value={user.lastName} />

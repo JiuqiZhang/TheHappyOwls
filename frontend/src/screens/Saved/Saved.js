@@ -7,7 +7,7 @@ import {
   Modal,
 } from "react-native";
 import { useIsFocused } from '@react-navigation/native';
-
+import * as Location from "expo-location";
 
 import { BlurView } from "expo-blur";
 import React, { useEffect, useState } from "react";
@@ -102,9 +102,14 @@ export default SavedScreen = ({ navigation }) => {
 
   const getFav = async () => {
     var req = new FormData();
+    var currentLocation = await Location.getLastKnownPositionAsync();
+    console.log("Location:");
+    console.log(currentLocation);
+   
+
     req.append("username", user.email);
-    req.append("lat", 40.7429);
-    req.append("lng", -73.9392);
+    req.append("lat", currentLocation.coords.latitude);
+    req.append("lng", currentLocation.coords.longitude);
     var config = {
       method: "post",
       url: "https://data.tpsi.io/api/v1/stores/getUserFavoriteStores",

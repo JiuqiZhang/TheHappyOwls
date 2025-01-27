@@ -11,30 +11,32 @@ import { LinearGradient } from "expo-linear-gradient";
 import { View, StyleSheet } from "react-native";
 const Tab = createBottomTabNavigator();
 import { useSelector } from "react-redux";
-export default TabScreen = ({ navigation }) => {
+export default TabScreen = ({ navigation,route }) => {
   const user = useSelector((state) => state.user);
+  const store=route.params.store
+
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        //     tabBarStyle:{
-        //       bottom:'3%',
-        //       position:'absolute',
-        //       height:'7%',
-        //       marginHorizontal:"5%",
-        //       paddingVertical:'1%',
-        //       borderRadius: 60,
-        // alignItems: "center",
-        // justifyContent: "center",
+            tabBarStyle:{
+              // bottom:'3%',
+              // position:'absolute',
+              height:84,
+              // marginHorizontal:"5%",
+              // paddingVertical:'1%',
+              // borderRadius: 60,
+        alignItems: "center",
+        justifyContent: "center",
 
-        // shadowColor: "#000",
-        // shadowOffset: { width: 0, height: 1 },
-        // shadowOpacity: 0.8,
-        // shadowRadius: 2,
-        // elevation: 5,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 2,
+        shadowRadius: 1.5,
+        elevation: 5,
 
-        //     },
-        tabBarLabelStyle: { position: "absolute", bottom: "-35%" },
+            },
+        tabBarLabelStyle: { position: "absolute", bottom: 0 },
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
 
@@ -45,34 +47,7 @@ export default TabScreen = ({ navigation }) => {
         tabBarInactiveTintColor: "gray",
       }}
     >
-      <Tab.Screen
-        name="Search"
-        component={Menu}
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <View>
-              <LinearGradient
-                colors={
-                  focused ? ["#F9EEC8", "#FFD029", "#D9AA04"] : ["transparent"]
-                }
-                start={{ x: -0.4, y: 0 }}
-                end={{ x: 1.6, y: 1 }}
-                style={[
-                  styles.shadow,
-                  { backgroundColor: focused ? "#FED546" : "white" },
-                ]}
-              />
-              <Feather
-                name="search"
-                size={24}
-                color={focused ? "black" : "grey"}
-              />
-            </View>
-          ),
-        }}
-      />
-
-      <Tab.Screen
+          <Tab.Screen
         name="Map"
         component={MapScreen}
         options={{
@@ -98,8 +73,36 @@ export default TabScreen = ({ navigation }) => {
           ),
         }}
       />
-
       <Tab.Screen
+        name="Search"
+        component={Menu}
+        initialParams={{store:store}}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <View>
+              <LinearGradient
+                colors={
+                  focused ? ["#F9EEC8", "#FFD029", "#D9AA04"] : ["transparent"]
+                }
+                start={{ x: -0.4, y: 0 }}
+                end={{ x: 1.6, y: 1 }}
+                style={[
+                  styles.shadow,
+                  { backgroundColor: focused ? "#FED546" : "white" },
+                ]}
+              />
+              <Feather
+                name="search"
+                size={24}
+                color={focused ? "black" : "grey"}
+              />
+            </View>
+          ),
+        }}
+      />
+
+
+ <Tab.Screen
         name="Offers"
         component={CouponList}
         options={{
@@ -142,8 +145,8 @@ export default TabScreen = ({ navigation }) => {
                   { backgroundColor: focused ? "#FED546" : "white" },
                 ]}
               />
-              <Entypo
-                name="bookmark"
+              <Feather
+                name="heart"
                 size={24}
                 color={focused ? "black" : "grey"}
               />
@@ -151,6 +154,7 @@ export default TabScreen = ({ navigation }) => {
           ),
         }}
       />
+
 
       <Tab.Screen
         name="Profile"
@@ -185,8 +189,8 @@ export default TabScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   shadow: {
     position: "absolute",
-    height: 55,
-    width: 55,
+    height: 60,
+    width: 60,
     zIndex: -1,
     borderRadius: 999,
     alignSelf: "center",

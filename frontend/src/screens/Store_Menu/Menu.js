@@ -1,6 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import ModalFilter from "../../Component/ModalFilter";
+import { Modal } from "react-native";
 import Constants from "expo-constants";
+import * as WebBrowser from "expo-web-browser";
+import * as Device from "expo-device";
+import * as Notifications from "expo-notifications";
 import {
   StyleSheet,
   SafeAreaView,
@@ -14,8 +18,14 @@ import {
   Keyboard,
   Text,
   TextInput,
+  RefreshControl,
   Dimensions,
 } from "react-native";
+import { setToken, setStore } from "../../redux/actions";
+import { Image } from "expo-image";
+import { useIsFocused } from "@react-navigation/native";
+const { width } = Dimensions.get("window");
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSelector } from "react-redux";
 import * as Location from "expo-location";
 import { LinearGradient } from "expo-linear-gradient";
@@ -23,7 +33,6 @@ import * as Icon from "react-native-feather";
 import { Divider } from "react-native-elements";
 import StoreCard from "../../Component/StoreCard";
 import axios from "axios";
-import { useRef } from "react";
 import moment from "moment/moment";
 const statusBarHeight = Constants.statusBarHeight;
 const dp = PixelRatio.get();
@@ -35,13 +44,28 @@ import {
   MaterialIcons,
   FontAwesome,
 } from "@expo/vector-icons";
-export default MenuScreen = ({ navigation }) => {
+import { useDispatch } from "react-redux";
+import { setReview } from "../../redux/actions";
+import DailyCard from "../../Component/DailyCard";
+export default MenuScreen = ({ navigation, route }) => {
+  const isFocused = useIsFocused();
+  const dispatch = useDispatch();
   const [msg, setmsg] = useState({
     open: new Date(),
     location: "location got at",
     makeRequestAt: "make request at",
     response: "got response at",
   });
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      getPerm();
+      setRefreshing(false);
+    }, 2000);
+  }, []);
   const [indicator, setIndicator] = useState(true);
   const [data, setData] = useState();
   const [search, setsearch] = useState("");
@@ -55,67 +79,11 @@ export default MenuScreen = ({ navigation }) => {
   const [theTag, settheTag] = useState();
 
   const taglist = {
-    "$1 Oysters": (
-      <FontAwesome5
-        name="money-bill-alt"
+    "Cheap Drinks": (
+      <MaterialIcons
+        name="local-drink"
         size={25}
-        color={theTag === "$1 Oyster" ? "black" : "grey"}
-      />
-    ),
-    Aperol: (
-      <FontAwesome5
-        name="wine-glass-alt"
-        size={25}
-        color={theTag === "Aperol" ? "black" : "grey"}
-      />
-    ),
-    Margarita: (
-      <Ionicons
-        name="wine"
-        size={25}
-        color={theTag === "Margarita" ? "black" : "grey"}
-      />
-    ),
-    "Espresso Martini": (
-      <Entypo
-        name="drink"
-        size={25}
-        color={theTag === "Espresso Martini" ? "black" : "grey"}
-      />
-    ),
-    "AYCD!": (
-      <MaterialCommunityIcons
-        name="party-popper"
-        size={25}
-        color={theTag === "AYCD!" ? "black" : "grey"}
-      />
-    ),
-    "Craft Beers": (
-      <Ionicons
-        name="pint"
-        size={25}
-        color={theTag === "Craft Beers" ? "black" : "grey"}
-      />
-    ),
-    "Wine Lovers": (
-      <MaterialCommunityIcons
-        name="fruit-grapes"
-        size={25}
-        color={theTag === "Wine Lovers" ? "black" : "grey"}
-      />
-    ),
-    "Mixology Master": (
-      <Entypo
-        name="lab-flask"
-        size={25}
-        color={theTag === "Mixology Master" ? "black" : "grey"}
-      />
-    ),
-    "Dog-friendly": (
-      <FontAwesome5
-        name="dog"
-        size={25}
-        color={theTag === "Dog-friendly" ? "black" : "grey"}
+        color={theTag === "Cheap Drinks" ? "black" : "grey"}
       />
     ),
     "Extended HH": (
@@ -125,32 +93,25 @@ export default MenuScreen = ({ navigation }) => {
         color={theTag === "Extended HH" ? "black" : "grey"}
       />
     ),
-    "TPSI offers": (
-      <FontAwesome5
-        name="fire-alt"
+    "Cheap Snacks": (
+      <FontAwesome
+        name="cutlery"
         size={25}
-        color={theTag === "TPSI offers" ? "black" : "grey"}
+        color={theTag === "Cheap Snacks" ? "black" : "grey"}
       />
     ),
-    "Date night": (
+    "$1 Oysters": (
       <FontAwesome5
-        name="heartbeat"
+        name="money-bill-alt"
         size={25}
-        color={theTag === "Date night" ? "black" : "grey"}
+        color={theTag === "$1 Oyster" ? "black" : "grey"}
       />
     ),
-    Trivia: (
+    Rooftop: (
       <MaterialCommunityIcons
-        name="brain"
+        name="balcony"
         size={25}
-        color={theTag === "Trivia" ? "black" : "grey"}
-      />
-    ),
-    "Live Music": (
-      <Entypo
-        name="modern-mic"
-        size={25}
-        color={theTag === "Live Music" ? "black" : "grey"}
+        color={theTag === "Rooftop" ? "black" : "grey"}
       />
     ),
     Ambiance: (
@@ -167,6 +128,20 @@ export default MenuScreen = ({ navigation }) => {
         color={theTag === "Lively Crowd" ? "black" : "grey"}
       />
     ),
+    "Espresso Martini": (
+      <Entypo
+        name="drink"
+        size={25}
+        color={theTag === "Espresso Martini" ? "black" : "grey"}
+      />
+    ),
+    "Live Music": (
+      <Entypo
+        name="modern-mic"
+        size={25}
+        color={theTag === "Live Music" ? "black" : "grey"}
+      />
+    ),
     "Amazing Views": (
       <MaterialCommunityIcons
         name="weather-night"
@@ -174,11 +149,39 @@ export default MenuScreen = ({ navigation }) => {
         color={theTag === "Amazing Views" ? "black" : "grey"}
       />
     ),
-    Rooftop: (
-      <MaterialCommunityIcons
-        name="balcony"
+    "Date Night": (
+      <FontAwesome5
+        name="heartbeat"
         size={25}
-        color={theTag === "Rooftop" ? "black" : "grey"}
+        color={theTag === "Date night" ? "black" : "grey"}
+      />
+    ),
+    "Wine Lovers": (
+      <MaterialCommunityIcons
+        name="fruit-grapes"
+        size={25}
+        color={theTag === "Wine Lovers" ? "black" : "grey"}
+      />
+    ),
+    "Craft Beers": (
+      <Ionicons
+        name="pint"
+        size={25}
+        color={theTag === "Craft Beers" ? "black" : "grey"}
+      />
+    ),
+    Aperol: (
+      <FontAwesome5
+        name="wine-glass-alt"
+        size={25}
+        color={theTag === "Aperol" ? "black" : "grey"}
+      />
+    ),
+    Margaritas: (
+      <Ionicons
+        name="wine"
+        size={25}
+        color={theTag === "Margarita" ? "black" : "grey"}
       />
     ),
     "Local Drinks": (
@@ -188,18 +191,41 @@ export default MenuScreen = ({ navigation }) => {
         color={theTag === "Local Drinks" ? "black" : "grey"}
       />
     ),
-    "Cheap Drinks": (
-      <MaterialIcons
-        name="local-drink"
+    "Dog-friendly": (
+      <FontAwesome5
+        name="dog"
         size={25}
-        color={theTag === "Cheap Drinks" ? "black" : "grey"}
+        color={theTag === "Dog-friendly" ? "black" : "grey"}
       />
     ),
-    "Cheap Snacks": (
-      <FontAwesome
-        name="cutlery"
+    "AYCD!": (
+      <MaterialCommunityIcons
+        name="party-popper"
         size={25}
-        color={theTag === "Cheap Snacks" ? "black" : "grey"}
+        color={theTag === "AYCD!" ? "black" : "grey"}
+      />
+    ),
+    "Mixology Master": (
+      <Entypo
+        name="lab-flask"
+        size={25}
+        color={theTag === "Mixology Master" ? "black" : "grey"}
+      />
+    ),
+
+    "TPSI Offers": (
+      <FontAwesome5
+        name="fire-alt"
+        size={25}
+        color={theTag === "TPSI offers" ? "black" : "grey"}
+      />
+    ),
+
+    Trivia: (
+      <MaterialCommunityIcons
+        name="brain"
+        size={25}
+        color={theTag === "Trivia" ? "black" : "grey"}
       />
     ),
   };
@@ -215,6 +241,7 @@ export default MenuScreen = ({ navigation }) => {
       Saturday: false,
       Sunday: false,
     },
+    custom: null,
     items: {
       Beer: false,
       Wine: false,
@@ -258,110 +285,10 @@ export default MenuScreen = ({ navigation }) => {
     sortBy: "distance",
   };
   const user = useSelector((state) => state.user);
+  const [reviewWindow, setReviewWindow] = useState(!user.review);
   const [filter, setFilter] = useState(filterVal);
-  const Filtering = (data) => {
-    let res = data;
-    
-    if(theTag){
-      console.log(theTag)
-      res= res.filter((data)=>{
-        try{
-          if (data.tags.includes(theTag)){
-            return data
-          }
-        }catch(e){
-          console.log(e)
-        }
-      })
-    }
-    if (filter.sortBy) {
-      if (filter.sortBy == "rating") {
-        res = res.sort((a, b) => {
-          return b[filter.sortBy] - a[filter.sortBy];
-        });
-      } else {
-        res = res.sort((a, b) => {
-          return a[filter.sortBy] - b[filter.sortBy];
-        });
-      }
-    }
-    return res.filter((store) => {
-      if (!open) {
-        for (day in filter.hhdays) {
-          if (filter.hhdays[day] === true && store.days[day].time.length <= 0) {
-            return;
-          }
-        }
-
-        if (
-          JSON.stringify(filter.price) !== JSON.stringify(filterVal.price) &&
-          filter.price[store.price] !== true
-        ) {
-          return;
-        }
-
-        if (
-          store.cuisine[0] !== filter.selectedCuisine &&
-          filter.selectedCuisine !== null
-        ) {
-          return;
-        }
-        if (Object.values(filter.items).indexOf(true) > -1) {
-          for (const key of Object.keys(filter.items)) {
-            if (filter.items[key] && store.items.includes(key)) {
-              return store;
-            }
-          }
-          return;
-        }
-
-        return store;
-      } else {
-        if (store.days[moment().format("dddd")].time.length > 0) {
-          if (
-            moment().format("HH:mm") >
-              store.days[moment().format("dddd")].time[0].split(" - ")[0] &&
-            moment().format("HH:mm") <
-              store.days[moment().format("dddd")].time[0].split(" - ")[1]
-          ) {
-            for (day in filter.hhdays) {
-              if (
-                filter.hhdays[day] === true &&
-                store.days[day].time.length <= 0
-              ) {
-                return;
-              }
-            }
-            if (
-              JSON.stringify(filter.price) !==
-                JSON.stringify(filterVal.price) &&
-              filter.price[store.price] !== true
-            ) {
-              return;
-            }
-
-            if (
-              store.cuisine[0] !== filter.selectedCuisine &&
-              filter.selectedCuisine !== null
-            ) {
-              return;
-            }
-            if (Object.values(filter.items).indexOf(true) > -1) {
-              for (const key of Object.keys(filter.items)) {
-                if (filter.items[key] && store.items.includes(key)) {
-                  return store;
-                }
-              }
-              return;
-            }
-
-            return store;
-          }
-        }
-        return;
-      }
-    });
-  };
+  const [filtered, setFiltered] = useState(0);
+  // const [filter, ]
 
   const validateItem = (hh) => {
     let res = [];
@@ -426,143 +353,389 @@ export default MenuScreen = ({ navigation }) => {
 
     return schedule;
   };
-  // useEffect(()=>{console.log(filter.selectedCuisine,typeof(filter.selectedCuisine))},[filter])
-  useEffect(() => {
-    const getPerm = async () => {
+  const getPerm = async () => {
+    setMessage(
+      "Please grant location permissions to use TPSI service.\nOr only searching can be used"
+    );
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      setIndicator(false);
       setMessage(
         "Please grant location permissions to use TPSI service.\nOr only searching can be used"
       );
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setIndicator(false);
-        setMessage(
-          "Please grant location permissions to use TPSI service.\nOr only searching can be used"
-        );
-        return;
-      } else {
-        setMessage(null);
-        const locationSubscription = await Location.watchPositionAsync(
-          {
-            accuracy: Location.Accuracy.Lowest,
-            timeInterval: 1000,
-            distanceInterval: 1,
-          },
-          (location) => {
-            setLoc({
-              latitude: location.coords.latitude,
-              longitude: location.coords.longitude,
-            });
-          }
-        );
-      }
-
-      var currentLocation = await Location.getLastKnownPositionAsync();
-      console.log("Location:");
-      console.log(currentLocation);
-      if (currentLocation) {
-        setLoc(currentLocation.coords);
-      } else {
-        currentLocation = await Location.getCurrentPositionAsync({
+      return;
+    } else {
+      setMessage(null);
+      const locationSubscription = await Location.watchPositionAsync(
+        {
           accuracy: Location.Accuracy.Lowest,
-        });
-        console.log("Location:");
-        console.log(currentLocation);
-        setLoc(currentLocation.coords);
-      }
+          timeInterval: 1000,
+          distanceInterval: 1,
+        },
+        (location) => {
+          setLoc({
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+          });
+        }
+      );
+    }
 
-      setmsg((prevState) => ({
-        ...prevState,
-        location: (new Date() - prevState.open) / 1000,
-      }));
-      await axios({
+    var currentLocation = await Location.getLastKnownPositionAsync();
+
+    if (currentLocation) {
+      setLoc(currentLocation.coords);
+    } else {
+      currentLocation = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Lowest,
+      });
+      // console.log("Location:");
+      // console.log(currentLocation);
+      setLoc(currentLocation.coords);
+    }
+
+    setmsg((prevState) => ({
+      ...prevState,
+      location: (new Date() - prevState.open) / 1000,
+    }));
+    await axios({
+      method: "post",
+      url:
+        "https://data.tpsi.io/api/v1/stores/getTodayDailySpecial?lat=" +
+        currentLocation.coords.latitude +
+        "&lng=" +
+        currentLocation.coords.longitude,
+    })
+      .then((response) => {
+        return response.data.map((store) => ({
+          name: store.name,
+          rating: store.rating,
+          cuisine: `${store.cuisine}`,
+          hours: store.hours,
+          photoResult: store.photoResult,
+          latitude: store.latitude,
+          longitude: store.longitude,
+          location: store.location,
+          hh: store.hhResult,
+          price: store.price,
+          website: store.website,
+          comments: store.comments,
+          number: store.number,
+          days: validatehh(store.hhResult),
+          off: findDeal(store.hhResult),
+          items: validateItem(store.hhResult),
+          ...store,
+        }));
+      })
+
+      .then((stores) => {
+        setSpecials(stores);
+      })
+
+      .catch((e) => {
+        console.log(e, "failed");
+      });
+
+    var req = new FormData();
+    req.append("lat", currentLocation.coords.latitude);
+    req.append("lng", currentLocation.coords.longitude);
+    if (user.email) {
+      req.append("username", user.email);
+    }
+    // req.append("latDelta", 0.0122);
+    // req.append("lngDelta", 0.0081);
+
+    var config = {
+      method: "post",
+      url: "https://data.tpsi.io/api/v1/stores/getAllStoresWithDistance",
+      headers: {},
+      data: req,
+    };
+
+    var requestOptions = {
+      method: "POST",
+      body: req,
+      redirect: "follow",
+    };
+    setmsg((prevState) => ({
+      ...prevState,
+      makeRequestAt: (new Date() - prevState.open) / 1000,
+    }));
+
+    await axios(config)
+      .then((response) => {
+        setmsg((prevState) => ({
+          ...prevState,
+          response: (new Date() - prevState.open) / 1000,
+        }));
+
+        return response.data.map((store) => ({
+          name: store.name,
+          rating: store.rating,
+          cuisine: `${store.cuisine}`,
+          hours: store.hours,
+          photoResult: store.photoResult,
+          latitude: store.latitude,
+          longitude: store.longitude,
+          location: store.location,
+          hh: store.hhResult,
+          price: store.price,
+          website: store.website,
+          comments: store.comments,
+          number: store.number,
+          days: validatehh(store.hhResult),
+          off: findDeal(store.hhResult),
+          items: validateItem(store.hhResult),
+          ...store,
+        }));
+      })
+      .then((stores) => {
+        // console.log(stores);
+        setData(stores);
+        setFilteredData(stores);
+        setIndicator(false);
+      })
+      .catch((error) => console.log(error));
+  };
+  async function getDevicetoken() {
+    const token = await Notifications.getDevicePushTokenAsync();
+    return token;
+  }
+  // useEffect(()=>{console.log(filter.selectedCuisine,typeof(filter.selectedCuisine))},[filter])
+
+  useEffect(() => {
+    if (route.params.store !== "no") {
+      let store = route.params.store;
+      navigation.setParams({
+        store: "no",
+      });
+
+      navigation.navigate("Detail", {
+        store: store,
+      });
+    }
+    getDevicetoken().then((token) => {
+      dispatch(setToken(token.data));
+      axios({
         method: "post",
         url:
-          "https://data.tpsi.io/api/v1/stores/getTodayDailySpecial?lat=" +
-          currentLocation.coords.latitude +
-          "&lng=" +
-          currentLocation.coords.longitude,
+          "https://data.tpsi.io/api/v1/users/?username=" +
+          user.email +
+          "&firstname=" +
+          user.firstName +
+          "&lastname=" +
+          user.lastName +
+          "&deviceToken=" +
+          token.data,
       })
-        .then((response) => {
-          console.log(response.data.splice(0, 10));
-          setSpecials(response.data.splice(0, 10));
-        })
+        .then((res) => {})
         .catch((e) => {
-          console.log(
-            e,
-            "failed" +
-              "https://data.tpsi.io/api/v1/stores/getTodayDailySpecial?lat=" +
-              currentLocation.coords.latitude +
-              "&lng=" +
-              currentLocation.coords.longitude
-          );
+          console.log(e);
         });
+    });
 
-      var req = new FormData();
-      req.append("lat", currentLocation.coords.latitude);
-      req.append("lng", currentLocation.coords.longitude);
-      if (user.email) {
-        req.append("username", user.email);
-      }
-      // req.append("latDelta", 0.0122);
-      // req.append("lngDelta", 0.0081);
-
-      var config = {
-        method: "post",
-        url: "https://data.tpsi.io/api/v1/stores/getAllStoresWithDistance",
-        headers: {},
-        data: req,
-      };
-
-      var requestOptions = {
-        method: "POST",
-        body: req,
-        redirect: "follow",
-      };
-      setmsg((prevState) => ({
-        ...prevState,
-        makeRequestAt: (new Date() - prevState.open) / 1000,
-      }));
-
-      await axios(config)
-        .then((response) => {
-          setmsg((prevState) => ({
-            ...prevState,
-            response: (new Date() - prevState.open) / 1000,
-          }));
-
-          return response.data.map((store) => ({
-            name: store.name,
-            rating: store.rating,
-            cuisine: `${store.cuisine}`,
-            hours: store.hours,
-            photoResult: store.photoResult,
-            latitude: store.latitude,
-            longitude: store.longitude,
-            location: store.location,
-            hh: store.hhResult,
-            price: store.price,
-            website: store.website,
-            comments: store.comments,
-            number: store.number,
-            days: validatehh(store.hhResult),
-            off: findDeal(store.hhResult),
-            items: validateItem(store.hhResult),
-            ...store,
-          }));
-        })
-        .then((stores) => {
-          // console.log(stores);
-          setData(stores);
-          setFilteredData(stores);
-          setIndicator(false);
-        })
-        .catch((error) => console.log(error));
-    };
     getPerm();
   }, [newloc]);
   const [newloc, setNew] = useState(null);
   const [specials, setSpecials] = useState(null);
+  const Filtering = (data) => {
+    let res = data;
 
+    if (theTag) {
+      res = res.filter((data) => {
+        try {
+          if (data.tagResult.find((tag) => tag.name == theTag)) {
+            return data;
+          }
+        } catch (e) {
+          console.log(e, data.name);
+        }
+      });
+    }
+    if (filter.sortBy) {
+      if (filter.sortBy == "rating") {
+        res = res.sort((a, b) => {
+          return b[filter.sortBy] - a[filter.sortBy];
+        });
+      } else {
+        res = res.sort((a, b) => {
+          return a[filter.sortBy] - b[filter.sortBy];
+        });
+      }
+    }
+
+    return res.filter((store) => {
+      if (!open) {
+        for (day in filter.hhdays) {
+          if (filter.hhdays[day] === true && store.days[day].time.length <= 0) {
+            return;
+          }
+        }
+
+        if (
+          JSON.stringify(filter.price) !== JSON.stringify(filterVal.price) &&
+          filter.price[store.price] !== true
+        ) {
+          return;
+        }
+
+        if (
+          store.cuisine[0] !== filter.selectedCuisine &&
+          filter.selectedCuisine !== null
+        ) {
+          return;
+        }
+        if (Object.values(filter.items).indexOf(true) > -1) {
+          for (const key of Object.keys(filter.items)) {
+            if (filter.items[key] && !store.items.includes(key)) {
+              return;
+            }
+          }
+        }
+
+        if (filter.custom !== null) {
+          if (store.days[moment().format("dddd")].time.length > 0) {
+            for (
+              let i = 0;
+              i < store.days[moment().format("dddd")].time.length;
+              i++
+            ) {
+              let start =
+                store.days[moment().format("dddd")].time[i].split(" - ")[0];
+              let end =
+                store.days[moment().format("dddd")].time[i].split(" - ")[1];
+
+                if (start.length == 5 && start.length > end.length) {
+                  if(filter.custom>=start){
+                    return store
+                  }else if (filter.custom< "0" + end){
+                    return store
+                  }
+
+                }
+
+              if (start.length < 5) {
+                start = "0" + start;
+              }
+              if (end.length < 5) {
+                end = "0" + end;
+              }
+              
+
+              if (start <= filter.custom && filter.custom < end) {
+                return store;
+              }
+              else{
+                return
+              }
+            }
+          }
+        } else {
+          return store;
+        }
+      } else {
+        if (store.days[moment().format("dddd")].time.length > 0) {
+          for (
+            let i = 0;
+            i < store.days[moment().format("dddd")].time.length;
+            i++
+          ) {
+            let start =
+              store.days[moment().format("dddd")].time[i].split(" - ")[0];
+            let end =
+              store.days[moment().format("dddd")].time[i].split(" - ")[1];
+            if (start.length == 5 && start.length > end.length) {
+              for (day in filter.hhdays) {
+                if (
+                  filter.hhdays[day] === true &&
+                  store.days[day].time.length <= 0
+                ) {
+                  return;
+                }
+              }
+              if (
+                JSON.stringify(filter.price) !==
+                  JSON.stringify(filterVal.price) &&
+                filter.price[store.price] !== true
+              ) {
+                return;
+              }
+
+              if (
+                store.cuisine[0] !== filter.selectedCuisine &&
+                filter.selectedCuisine !== null
+              ) {
+                return;
+              }
+              if (Object.values(filter.items).indexOf(true) > -1) {
+                for (const key of Object.keys(filter.items)) {
+                  if (filter.items[key] && !store.items.includes(key)) {
+                    return;
+                  }
+                }
+              }
+
+             
+                if(moment().format("HH:mm")>=start){
+                  return store
+                }
+              
+            
+                if(moment().format("HH:mm") < "0" + end){
+                  return store
+                }
+              
+              else{return}
+            }
+            if (start.length < 5) {
+              start = "0" + start;
+            }
+            if (end.length < 5) {
+              end = "0" + end;
+            }
+            if (
+              moment().format("HH:mm") >= start &&
+              moment().format("HH:mm") < end
+            ) {
+              for (day in filter.hhdays) {
+                if (
+                  filter.hhdays[day] === true &&
+                  store.days[day].time.length <= 0
+                ) {
+                  return;
+                }
+              }
+              if (
+                JSON.stringify(filter.price) !==
+                  JSON.stringify(filterVal.price) &&
+                filter.price[store.price] !== true
+              ) {
+                return;
+              }
+
+              if (
+                store.cuisine[0] !== filter.selectedCuisine &&
+                filter.selectedCuisine !== null
+              ) {
+                return;
+              }
+              if (Object.values(filter.items).indexOf(true) > -1) {
+                for (const key of Object.keys(filter.items)) {
+                  if (filter.items[key] && store.items.includes(key)) {
+                    return store;
+                  }
+                }
+                return;
+              }
+
+              return store;
+            }
+          }
+        }
+        return;
+      }
+    });
+  };
   const findDeal = (hh) => {
     var res = 1;
     if (hh.length > 0) {
@@ -632,10 +805,13 @@ export default MenuScreen = ({ navigation }) => {
         )
         .then((data) => {
           setResult(data);
-          scrollRef.current?.scrollTo({
-            y: 0,
-            animated: true,
-          });
+          if (scrollRef.current) {
+            scrollRef.current.scrollTo({
+              y: 0,
+              animated: true,
+            });
+          }
+
           setIndicator(false);
         })
         .catch((e) => {
@@ -668,10 +844,13 @@ export default MenuScreen = ({ navigation }) => {
         )
         .then((data) => {
           setResult(data);
-          scrollRef.current?.scrollTo({
-            y: 0,
-            animated: true,
-          });
+
+          if (scrollRef.current) {
+            scrollRef.current.scrollTo({
+              y: 0,
+              animated: true,
+            });
+          }
           setIndicator(false);
         })
         .catch((e) => {
@@ -688,15 +867,100 @@ export default MenuScreen = ({ navigation }) => {
   //   )
   // }
   return (
-    <View
+    <GestureHandlerRootView
       style={styles.container}
       onTouchStart={() => {
         Keyboard.dismiss();
       }}
     >
+      <Modal visible={reviewWindow} transparent={true}>
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0,0,0,0.6)",
+          }}
+          onPress={() => setReviewWindow(false)}
+        >
+          <TouchableOpacity activeOpacity={1}>
+            <Image
+              source={require("../../Image/review.png")}
+              style={{
+                width: 353,
+                height: 144,
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  marginTop: 12,
+                  marginBottom: 17,
+                  fontSize: 12,
+                  fontWeight: "bold",
+                }}
+              >
+                Improve Your Happy Hour Experience! 🎉
+              </Text>
+              <Text style={{ fontSize: 12, width: 290 }}>
+                Would you like to tell us what features are most important to
+                you when searching for Happy Hour spots?
+              </Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-around",
+                  width: "100%",
+                  marginTop: 8,
+                }}
+              >
+                <TouchableOpacity
+                  style={{
+                    width: 83,
+                    height: 21,
+                    backgroundColor: "#FAF1D1",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 10,
+                    borderWidth: 1,
+                  }}
+                  onPress={async () => {
+                    await WebBrowser.openBrowserAsync(
+                      "https://forms.gle/ia913aAd5T87WiNc6"
+                    ).then(() => {
+                      setReviewWindow(false);
+                      dispatch(setReview(true));
+                    });
+                  }}
+                >
+                  <Text style={{ fontSize: 12 }}>sure thing!</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={{
+                    width: 83,
+                    height: 21,
+                    backgroundColor: "#FAF1D1",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 10,
+                    borderWidth: 1,
+                  }}
+                  onPress={() => {
+                    setReviewWindow(false);
+                    dispatch(setReview(true));
+                  }}
+                >
+                  <Text style={{ fontSize: 12 }}>maybe not..</Text>
+                </TouchableOpacity>
+              </View>
+            </Image>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
       <ModalFilter
         filter={filter}
         filterVal={filterVal}
+        setFiltered={setFiltered}
         setFilter={setFilter}
         setFilteredData={setFilteredData}
         data={data}
@@ -705,7 +969,12 @@ export default MenuScreen = ({ navigation }) => {
         modal={modal}
         setmodal={setmodal}
       />
-      <View style={styles.searchArea}>
+      <LinearGradient
+        colors={["#F9EEC8", "#FFD029", "#D9AA04"]}
+        start={{ x: -0.4, y: 0 }}
+        end={{ x: 2.4, y: 2 }}
+        style={styles.searchArea}
+      >
         <View style={styles.inputContainer}>
           <View
             style={[
@@ -720,18 +989,28 @@ export default MenuScreen = ({ navigation }) => {
             <TextInput
               value={search}
               onChangeText={setsearch}
-              placeholder=" Search store name"
+              placeholder=" search for places/drinks"
               returnKeyType="search"
               onSubmitEditing={() => {
                 searchResult();
               }}
+              style={{ height: 42, flex: 1 }}
             />
+            {search === "" ? null : (
+              <TouchableOpacity
+                onPress={() => {
+                  setsearch("");
+                  setResult(null);
+                }}
+              >
+                <Icon.X color={"grey"} height={16} />
+              </TouchableOpacity>
+            )}
           </View>
           <TouchableOpacity
-              onPress={() => {
-                setmodal(true);
-              }}
-            
+            onPress={() => {
+              setmodal(true);
+            }}
             style={{
               alignSelf: "center",
               marginRight: 20,
@@ -743,36 +1022,57 @@ export default MenuScreen = ({ navigation }) => {
               textAlign: "center",
               display: "flex",
               borderWidth: 1.5,
-              borderColor: "white",
-              backgroundColor: "#F9EEC8",
-              shadowColor: "#C58A00",
+              borderColor: filtered === 0 ? "white" : "black",
+              backgroundColor: "white",
+              shadowColor: "black",
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.4,
               shadowRadius: 2,
             }}
           >
-            
-              <Icon.Sliders
-                style={{ transform: [{ rotate: "90deg" }] }}
-                color={"grey"}
-                height={20}
-              />
-            </TouchableOpacity>
-
+            {filtered === 0 ? null : (
+              <View
+                style={{
+                  position: "absolute",
+                  top: -3,
+                  right: -3,
+                  borderRadius: 25,
+                  backgroundColor: "black",
+                  height: 17,
+                  width: 17,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Text
+                  style={{ color: "white", fontSize: 10, fontWeight: "600" }}
+                >
+                  {filtered}
+                </Text>
+              </View>
+            )}
+            <Icon.Sliders
+              style={{ transform: [{ rotate: "90deg" }] }}
+              color={filtered === 0 ? "grey" : "black"}
+              height={20}
+            />
+          </TouchableOpacity>
         </View>
-      </View>
-
-      {/* <Text>{JSON.stringify(filteredData)}</Text> */}
+      </LinearGradient>
       {/* <DailySection/> */}
-     
+
       {/* testing info */}
-      <View
-        style={styles.scrollView}
-        ref={scrollRef}
-        keyboardShouldPersistTaps="handled"
-      >
+      <View style={[styles.scrollView]} keyboardShouldPersistTaps="handled">
         <ScrollView
-          style={{ height: 80, paddingHorizontal: 10 }}
+          style={{
+            paddingTop: 17,
+            paddingHorizontal: 14,
+            backgroundColor: "#FFFEFA",
+            shadowColor: "#C58A00",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.4,
+            shadowRadius: 2,
+          }}
           horizontal={true}
           showsHorizontalScrollIndicator={false}
         >
@@ -785,17 +1085,22 @@ export default MenuScreen = ({ navigation }) => {
                     settheTag(null);
                   } else {
                     settheTag(tag);
+                    if (scrollRef.current) {
+                      scrollRef.current.scrollTo({
+                        y: 0,
+                        animated: true,
+                      });
+                    }
                   }
                 }}
                 style={{
                   justifyContent: "flex-end",
                   alignItems: "center",
-                  paddingHorizontal: 10,
+                  marginHorizontal: 10,
                   alignSelf: "center",
-                  height: 70,
-                  paddingBottom: 10,
-                  borderBottomWidth:tag === theTag ?2 : 0,
-                  borderColor:'black'
+                  paddingBottom: 14,
+                  borderBottomWidth: tag === theTag ? 4 : 0,
+                  borderColor: "#C48A00",
                 }}
               >
                 {/* <View
@@ -810,9 +1115,9 @@ export default MenuScreen = ({ navigation }) => {
                 /> */}
                 {taglist[tag]}
                 <Text
-                
                   style={{
-                    fontSize: 15,
+                    fontSize: 11,
+                    marginTop: 6,
                     fontWeight: "500",
                     flexWrap: "wrap",
                     color: tag === theTag ? "black" : "grey",
@@ -824,21 +1129,79 @@ export default MenuScreen = ({ navigation }) => {
             );
           })}
         </ScrollView>
+        <Divider orientation="horizontal" width={1} color={"#EDEDED"} />
         {/*Today's special!!!!!!!!!!!!!!!!!!!!!!!  */}
-        {specials&&!theTag?<ScrollView style={{flexDirection:'column'}}>
-      {specials.map((item,id)=>{
-        return(<Text key={id}>{item.name}</Text>)
-      })}
-      </ScrollView>:null}
-      {filteredData && Filtering(filteredData).length < 1 ? (
-        <Text>no store within the filtered scope</Text>
-      ) : null}
+
         {!indicator ? (
           !result ? (
             data ? (
               <FlatList
+                ref={this.scrollRef}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                  />
+                }
+                ListHeaderComponent={
+                  <View>
+                    {JSON.stringify(filter) == JSON.stringify(filterVal) &&
+                    !open &&
+                    !theTag ? (
+                      <>
+                        {specials && !theTag ? (
+                          <>
+                            <Text
+                              style={{
+                                marginLeft: 20,
+                                marginTop: 15,
+                                marginBottom: 15,
+                                fontSize: 18,
+                                fontWeight: "600",
+                              }}
+                            >
+                              Today's special
+                            </Text>
+                            <FlatList
+                              data={specials}
+                              style={{ paddingLeft: 20 }}
+                              horizontal
+                              showsHorizontalScrollIndicator={false}
+                              renderItem={(item, ind) => (
+                                <DailyCard
+                                  store={item.item}
+                                  key={ind}
+                                  navigation={navigation}
+                                />
+                              )}
+                            />
+                          </>
+                        ) : null}
+                        {filteredData && Filtering(filteredData).length < 1 ? (
+                          <Text>no store within the filtered scope</Text>
+                        ) : null}
+                        <Divider
+                          orientation="horizontal"
+                          width={1.5}
+                          color={"#EDEDED"}
+                        />
+                        <Text
+                          style={{
+                            marginLeft: 20,
+                            marginTop: 15,
+                            fontSize: 19,
+                            fontWeight: "600",
+                          }}
+                        >
+                          All stores
+                        </Text>
+                      </>
+                    ) : null}
+                  </View>
+                }
+                contentContainerStyle={{ paddingBottom: 300 }}
                 data={
-                  filter === filterVal || !open
+                  JSON.stringify(filter) == JSON.stringify(filterVal) || !open
                     ? Filtering(data)
                     : filteredData
                     ? Filtering(filteredData)
@@ -846,13 +1209,16 @@ export default MenuScreen = ({ navigation }) => {
                 }
                 renderItem={({ item }) => (
                   <TouchableOpacity
-                    key={item.name}
                     onPress={() => {
-                      navigation.navigate("Detail", { store: item });
+                      navigation.navigate("Detail", {
+                        store: item,
+                        location: loc,
+                      });
                       // navigation.navigate("Detail", { store: item,test:"123", change:filter === filterVal || !open ? ()=>setData:()=>setFilteredData});
                     }}
                   >
                     <StoreCard
+                      key={item.name}
                       store={item}
                       navigation={navigation}
                       change={
@@ -872,20 +1238,59 @@ export default MenuScreen = ({ navigation }) => {
                   style={{ top: "5%" }}
                   animating={indicator}
                 />
-                <Text>{messasge}</Text>
               </>
             )
           ) : (
             <ScrollView
-              style={styles.scrollView}
-              ref={scrollRef}
+              style={{ width: "100%" }}
+              contentContainerStyle={{ paddingBottom: 300 }}
+              ref={this.scrollRef}
               keyboardShouldPersistTaps="handled"
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }
             >
+              {result == null || result.length == 0 ? (
+                <>
+                  <Image
+                    style={{
+                      width: 100,
+                      height: 100,
+                      alignSelf: "center",
+                      marginTop: "40%",
+                    }}
+                    source={require("../../Image/Cocktail.png")}
+                  />
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: "600",
+                      alignSelf: "center",
+                      marginTop: "5%",
+                    }}
+                  >
+                    We didn't find a match.
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      color: "grey",
+                      alignSelf: "center",
+                      marginTop: "2%",
+                    }}
+                  >
+                    Try search for something else instead.
+                  </Text>
+                </>
+              ) : null}
               {Filtering(result).map((object, index) => (
                 <TouchableOpacity
                   key={index}
                   onPress={() => {
-                    navigation.navigate("Detail", { store: object });
+                    navigation.navigate("Detail", {
+                      store: object,
+                      location: loc,
+                    });
                   }}
                 >
                   <StoreCard
@@ -926,7 +1331,7 @@ export default MenuScreen = ({ navigation }) => {
           />
         ) : null}
       </View>
-    </View>
+    </GestureHandlerRootView>
   );
 };
 const styles = StyleSheet.create({
@@ -943,6 +1348,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     display: "flex",
     flexDirection: "row",
+    paddingBottom: 12,
   },
   searchArea: {
     width: "100%",
@@ -950,21 +1356,35 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingTop: statusBarHeight,
     backgroundColor: "#F9EEC8",
-    shadowColor: "rgb(129, 129, 129)",
+    paddingTop: 56,
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.4,
     shadowRadius: 2,
   },
+  card: {
+    // padding: 10,
+    elevation: 5,
+    backgroundColor: "#FFF",
+    flexDirection: "row",
+    borderRadius: 5,
+    marginHorizontal: 4,
+    shadowColor: "#000",
+    shadowRadius: 5,
+    shadowOpacity: 0.3,
+    shadowOffset: { x: 2, y: -2 },
+    overflow: "hidden",
+  },
   divider: {
-    marginHorizontal: 6,
-    borderColor: "grey",
+    borderColor: "black",
+    marginTop: "3%",
   },
   input: {
     height: 42,
     flexGrow: 1,
     borderWidth: 1,
     borderColor: "white",
-    padding: 10,
+    paddingHorizontal: 10,
     borderRadius: 20,
     display: "flex",
     marginRight: 14,
@@ -1012,5 +1432,21 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 5,
     marginBottom: "1%",
+  },
+  percent: {
+    backgroundColor: "#F5E3A3",
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.4,
+    shadowRadius: 1,
+    elevation: 1,
+  },
+  row: {
+    display: "flex",
+    flexDirection: "row",
+    flex: 1,
   },
 });

@@ -48,7 +48,7 @@ const Slider = (props) => {
 
   <FlatList
     data={!props.img?Slides:props.img.photos}
-    renderItem={({item}) => <SlideItem item={!props.img?item:{img:{uri:'http://spring-boot-repo-tpsi.s3.amazonaws.com/'+props.img._id+'_'+item.id}}} />}
+    renderItem={({item}) => <SlideItem item={!props.img?item:{img:{uri:'https://spring-boot-repo-tpsi.s3.amazonaws.com/'+props.img._id+'_'+item.id}}} />}
     horizontal
     pagingEnabled
     // disableIntervalMomentum={true}

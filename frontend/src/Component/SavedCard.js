@@ -51,7 +51,7 @@ export default SavedCard = React.memo(({item,setRefresh}) =>{
             item.photoResult[0] && item.photoResult[0].photos[0]
               ? {
                   uri:
-                    "http://spring-boot-repo-tpsi.s3.amazonaws.com/" +
+                    "https://spring-boot-repo-tpsi.s3.amazonaws.com/" +
                     item.photoResult[0]._id +
                     "_" +
                     item.photoResult[0].photos[0].id,
@@ -114,7 +114,7 @@ export default SavedCard = React.memo(({item,setRefresh}) =>{
               {item.distance + " mi"}
             </Text>
            <TouchableOpacity  style={{ position: "absolute", right: 0, top: 30,padding:0 }} onPress={()=>{remove(item._id)}}>
-           <Icon.Bookmark
+           <Icon.Heart
         height={25}
         width={20}
         fill={"#FFD029"}

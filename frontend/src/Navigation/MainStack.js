@@ -11,15 +11,17 @@ import Privacy_policy from '../screens/Profile/Privacy_policy';
 import { useSelector } from 'react-redux';
 
 import Login from '../screens/Auth/Login';
-export default function MainStack(Stack){
+export default function MainStack(Stack,store){
   const  user = useSelector(state => state.user);
-    return(
+
+     return(
 
 <>     
         <Stack.Screen
           name="Home"
           component={TabScreen}
           options={{ title: "Happy Owls" }}
+          initialParams={{store:store?{_id:store}:'no'}}
         />
           <Stack.Screen
           name="Signup"
@@ -34,6 +36,7 @@ export default function MainStack(Stack){
         <Stack.Screen
           name="Detail"
           component={DetailPage}
+          initialParams={{'key':'value'}}
 
         />
         
@@ -61,4 +64,5 @@ export default function MainStack(Stack){
 
 </>
     )
+
 }
