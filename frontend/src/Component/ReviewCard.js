@@ -58,8 +58,9 @@ export default function ReviewCard({ reviews }) {
 
     const listDishes = (dishes) => {
         return dishes.map((dish, index) => (
-            <View key={index} style={{ flexDirection: "row", marginRight: 10 }}>
+            <View key={index} style={{ flexDirection: "row" }}>
                 <Text style={{ fontSize: 14, }}>{dish}</Text>
+                <Text style={{}}>{index === dishes.length - 1 ? "" : ", "}</Text>
             </View>
         ))
     }
