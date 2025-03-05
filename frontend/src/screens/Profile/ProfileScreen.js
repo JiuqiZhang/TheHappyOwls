@@ -107,6 +107,30 @@ export default ProfileScreen = ({ navigation }) => {
           <TouchableOpacity
             style={styles.section}
             onPress={() => {
+              navigation.navigate("ManageCheckInScreen");
+            }}
+          >
+            <View style={styles.box}>
+              <View style={styles.row}>
+                <Icon.Star
+                  style={{ alignSelf: "center" }}
+                  color={"black"}
+                />
+                <Text style={[styles.datafield, { marginVertical: 7 }]}>
+                  Manage Check-ins
+                </Text>
+              </View>
+
+              <Icon.ArrowRight
+                style={{ alignSelf: "center", marginRight: 26 }}
+                color={"black"}
+              />
+            </View>
+            <Divider width={1} color={"#EDEDED"} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.section}
+            onPress={() => {
               navigation.navigate("Info");
             }}
           >
@@ -125,7 +149,7 @@ export default ProfileScreen = ({ navigation }) => {
             </View>
             <Divider width={1} color={"#EDEDED"} />
           </TouchableOpacity>
-          
+
         </View>
         <View
           style={{
@@ -159,26 +183,26 @@ export default ProfileScreen = ({ navigation }) => {
             <Text style={{ fontSize: 10, fontWeight: "600" }}>Log Out</Text>
           </TouchableOpacity>
           <View style={{ height: 24, marginTop: 20, alignSelf: "center" }}>
-           
-              <TouchableOpacity
-                onPress={async () => {
-                  await WebBrowser.openBrowserAsync(
-                    "https://drive.google.com/file/d/1ggIpVeV0VEU9USRVWB4fnV6yneEvCCPU/view"
-                  );
+
+            <TouchableOpacity
+              onPress={async () => {
+                await WebBrowser.openBrowserAsync(
+                  "https://drive.google.com/file/d/1ggIpVeV0VEU9USRVWB4fnV6yneEvCCPU/view"
+                );
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 10,
+                  fontWeight: "500",
+                  textAlign: "center",
+                  color: '#8A6F0F',
+                  textDecorationLine: 'underline'
                 }}
               >
-                <Text
-                  style={{
-                    fontSize: 10,
-                    fontWeight: "500",
-                    textAlign: "center",
-                    color:'#8A6F0F',
-                    textDecorationLine:'underline'
-                  }}
-                >
-                  Privacy Policy
-                </Text>
-              </TouchableOpacity>
+                Privacy Policy
+              </Text>
+            </TouchableOpacity>
 
           </View>
           <View style={{ height: 24, marginTop: 6, alignSelf: "center" }}>

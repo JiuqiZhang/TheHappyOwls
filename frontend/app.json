@@ -35,9 +35,9 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.theHappyOwls.Tpsi",
       "infoPlist": {
-        "NSLocationAlwaysUsageDescription": "App would like to access user location to provide nearby happy hour infos, distance from all stores, and map navigations to nearby stores.",
-        "NSLocationWhenInUseUsageDescription": "App would like to access user location to provide nearby happy hour infos, distance from all stores, and map navigations to nearby stores.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "App would like to access user location to provide nearby happy hour infos, distance from all stores, and map navigations to nearby stores."
+        "NSLocationAlwaysUsageDescription": "App would like to access user location to provide nearby happy hour infos, distance from all stores, and map navigation to nearby stores.",
+        "NSLocationWhenInUseUsageDescription": "App would like to access user location to provide nearby happy hour infos, distance from all stores, and map navigation to nearby stores.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "App would like to access user location to provide nearby happy hour infos, distance from all stores, and map navigation to nearby stores."
       },
       "buildNumber": "1.102",
       "config": {
