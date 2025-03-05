@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "center",
         alignItems: "center",
-        paddingBottom: "20%",
+        paddingBottom: "15%",
         borderBottomColor: "#F5E3A3",
         borderBottomWidth: 5,
 
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     },
     container: {
         flex: 1,
-        paddingTop: "17%",
+        paddingTop: "20%",
         // paddingHorizontal: "5%",
     },
     divider: {
