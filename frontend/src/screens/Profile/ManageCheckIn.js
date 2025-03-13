@@ -11,15 +11,18 @@ import { Image } from "expo-image";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import ReviewCard from "../../Component/ReviewCard";
-import ImageViewer from "../../Component/ImageViewer";
 
 export default function ManageCheckInScreen({ navigation }) {
     const [checkIns, setCheckIns] = React.useState([]);
 
     const fetch = async () => {
         const res = await axios.get("https://data.tpsi.io/api/v1/reviews/" + user.email);
-        console.log(res.data);
         setCheckIns(res.data);
+    }
+
+    async function reloadPage() {
+        console.log('reloading')
+        await fetch();
     }
 
     const user = useSelector((state) => state.user);
@@ -47,7 +50,7 @@ export default function ManageCheckInScreen({ navigation }) {
                     </Text>
                 </View>
                 <ScrollView>
-                    <ReviewCard reviews={checkIns} />
+                    <ReviewCard reviews={checkIns} onReload={reloadPage} type={'checkIn'} />
                 </ScrollView>
             </View>
             <TouchableOpacity

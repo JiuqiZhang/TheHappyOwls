@@ -33,7 +33,7 @@ const { height, width } = Dimensions.get("screen");
 import moment from "moment";
 import { Avatar } from "react-native-elements";
 import { Dropdown } from "react-native-element-dropdown";
-import { SafeAreaView } from "react-native-safe-area-context";
+import ReviewCard from "../../Component/ReviewCard";
 export default DetailPage = ({ navigation, route }) => {
   const user = useSelector((state) => state.user);
   const img = {
@@ -130,7 +130,6 @@ export default DetailPage = ({ navigation, route }) => {
 
     return res;
   };
-
   useEffect(() => {
     const getPerm = async () => {
       // var req = new FormData();
@@ -150,6 +149,7 @@ export default DetailPage = ({ navigation, route }) => {
 
       await axios(config)
         .then((response) => {
+          setReviews(response.data.reviewResult);
           return response.data;
         })
         .then((store) => {
@@ -170,6 +170,7 @@ export default DetailPage = ({ navigation, route }) => {
             items: validateItem(store.hhResult),
             ...store,
           });
+          setReviews(store.reviewResult);
         })
         .catch((error) => console.log(error));
     };
@@ -185,6 +186,7 @@ export default DetailPage = ({ navigation, route }) => {
   const [value, setValue] = useState(moment().isoWeekday() - 1);
   const [isFocus, setIsFocus] = useState(false);
   const [data, setData] = useState(route.params.store);
+  const [reviews, setReviews] = useState([]);
   const dayInWeek = [
     { label: "Monday", value: 0 },
     { label: "Tuesday", value: 1 },
@@ -195,7 +197,7 @@ export default DetailPage = ({ navigation, route }) => {
     { label: "Sunday", value: 6 },
   ];
   useEffect(() => {
-   
+
     if (review == false) {
       var config = {
         method: "get",
@@ -205,6 +207,7 @@ export default DetailPage = ({ navigation, route }) => {
 
       axios(config)
         .then((response) => {
+          setReviews(response.data.reviewResult);
           return response.data;
         })
         .then((store) => {
@@ -225,7 +228,7 @@ export default DetailPage = ({ navigation, route }) => {
             items: validateItem(store.hhResult),
             ...store,
           });
-  
+          setReviews(store.reviewResult);
         })
         .catch((error) => console.log(error));
     }
@@ -664,46 +667,46 @@ export default DetailPage = ({ navigation, route }) => {
                 {data.tagResult === null || data.tagResult.length == 0
                   ? null
                   : data.tagResult.map((tag, i) => {
-                      return (
-                        <View
-                          key={i}
-                          style={{
-                            borderRadius: 8,
-                            backgroundColor: "#F5E3A3",
-                            marginRight: 8,
-                          }}
-                        >
-                          {tag.name !== "No Tag" ? (
-                            <Text
-                              style={{
-                                fontSize: 11,
-                                fontWeight: "500",
-                                marginHorizontal: 6,
-                                marginVertical: 2,
-                              }}
-                            >
-                              {tag.name}
-                            </Text>
-                          ) : null}
-                        </View>
-                      );
-                    })}
+                    return (
+                      <View
+                        key={i}
+                        style={{
+                          borderRadius: 8,
+                          backgroundColor: "#F5E3A3",
+                          marginRight: 8,
+                        }}
+                      >
+                        {tag.name !== "No Tag" ? (
+                          <Text
+                            style={{
+                              fontSize: 11,
+                              fontWeight: "500",
+                              marginHorizontal: 6,
+                              marginVertical: 2,
+                            }}
+                          >
+                            {tag.name}
+                          </Text>
+                        ) : null}
+                      </View>
+                    );
+                  })}
               </View>
             </View>
             <TouchableOpacity
               style={{ height: 52, marginBottom: 18 }}
               onPress={() => {
-                if(user.email){
+                if (user.email) {
                   openReview(true);
-                }else{
+                } else {
                   Alert.alert('To leave a review', 'Please login in to your TPSI account.', [
-                    
-      {
-        text: 'OK',
-        onPress: () => navigation.navigate("Profile"),
-      },
-     
-    ]);
+
+                    {
+                      text: 'OK',
+                      onPress: () => navigation.navigate("Profile"),
+                    },
+
+                  ]);
                 }
               }}
             >
@@ -724,11 +727,11 @@ export default DetailPage = ({ navigation, route }) => {
                 </Text>
               </LinearGradient>
             </TouchableOpacity>
-{user.email?<ReviewModal
+            {user.email ? <ReviewModal
               review={review}
               openReview={openReview}
               store={data._id}
-            />:null}
+            /> : null}
             <View style={{ paddingBottom: 24 }}>
               <View
                 style={{
@@ -769,9 +772,9 @@ export default DetailPage = ({ navigation, route }) => {
                     onPress={() =>
                       Linking.openURL(
                         "maps://app?daddr=" +
-                          data.latitude +
-                          "+" +
-                          data.longitude
+                        data.latitude +
+                        "+" +
+                        data.longitude
                       )
                     }
                   >
@@ -841,15 +844,15 @@ export default DetailPage = ({ navigation, route }) => {
                     onPress={() => {
                       isModal(!modal);
                     }}
-                    //           onPress={
-                    //   user.email
-                    //     ? () => {
-                    //         !data.userFavorite ? addToFav(data._id) : removeFav(data._id);
-                    //       }
-                    //     : () => {
-                    //         navigation.navigate("Saved");
-                    //       }
-                    // }
+                  //           onPress={
+                  //   user.email
+                  //     ? () => {
+                  //         !data.userFavorite ? addToFav(data._id) : removeFav(data._id);
+                  //       }
+                  //     : () => {
+                  //         navigation.navigate("Saved");
+                  //       }
+                  // }
                   >
                     <View style={styles.directionIcon}>
                       <LinearGradient
@@ -1099,7 +1102,7 @@ export default DetailPage = ({ navigation, route }) => {
                 </View>
               </View>
               {data.hhResult.length > 0 &&
-              data.hhResult[0].infos[0].items.length > 0 ? (
+                data.hhResult[0].infos[0].items.length > 0 ? (
                 <>
                   {(!more
                     ? data.hhResult[0].infos[0].items.slice(0, 4)
@@ -1165,8 +1168,8 @@ export default DetailPage = ({ navigation, route }) => {
                     );
                   })}
                   {!more &&
-                  data.hhResult.length > 0 &&
-                  data.hhResult[0].infos[0].items.length > 4 ? (
+                    data.hhResult.length > 0 &&
+                    data.hhResult[0].infos[0].items.length > 4 ? (
                     <TouchableOpacity
                       onPress={() => {
                         setMore(true);
@@ -1316,7 +1319,10 @@ export default DetailPage = ({ navigation, route }) => {
               }}
             />
           </View>
-          <View style={styles.card}>
+          <View>
+            <ReviewCard reviews={reviews} />
+          </View>
+          {/* <View style={styles.card}>
             <View style={{ width: "67%" }}>
               <Text
                 style={{
@@ -1325,7 +1331,7 @@ export default DetailPage = ({ navigation, route }) => {
                   marginTop: 10,
                 }}
               >
-                Recent Acticity{"\n"}
+                Recent Activity{"\n"}
               </Text>
             </View>
             {data.reviewResult &&
@@ -1336,7 +1342,7 @@ export default DetailPage = ({ navigation, route }) => {
                       style={{
                         flexDirection: "row",
                         justifyContent: "space-between",
-                        marginBottom:10
+                        marginBottom: 10
                       }}
                     >
                       <View style={{ flexDirection: "row" }}>
@@ -1351,7 +1357,7 @@ export default DetailPage = ({ navigation, route }) => {
                         <View
                           style={{ flexDirection: "column", marginLeft: 12 }}
                         >
-                          <Text style={{ fontSize: 12, fontWeight: 600 }}>
+                          <Text style={{ fontSize: 17, fontWeight: 600 }}>
                             {review.firstName + " " + review.lastName}
                           </Text>
                           <Text
@@ -1389,33 +1395,28 @@ export default DetailPage = ({ navigation, route }) => {
                     >
                       {review.photo
                         ? review.photo.map((item, i) => {
-                            return (
-                              <Pressable key={i}>
-                                <Image
-                                  source={{
-                                    uri:
-                                      "https://tpsi-review-photos.s3.amazonaws.com/" +
-                                      item.id +
-                                      ".png",
-                                  }}
-                                  style={{
-                                    width: 80,
-                                    height: 80,
-                                    marginHorizontal: 2,
-                                  }}
-                                />
-                              </Pressable>
-                            );
-                          })
+                          let photos = [];
+                          photos.push(
+                            <ImageViewer key={item.id} source={item.id}></ImageViewer >
+                          );
+                          return (
+                            <ScrollView
+                              horizontal={true}
+                              showsHorizontalScrollIndicator={false}
+                            >
+                              {photos}
+                            </ScrollView>
+                          );
+                        })
                         : null}
                     </ScrollView>
-                    <Text style={{ fontSize: 10 }}>{review.content}</Text>
-                    <Text style={{ fontSize: 10 }}>
+                    <Text style={{ fontSize: 14 }}>{review.content}</Text>
+                    <Text style={{ marginTop: 10 }}>
                       <Text style={{ fontWeight: "900" }}>Favorites: </Text>{" "}
                       {review.dish &&
                         review.dish.map((input, i) => {
                           return (
-                            <Text style={{ fontSize: 10 }} key={i}>
+                            <Text style={{ fontSize: 14 }} key={i}>
                               {i != review.dish.length - 1
                                 ? input + ", "
                                 : input}
@@ -1426,7 +1427,7 @@ export default DetailPage = ({ navigation, route }) => {
                   </View>
                 );
               })}
-          </View>
+          </View> */}
           <TouchableOpacity
             style={styles.back}
             onPress={() => {

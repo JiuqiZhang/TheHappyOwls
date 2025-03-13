@@ -36,6 +36,7 @@ export default function ReviewModal(props) {
     setInputs(addinputs);
   };
 
+
   const inputHandler = (text, key) => {
     const _inputs = [...inputs];
     _inputs[key].value = text;
@@ -64,7 +65,7 @@ export default function ReviewModal(props) {
       JSON.stringify({
         content: notes,
         store_id: props.store,
-        username: user.email?user.email:null,
+        username: user.email ? user.email : null,
         rating: value == 0 ? 0 : Math.round(value * 10) / 10,
         dish: dishes,
       })
@@ -91,6 +92,7 @@ export default function ReviewModal(props) {
             if (data.status == "200") {
               props.openReview(false);
 
+              // isEditnote(false);
               setValue(0);
               setNotes("");
               setDishes("");
@@ -185,7 +187,7 @@ export default function ReviewModal(props) {
             editable
             multiline
             numberOfLines={10}
-            style={{ height: height - 80, marginTop: 25 }}
+            style={{ height: height - 80, marginTop: 25, marginHorizontal: 20 }}
             onChangeText={setNotes}
             value={notes}
             placeholder="     Share your thoughts"
@@ -312,6 +314,7 @@ export default function ReviewModal(props) {
             }}
             onPress={() => {
               props.openReview(false);
+              // isEditnote(false);
             }}
           >
             <Icon.X color={"black"} />
@@ -410,19 +413,19 @@ export default function ReviewModal(props) {
             >
               {image
                 ? image.map((item, i) => {
-                    return (
-                      <Pressable key={i}>
-                        <Image
-                          source={{ uri: item }}
-                          style={{
-                            width: 80,
-                            height: 80,
-                            marginHorizontal: 2,
-                          }}
-                        />
-                      </Pressable>
-                    );
-                  })
+                  return (
+                    <Pressable key={i}>
+                      <Image
+                        source={{ uri: item }}
+                        style={{
+                          width: 80,
+                          height: 80,
+                          marginHorizontal: 2,
+                        }}
+                      />
+                    </Pressable>
+                  );
+                })
                 : null}
             </ScrollView>
             <Divider
