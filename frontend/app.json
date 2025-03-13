@@ -19,7 +19,7 @@
     ],
     "name": "TPSI",
     "slug": "tpsi",
-    "version": "1.0.9",
+    "version": "1.1",
     "orientation": "portrait",
     "icon": "./assets/app.png",
     "userInterfaceStyle": "light",
@@ -39,7 +39,7 @@
         "NSLocationWhenInUseUsageDescription": "App would like to access user location to provide nearby happy hour infos, distance from all stores, and map navigation to nearby stores.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "App would like to access user location to provide nearby happy hour infos, distance from all stores, and map navigation to nearby stores."
       },
-      "buildNumber": "1.102",
+      "buildNumber": "1.103",
       "config": {
         "googleMapsApiKey": "AIzaSyBWQ5iFtnT2EQSo1Yi4D6pc-edq7MJkaPA"
       },
