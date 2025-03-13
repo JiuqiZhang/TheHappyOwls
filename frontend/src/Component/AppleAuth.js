@@ -21,7 +21,6 @@ export default function AppleAuth({ navigation }) {
           cornerRadius={5}
           style={styles.button}
           onPress={async () => {
-            console.log('hh')
             try {
               const credential = await AppleAuthentication.signInAsync({
                 requestedScopes: [
@@ -30,12 +29,7 @@ export default function AppleAuth({ navigation }) {
                 ],
               });
               setUser(credential);
-     
-              console.log(credential)
-
-
               if (credential.identityToken) {
-                console.log('sign sent')
                 axios
                   .post(
                     "https://data.tpsi.io/api/v1/users/checkEmail?email=" +
@@ -44,7 +38,6 @@ export default function AppleAuth({ navigation }) {
                   .then((response) => response.data)
                   .then((res) => {
                     if (res.firstname) {
-                      console.log('first hrere')
                       dispatch(
                         setEmail(jwtDecode(credential.identityToken).email)
                       );
@@ -52,23 +45,40 @@ export default function AppleAuth({ navigation }) {
                       dispatch(setNameFirst(res.firstname));
                       dispatch(setNameLast(res.lastname));
                       navigation.navigate("Home");
-           
                     } else {
-                      console.log('2nd hrere')
-                      if (user.fullName.familyName!==null) {
-                        dispatch(
-                          setEmail(jwtDecode(credential.identityToken).email)
-                        );
-
-                        dispatch(setNameFirst(user.fullName.givenName));
-                        dispatch(setNameLast(user.fullName.familyName));
-                        navigation.navigate("Home");
-                      } 
-                    }
-                    console.log('not hrere')
-                    navigation.navigate("SignupName", {
+                      if (credential.fullName.familyName) {
+                        fetch(
+                          "https://data.tpsi.io/api/v1/users/registerUser?email=" +
+                          jwtDecode(credential.identityToken).email +
+                            "&lastname=" +
+                            credential.fullName.familyName +
+                            "&firstname=" +
+                            credential.fullName.givenName,
+                          { method: "post" }
+                        )
+                          .then((res) => {
+                            dispatch(
+                              setEmail(
+                                jwtDecode(credential.identityToken).email
+                              )
+                            );
+                            dispatch(
+                              setNameFirst(credential.fullName.givenName)
+                            );
+                            dispatch(
+                              setNameLast(credential.fullName.familyName)
+                            );
+                            navigation.navigate("Home");
+                          })
+                          .catch((error) => console.log("error", error));
+                      }else{
+                        navigation.navigate("SignupName", {
                           email: jwtDecode(credential.identityToken).email,
                         });
+                      }
+                    }
+                    // console.log(credential);
+                    
                   })
                   .catch((error) => console.log("error", error));
               }
@@ -84,9 +94,7 @@ export default function AppleAuth({ navigation }) {
           }}
         />
       ) : (
-        <Text>
-          {"Welcome, TPSI Fam!"+JSON.stringify(user.identityToken) }
-        </Text>
+        <Text>{"Welcome, TPSI Fam!"}</Text>
       )}
     </View>
   );

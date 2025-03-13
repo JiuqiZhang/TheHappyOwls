@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Image,
 } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import React, { useEffect, useState } from "react";
 import { Divider } from "react-native-elements";
 import Modal from "react-native-modal";
@@ -41,6 +42,7 @@ const img = {
 export default FilterModal = ({
   filter,
   setFilter,
+  setFiltered,
   data,
   modal,
   setmodal,
@@ -50,6 +52,7 @@ export default FilterModal = ({
   filterVal,
   screen,
 }) => {
+  const [time, setTime] = useState(false);
   return (
     <Modal
       animationType="slide"
@@ -156,47 +159,20 @@ export default FilterModal = ({
                 paddingLeft: "8%",
               }}
             >
-              Happy Hour Live
-            </Text>
-            <View
-              style={[
-                { flexDirection: "row", justifyContent: "space-between" },
-                styles.Checkbox,
-              ]}
-            >
-              <Text>Live Now</Text>
-              <Checkbox
-                value={open}
-                onValueChange={() => {
-                  setopen(!open);
-                }}
-                color={"#E8BA183D"}
-              />
-            </View>
-            <Divider width={1} style={{ margin: "2%" }} />
-            <Text
-              style={{
-                fontWeight: "600",
-                fontSize: 15,
-                padding: "5%",
-                paddingLeft: "8%",
-              }}
-            >
               Days
             </Text>
             <View
               style={{
                 flexDirection: "row",
                 display: "flex",
-                paddingLeft: "8%",
+                marginHorizontal:30,
               }}
             >
               <View
                 style={[
                   {
                     paddingHorizontal: 10,
-                    marginLeft: 16,
-                    marginRight: 20,
+         
                     alignItems: "center",
                     justifyContent: "center",
                     borderRadius: 15,
@@ -208,11 +184,10 @@ export default FilterModal = ({
                     marginBottom: "1%",
                     flexDirection: "row",
                     backgroundColor: "#F9EEC8",
-                    right: 20,
                     borderWidth: 1,
                     borderColor: "white",
                     justifyContent: "space-between",
-                    width: '92%',
+                    width: "100%",
                     paddingVertical: 1,
                     height: 32,
                   },
@@ -227,6 +202,11 @@ export default FilterModal = ({
                           ...filter,
                           hhdays: { ...filter.hhdays, [day[0]]: !day[1] },
                         }));
+                        if (!day[1]) {
+                          setFiltered((filter) => filter + 1);
+                        } else {
+                          setFiltered((filter) => filter - 1);
+                        }
                       }}
                       key={i}
                     >
@@ -280,6 +260,128 @@ export default FilterModal = ({
                 })}
               </View>
             </View>
+            <Text
+              style={{
+                fontWeight: "600",
+                fontSize: 15,
+                padding: "5%",
+                paddingLeft: "8%",
+                
+              }}
+            >
+              Hours
+            </Text>
+            <View
+              style={{
+                flexDirection: "row",
+                marginHorizontal: 30,
+                justifyContent: "space-between",
+                borderRadius: 15,
+                borderWidth: 1,
+                borderColor: "#D1CFCF",
+                height: 39,
+                alignItems: "center",
+                marginBottom:'2%'
+              }}
+            >
+              <TouchableOpacity
+  
+                style={{ width: "33%", height: 37, justifyContent: "center",backgroundColor:(!open && !time)?"#F9EEC8":null,borderRadius: 15,left:0,
+     
+                borderColor: (!open && !time)?"#D1CFCF":null,}}
+                onPress={() => {
+                  setopen(false);
+                  setTime(false);
+                  setFilter((filter) => ({
+                    ...filter,
+                    custom: null,
+                  }));
+                  setFiltered((filter) => filter - 1);
+        
+                }}
+                color={"#E8BA183D"}
+              >
+                <Text style={{ alignSelf: "center" }}>Any</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={{ width: "33%", height: 37, justifyContent: "center",backgroundColor:(open)?"#F9EEC8":null,borderRadius: 15,
+borderColor: (open)?"#D1CFCF":null, }}
+                value={open}
+                onPress={() => {
+                  if (!open) {
+                    setopen(true);
+                  }
+                  if (!time) {
+                    setFiltered((filter) => filter + 1);
+                  }
+
+                  setTime(false);
+                  setFilter((filter) => ({
+                    ...filter,
+                    custom: null,
+                  }));
+                }}
+                color={"#E8BA183D"}
+              >
+                <Text style={{ alignSelf: "center" }}>Live Now</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                value={time}
+                style={{ width: "33%", height: 39, justifyContent: "center",backgroundColor:(time)?"#F9EEC8":null,borderRadius: 15,
+borderColor: (time)?"#D1CFCF":null, }}
+                onPress={() => {
+                  if (!open) {
+                    setFiltered((filter) => filter + 1);
+                  }
+                  setopen(false);
+                  setTime(true);
+                }}
+                color={"#E8BA183D"}
+              >
+                <Text style={{ alignSelf: "center" }}>Custom</Text>
+              </TouchableOpacity>
+            </View>
+            {time ? (
+              <Picker
+                selectedValue={time}
+                onValueChange={(itemValue, itemIndex) => {
+                  setTime(itemValue);
+                  setFilter((filter) => ({
+                    ...filter,
+                    custom: itemValue,
+                  }));
+                }}
+              >
+                <Picker.Item label="00:00" value="00:00" />
+                <Picker.Item label="01:00" value="01:00" />
+                <Picker.Item label="02:00" value="02:00" />
+                <Picker.Item label="03:00" value="03:00" />
+                <Picker.Item label="04:00" value="04:00" />
+                <Picker.Item label="05:00" value="05:00" />
+                <Picker.Item label="06:00" value="06:00" />
+                <Picker.Item label="07:00" value="07:00" />
+                <Picker.Item label="08:00" value="08:00" />
+                <Picker.Item label="09:00" value="09:00" />
+                <Picker.Item label="10:00" value="10:00" />
+                <Picker.Item label="11:00" value="11:00" />
+                <Picker.Item label="12:00" value="12:00" />
+                <Picker.Item label="13:00" value="13:00" />
+                <Picker.Item label="14:00" value="14:00" />
+                <Picker.Item label="15:00" value="15:00" />
+                <Picker.Item label="16:00" value="16:00" />
+                <Picker.Item label="17:00" value="17:00" />
+                <Picker.Item label="18:00" value="18:00" />
+                <Picker.Item label="19:00" value="19:00" />
+                <Picker.Item label="20:00" value="20:00" />
+                <Picker.Item label="21:00" value="21:00" />
+                <Picker.Item label="22:00" value="22:00" />
+                <Picker.Item label="23:00" value="23:00" />
+              </Picker>
+            ) : null}
+
+
             <Divider width={1} style={{ margin: "2%" }} />
             {/* items */}
             <Text
@@ -319,6 +421,11 @@ export default FilterModal = ({
                         ...filter,
                         items: { ...filter.items, [item[0]]: !item[1] },
                       }));
+                      if (!item[1]) {
+                        setFiltered((filter) => filter + 1);
+                      } else {
+                        setFiltered((filter) => filter - 1);
+                      }
                     }}
                   >
                     <Image
@@ -369,6 +476,12 @@ export default FilterModal = ({
                         ...filter,
                         price: { ...filter.price, [s[0]]: !s[1] },
                       }));
+
+                      if (!s[1]) {
+                        setFiltered((filter) => filter + 1);
+                      } else {
+                        setFiltered((filter) => filter - 1);
+                      }
                     }}
                   >
                     <Text style={{ textAlign: "center" }}>
@@ -408,7 +521,11 @@ export default FilterModal = ({
                           ...filter,
                           selectedCuisine: null,
                         }));
+                        setFiltered((filter) => filter - 1);
                       } else {
+                        if (filter.selectedCuisine === null) {
+                          setFiltered((filter) => filter + 1);
+                        }
                         setFilter((filter) => ({
                           ...filter,
                           selectedCuisine: type,
@@ -452,7 +569,9 @@ export default FilterModal = ({
                 setFilter(filterVal);
                 setFilteredData(data);
                 setmodal(false);
-                setopen(false)
+                setopen(false);
+                setFiltered(0);
+                setTime(false);
               }}
             >
               <Text

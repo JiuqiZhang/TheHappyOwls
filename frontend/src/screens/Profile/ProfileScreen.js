@@ -1,135 +1,229 @@
-import { Text, StyleSheet, View, Button, TouchableOpacity } from "react-native";
-import { useSelector,useDispatch } from "react-redux";
+import {
+  Text,
+  StyleSheet,
+  View,
+  Button,
+  TouchableOpacity,
+  Dimensions,
+  Linking,
+} from "react-native";
+import { useSelector, useDispatch } from "react-redux";
+import { Image } from "expo-image";
+import * as WebBrowser from "expo-web-browser";
 import { Divider } from "react-native-elements";
 import * as Icon from "react-native-feather";
-import ResetPassword from "../Auth/ResetPassword";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+const { width } = Dimensions.get("window");
+// import ResetPassword from "../Auth/ResetPassword";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
 import { setEmail, setNameFirst, setNameLast } from "../../redux/actions";
 export default ProfileScreen = ({ navigation }) => {
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Settings</Text>
-      <TouchableOpacity
-        onPress={() => {
-          navigation.navigate("Info");
-        }}
-        style={styles.section}
-      >
-        <View style={styles.box}>
-          <View style={styles.row}>
-            <Icon.User style={{ marginVertical: "2%" }} color={"grey"} />
-            <Text style={[styles.datafield, { marginVertical: 7 }]}>
-              Personal account
+    <>
+      <View style={styles.container}>
+        <Text style={styles.title}>Profile</Text>
+        <View style={{ width: "100%" }}>
+          <Text
+            style={{ fontSize: 24, fontWeight: "bold", textAlign: "center" }}
+          >
+            Hi, {user.firstName + " " + user.lastName}!
+          </Text>
+        </View>
+        <View style={{ marginTop: 70 }}>
+          <TouchableOpacity
+            style={styles.section}
+            onPress={async () => {
+              await WebBrowser.openBrowserAsync(
+                "https://forms.gle/mUWixei7T2GoppBC8"
+              );
+            }}
+          >
+            <View style={styles.box}>
+              <View style={styles.row}>
+                <Icon.PlusCircle
+                  style={{ marginVertical: "2%" }}
+                  color={"black"}
+                />
+                <Text style={[styles.datafield, { marginVertical: 7 }]}>
+                  Submit New Happy Hours
+                </Text>
+              </View>
+
+              <Icon.ArrowRight
+                style={{ alignSelf: "center", marginRight: 26 }}
+                color={"black"}
+              />
+            </View>
+            <Divider width={1} color={"#EDEDED"} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.section}
+            onPress={() => {
+              Linking.openURL("mailto:info@tpsi.io").catch((error) => {
+                console.log(error);
+              });
+            }}
+          >
+            <View style={styles.box}>
+              <View style={styles.row}>
+                <Icon.Mail style={{ alignSelf: "center" }} color={"black"} />
+                <Text style={[styles.datafield, { marginVertical: 7 }]}>
+                  Email Support
+                </Text>
+              </View>
+
+              <Icon.ArrowRight
+                style={{ alignSelf: "center", marginRight: 26 }}
+                color={"black"}
+              />
+            </View>
+            <Divider width={1} color={"#EDEDED"} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.section}
+            onPress={() => {
+              Linking.openURL("https://discord.gg/nzMYBmBtKw");
+            }}
+          >
+            <View style={styles.box}>
+              <View style={styles.row}>
+                <Icon.MessageCircle
+                  style={{ alignSelf: "center" }}
+                  color={"black"}
+                />
+                <Text style={[styles.datafield, { marginVertical: 7 }]}>
+                  Join Our Discord Group
+                </Text>
+              </View>
+
+              <Icon.ArrowRight
+                style={{ alignSelf: "center", marginRight: 26 }}
+                color={"black"}
+              />
+            </View>
+            <Divider width={1} color={"#EDEDED"} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.section}
+            onPress={() => {
+              navigation.navigate("ManageCheckInScreen");
+            }}
+          >
+            <View style={styles.box}>
+              <View style={styles.row}>
+                <Icon.Star
+                  style={{ alignSelf: "center" }}
+                  color={"black"}
+                />
+                <Text style={[styles.datafield, { marginVertical: 7 }]}>
+                  Manage Check-ins
+                </Text>
+              </View>
+
+              <Icon.ArrowRight
+                style={{ alignSelf: "center", marginRight: 26 }}
+                color={"black"}
+              />
+            </View>
+            <Divider width={1} color={"#EDEDED"} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.section}
+            onPress={() => {
+              navigation.navigate("Info");
+            }}
+          >
+            <View style={styles.box}>
+              <View style={styles.row}>
+                <Icon.Settings style={{ alignSelf: "center" }} color={"black"} />
+                <Text style={[styles.datafield, { marginVertical: 7 }]}>
+                  Settings
+                </Text>
+              </View>
+
+              <Icon.ArrowRight
+                style={{ alignSelf: "center", marginRight: 26 }}
+                color={"black"}
+              />
+            </View>
+            <Divider width={1} color={"#EDEDED"} />
+          </TouchableOpacity>
+
+        </View>
+        <View
+          style={{
+            height: 136,
+            position: "absolute",
+            bottom: -20,
+            alignContent: "center",
+            flexDirection: "column",
+            width: "100%",
+          }}
+        >
+          <TouchableOpacity
+            style={{
+              alignSelf: "center",
+              marginTop: 24,
+              width: 353,
+              height: 32,
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 100,
+              borderRadius: 100,
+              borderWidth: 1.5,
+              borderColor: "#D3D3D3",
+            }}
+            onPress={() => {
+              dispatch(setEmail(null));
+              dispatch(setNameFirst(null));
+              dispatch(setNameLast(null));
+            }}
+          >
+            <Text style={{ fontSize: 10, fontWeight: "600" }}>Log Out</Text>
+          </TouchableOpacity>
+          <View style={{ height: 24, marginTop: 20, alignSelf: "center" }}>
+
+            <TouchableOpacity
+              onPress={async () => {
+                await WebBrowser.openBrowserAsync(
+                  "https://drive.google.com/file/d/1ggIpVeV0VEU9USRVWB4fnV6yneEvCCPU/view"
+                );
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 10,
+                  fontWeight: "500",
+                  textAlign: "center",
+                  color: '#8A6F0F',
+                  textDecorationLine: 'underline'
+                }}
+              >
+                Privacy Policy
+              </Text>
+            </TouchableOpacity>
+
+          </View>
+          <View style={{ height: 24, marginTop: 6, alignSelf: "center" }}>
+            <Text style={{ fontSize: 10, fontWeight: "500", color: "#999999" }}>
+              Version: 1.0.8
             </Text>
           </View>
-
-          <Icon.ArrowRight style={{ marginVertical: "2%" }} color={"grey"} />
         </View>
-        <Divider width={1.5} />
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.section}
-        onPress={() => {
-          navigation.navigate("Security");
-        }}
-      >
-        <View style={styles.box}>
-          <View style={styles.row}>
-            <Icon.Lock style={{ marginVertical: "2%" }} color={"grey"} />
-            <Text style={[styles.datafield, { marginVertical: 7 }]}>
-              Security
-            </Text>
-          </View>
-
-          <Icon.ArrowRight style={{ marginVertical: "2%" }} color={"grey"} />
-        </View>
-        <Divider width={1.5} />
-      </TouchableOpacity>
-
-      <Text style={styles.title}>Support</Text>
-      <TouchableOpacity
-        style={styles.section}
-        onPress={() => {
-          navigation.navigate("Feedback");
-        }}
-      >
-        <View style={styles.box}>
-          <View style={styles.row}>
-            <Icon.Edit3 style={{ marginVertical: "2%" }} color={"grey"} />
-            <Text style={[styles.datafield, { marginVertical: 7 }]}>
-              Give us feedback
-            </Text>
-          </View>
-
-          <Icon.ArrowRight style={{ marginVertical: "2%" }} color={"grey"} />
-        </View>
-        <Divider width={1.5} />
-      </TouchableOpacity>
-
-      <Text style={styles.title}>Legal</Text>
-      {/* <TouchableOpacity style={styles.section}>
-        <View style={styles.box}>
-          <View style={styles.row}>
-            <Icon.BookOpen style={{ marginVertical: "2%" }} color={"grey"} />
-            <Text style={[styles.datafield, { marginVertical: 7 }]}>
-              Terms of Service
-            </Text>
-          </View>
-
-          <Icon.ArrowRight style={{ marginVertical: "2%" }} color={"grey"} />
-        </View>
-        <Divider width={1.5} />
-      </TouchableOpacity> */}
-
-      <TouchableOpacity style={styles.section} disabled={true} onPress={() => {
-          navigation.navigate("Policy");
-        }}>
-        <View style={styles.box}>
-          <View style={styles.row}>
-            <Icon.BookOpen style={{ marginVertical: "2%" }} color={"grey"} />
-            <Text style={[styles.datafield, { marginVertical: 7 }]}>
-              Privacy Policy
-            </Text>
-          </View>
-
-          <Icon.ArrowRight style={{ marginVertical: "2%" }} color={"grey"} />
-        </View>
-        <Divider width={1.5} />
-      </TouchableOpacity>
-
-      {/* <View style={styles.section}>
-        <Text style={styles.subtitle}>Name:</Text>
-        <Text style={styles.datafield}>{state.name}</Text>
-        <Divider width={1.5} />
       </View>
-      <View style={styles.section}>
-        <Text style={styles.subtitle}>Email:</Text>
-        <Text style={styles.datafield}>{state.email}</Text>
-        <Divider width={1.5} />
-      </View>
-      <View style={styles.section}>
-        <Text style={styles.subtitle}>Phone Number:</Text>
-        <Text style={styles.datafield}>{state.numbers}</Text>
-        <Divider width={1.5} />
-      </View>
-      <View style={styles.section}>
-        <Text style={styles.subtitle}>DOB:{state.dob}</Text>
-        <Divider width={1.5} />
-      </View>
-      <View style={styles.section}>
-        <Text style={styles.subtitle}>Password:{state.email}</Text>
-        <Divider width={1.5} />
-      </View> */}
-      <Button
-        title="Logout"
-        onPress={() => {
-          dispatch(setEmail(null));
-          dispatch(setNameFirst(null));
-          dispatch(setNameLast(null));
+      <Image
+        style={{
+          height: 210,
+          width: "100%",
+          position: "absolute",
+          top: 0,
+          zIndex: -97,
         }}
+        source={require("../../Image/profileBG.png")}
+        contentFit="fill"
       />
-    </View>
+    </>
   );
 };
 const styles = StyleSheet.create({
@@ -141,26 +235,25 @@ const styles = StyleSheet.create({
   row: {
     display: "flex",
     flexDirection: "row",
-  },
-  section: {
-    marginVertical: "2%",
+    paddingHorizontal: 26,
   },
   box: {
     display: "flex",
     flexDirection: "row",
-    marginVertical: "2%",
     justifyContent: "space-between",
+
+    paddingTop: 18,
+    paddingBottom: 21,
   },
   title: {
-    fontSize: 32,
-    fontWeight: "bold",
+    fontSize: 20,
+    fontWeight: "600",
     marginVertical: "4%",
   },
 
   datafield: {
-    color: "#8B8378",
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "600",
-    marginLeft: "5%",
+    marginLeft: 26,
   },
 });

@@ -1,13 +1,15 @@
-import React, {Text} from 'react';
+import React, {Text, useEffect,View} from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 
 
 import SignupScreen from '../screens/Auth/SignupScreen';
-
+import { setStore,setNameLast } from "../redux/actions";
 import MainStack from './MainStack';
 import { useSelector } from 'react-redux';
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
+import { useDispatch } from "react-redux";
+import UpdateScreen from '../screens/Update/update';
 const Stack = createNativeStackNavigator();
 
 const MyTheme = {
@@ -17,8 +19,10 @@ const MyTheme = {
       background: '#FFFFFF'
     },
   };
-export default function Routes() {
+export default function Routes(props) {
     const  user = useSelector(state => state.user);
+    const dispatch = useDispatch();
+
 
 
     return (
@@ -32,7 +36,11 @@ export default function Routes() {
           name="onBoard"
           component={SignupScreen}
         />}
-        {MainStack(Stack)}
+         {user.update?<Stack.Screen
+          name="Update"
+          component={UpdateScreen}
+        />:null}
+        {MainStack(Stack,props.store)}
 
             </Stack.Navigator>
         </NavigationContainer>

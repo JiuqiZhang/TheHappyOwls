@@ -3,13 +3,25 @@
     "plugins": [
       "expo-apple-authentication",
       "expo-build-properties",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Tpsi to to access user location to provide nearby happy hour infos, distance from all stores, and map navigations to nearby stores."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with the friends about the bar they are rating."
+        }
+      ]
     ],
     "name": "TPSI",
     "slug": "tpsi",
-    "version": "1.0.0",
+    "version": "1.1",
     "orientation": "portrait",
-    "icon": "./assets/app.jpeg",
+    "icon": "./assets/app.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -23,9 +35,11 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.theHappyOwls.Tpsi",
       "infoPlist": {
-        "NSLocationAlwaysUsageDescription": "App would like to access user location to provide nearby happy hour infos, distance from all stores, and map navigations to nearby stores."
+        "NSLocationAlwaysUsageDescription": "App would like to access user location to provide nearby happy hour infos, distance from all stores, and map navigation to nearby stores.",
+        "NSLocationWhenInUseUsageDescription": "App would like to access user location to provide nearby happy hour infos, distance from all stores, and map navigation to nearby stores.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "App would like to access user location to provide nearby happy hour infos, distance from all stores, and map navigation to nearby stores."
       },
-      "buildNumber": "1.55",
+      "buildNumber": "1.103",
       "config": {
         "googleMapsApiKey": "AIzaSyBWQ5iFtnT2EQSo1Yi4D6pc-edq7MJkaPA"
       },
