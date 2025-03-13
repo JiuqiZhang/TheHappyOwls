@@ -103,7 +103,7 @@ export default function ReviewCard({ reviews, onReload, type }) {
             // redirect: "follow"
         };
 
-        fetch("http://localhost:8080/api/v1/reviews/" + reviewID, requestOptions)
+        fetch("https://data.tpsi.io/api/v1/reviews/" + reviewID, requestOptions)
             .then((response) => {
                 response.text();
                 console.log("Delete response: ", response.status);

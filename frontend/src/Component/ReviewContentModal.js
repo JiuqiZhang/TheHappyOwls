@@ -64,7 +64,7 @@ export default function ReviewContentModal({ isOpen, hideModal, option, onConfir
         console.log('formData: ');
         console.log(formData._parts)
         try {
-            const response = await fetch("http://localhost:8080/api/v1/reviews/update", requestOptions);
+            const response = await fetch("https://data.tpsi.io/api/v1/reviews/update", requestOptions);
             const data = await response.json();
             if (data) {
                 console.log("Review updated successfully");
