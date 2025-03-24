@@ -17,6 +17,7 @@ export default function ManageCheckInScreen({ navigation }) {
 
     const fetch = async () => {
         const res = await axios.get("https://data.tpsi.io/api/v1/reviews/" + user.email);
+        // const res = await axios.get("https://data.tpsi.io/api/v1/reviews/" + "zachzhang98@yahoo.com");
         setCheckIns(res.data);
     }
 

@@ -18,8 +18,10 @@ export default function ReviewCard({ reviews, onReload, type }) {
     const [selectedReview, setSelectedReview] = useState({});
     const [reviewsFromStore, setReviewsFromStore] = useState(reviews ?? []);
     const [reviewID, setReviewID] = useState(0);
+    const [dishes, setDishes] = useState([]);
     React.useEffect(() => {
         setReviewsFromStore(reviews);
+        setDishes(reviews.dish);
     }, [reviews]);
     const hideModal = () => {
         setIsOpen(false);
@@ -74,10 +76,13 @@ export default function ReviewCard({ reviews, onReload, type }) {
     }
 
     const listDishes = (dishes) => {
+        if (dishes === undefined || dishes === null || dishes.length === 0) {
+            return
+        }
         return dishes.map((dish, index) => (
             <View key={dish} style={{ flexDirection: "row" }}>
                 <Text style={{ fontSize: 14 }}>{dish}</Text>
-                <Text style={{}}>{index === dishes.length - 1 ? "" : ", "}</Text>
+                <Text>{index === dishes.length - 1 ? "" : ", "}</Text>
             </View>
         ))
     }
@@ -169,7 +174,6 @@ export default function ReviewCard({ reviews, onReload, type }) {
                     <Text style={styles.reviewHeader}>Recent Activities</Text>
                 </View>
                 {reviewsFromStore.map((review, index) => {
-                    console.log("Review: ", review);
                     return (
                         <View key={review._id} style={styles.container}>
 

@@ -44,11 +44,15 @@ export default function ReviewModal(props) {
     setInputs(_inputs);
   };
   const sendReview = async () => {
-    const fetchImageFromUri = async (uri) => {
-      const response = await fetch(uri);
-      const blob = await response.blob();
-      return blob;
-    };
+    // const fetchImageFromUri = async (uri) => {
+    //   const response = await fetch(uri);
+    //   const blob = await response.blob();
+    //   return blob;
+    // };
+    if (value == 0) {
+      alert("Please rate the store")
+      return;
+    }
 
     var formdata = new FormData();
     let dishes = [];

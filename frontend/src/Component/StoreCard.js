@@ -1,4 +1,4 @@
-import React,{useEffect} from "react";
+import React, { useEffect } from "react";
 import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Image } from "expo-image";
@@ -11,11 +11,11 @@ import { useSelector } from "react-redux";
 import Slider from "./Slider";
 export default StoreCard = React.memo((props) => {
   const user = useSelector((state) => state.user);
-  useEffect(()=>{
-    if(props.store.tags == null){
-      console.log( props.store.name)
+  useEffect(() => {
+    if (props.store.tags == null) {
+      console.log(props.store.name)
     }
-  },[])
+  }, [])
   const removeFav = async (id) => {
     // var formdata = new FormData();
 
@@ -87,13 +87,13 @@ export default StoreCard = React.memo((props) => {
         onPress={
           user.email
             ? () => {
-                !props.store.userFavorite
-                  ? addToFav(props.store._id)
-                  : removeFav(props.store._id);
-              }
+              !props.store.userFavorite
+                ? addToFav(props.store._id)
+                : removeFav(props.store._id);
+            }
             : () => {
-                props.navigation.navigate("Saved");
-              }
+              props.navigation.navigate("Saved");
+            }
         }
       >
         <Icon.Heart
@@ -105,11 +105,11 @@ export default StoreCard = React.memo((props) => {
         />
       </TouchableOpacity>
       <LinearGradient
-                      colors={["#F9EEC8", "#FFD029", "#D9AA04"]}
-                      start={{ x: -0.4, y: 0 }}
-                      end={{ x: 1.6, y: 1 }}
-                     
-               
+        colors={["#F9EEC8", "#FFD029", "#D9AA04"]}
+        start={{ x: -0.4, y: 0 }}
+        end={{ x: 1.6, y: 1 }}
+
+
         style={[
           {
             position: "absolute",
@@ -117,7 +117,7 @@ export default StoreCard = React.memo((props) => {
             top: 29,
             left: 10,
             paddingVertical: 2,
-            paddingHorizontal:6,
+            paddingHorizontal: 6,
             display: props.store.off ? "flex" : "none",
           },
           styles.percent,
@@ -149,15 +149,15 @@ export default StoreCard = React.memo((props) => {
         source={
           props.store.photoResult[0] && props.store.photoResult[0].photos[0]
             ? {
-                uri:
-                  "https://spring-boot-repo-tpsi.s3.amazonaws.com/" +
-                  props.store.photoResult[0]._id +
-                  "_" +
-                  props.store.photoResult[0].photos[0].id,
-              }
+              uri:
+                "https://spring-boot-repo-tpsi.s3.amazonaws.com/" +
+                props.store.photoResult[0]._id +
+                "_" +
+                props.store.photoResult[0].photos[0].id,
+            }
             : require("../Image/store.jpg")
         }
-      /> 
+      />
       <View>
         <View
           style={{
@@ -240,21 +240,21 @@ export default StoreCard = React.memo((props) => {
             marginTop: 7,
           }}
         >
-          { props.store.tagResult===null||props.store.tagResult.length == 0
+          {props.store.tagResult === null || props.store.tagResult.length == 0
             ? null
             : props.store.tagResult.slice(0, 3).map((tag, i) => {
-                return (
-                  <View key={i} style={{borderRadius:8,backgroundColor:'#F5E3A3',marginRight:8}}>
-                    {tag.name !== "No Tag" ? (
-                      <Text style={{ fontSize: 11, fontWeight: "500",marginHorizontal:6,marginVertical:2 }}>
-                        {tag.name}
-                      </Text>
-                    ) : null}
-                  </View>
-                );
-              })}
-          {props.store.tags!==null && props.store.tags.length > 3 ? (
-            <Text style={{fontSize: 11, fontWeight: "500",marginTop:2}}>+{props.store.tags.length - 3}</Text>
+              return (
+                <View key={i} style={{ borderRadius: 8, backgroundColor: '#F5E3A3', marginRight: 8 }}>
+                  {tag.name !== "No Tag" ? (
+                    <Text style={{ fontSize: 11, fontWeight: "500", marginHorizontal: 6, marginVertical: 2 }}>
+                      {tag.name}
+                    </Text>
+                  ) : null}
+                </View>
+              );
+            })}
+          {props.store.tags !== null && props.store.tags.length > 3 ? (
+            <Text style={{ fontSize: 11, fontWeight: "500", marginTop: 2 }}>+{props.store.tags.length - 3}</Text>
           ) : null}
         </View>
       </View>
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
     left: "5%",
     right: "auto",
     flex: 1,
-    marginBottom:2
+    marginBottom: 2
   },
   text: {
     fontSize: 16,
